@@ -4,9 +4,13 @@ const axios = require('axios').default
 const bunyan = require('bunyan');
 const log = bunyan.createLogger({name: "ipfs"});
 
+const OS = require('os').platform()
+const arch = require('os').arch()
+const EXE_FILE = OS === 'darwin' ? 'ipfs-amd64' : OS == 'win32' ? 'ipfs.exe' : 'ipfs';
+
 class IPFSDaemon { // 启动并监视IPFS Daemon
     static REPO_PATH = require('path').join(__dirname, '..', '..', '..', 'debugrepo')
-    static EXE_PATH = require('path').join(__dirname, '..', '..', '..', 'ipfsbin', 'ipfs-amd64')
+    static EXE_PATH = require('path').join(__dirname, '..', '..', '..', 'ipfsbin', EXE_FILE)
     async init() {
         this.isBootstrapping = true
         this.online = false
