@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta content="True" name="HandheldFriendly">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#fff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+    <link rel="stylesheet" href="{{ assets_prefix }}assets/style.css?r={{ build_timestamp }}">
+    <title>{% block title %}{{ page_title|escape }}{% endblock %}</title>
+    <script>
+      let userAgentRegex = /Planet\/\S*/;
+      window.PLANET = {
+        visitedFromPlanetClient: !!navigator.userAgent.match(userAgentRegex),
+        assetsPrefix: '{{ assets_prefix }}',
+      };
+
+      function breadcrumb(stubs) {
+        let container = document.createElement('div');
+        container.classList.add('breadcrumb')
+        if (!stubs || !stubs.length) {
+          return;
+        }
+
+        const getStubElem = (stub) => {
+          let elem;
+          if (stub.url) {
+            elem = document.createElement('a');
+            elem.href = stub.url;
+          } else {
+            elem = document.createElement('span');
+          }
+          elem.innerText = stub.text;
+          if (stub.classes) {
+            elem.classList.add(...stub.classes);
+          }
+          return elem;
+        };
+
+        const getSeparatorElem = () => {
+          let elem = document.createElement('span');
+          elem.innerText = '›';
+          elem.classList.add("chevron");
+          return elem;
+        }
+
+        container.append(getStubElem(stubs[0]));
+        container.append(getSeparatorElem());
+        for (let i = 1; i < stubs.length; i++)  {
+          container.append(getStubElem(stubs[i]));
+          if (i < stubs.length - 1) {
+            container.append(getSeparatorElem());
+          }
+        }
+
+        let main = document.querySelector('.main');
+        main.style.marginTop = '50px';
+        main.insertAdjacentElement('afterbegin', container);
+      }
+    </script>
+    {% if has_avatar %}
+    <link rel="icon" href="{{ assets_prefix }}avatar.png" sizes="144x144">
+    {% endif %}
+    {% block head %}{% endblock %}
+    {% if planet.plausibleEnabled %}
+    <script defer data-domain="{{ planet.plausibleDomain }}" src="https://{{ planet.plausibleAPIServer }}/js/plausible.local.js"></script>
+    {% endif %}
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="main">
+      {% block main %}
+      {% endblock %}
+      </div>
+    </div>
+  </body>
+</html>

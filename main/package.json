@@ -1,0 +1,72 @@
+{
+    "name": "planetjs",
+    "version": "1.0.0",
+    "license": "MIT",
+    "main": "main.js",
+    "scripts": {
+        "start": "WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='..' electron-forge start",
+        "start:watch": "WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='..' nodemon --watch main.js --watch ./src --exec 'yarn start'",
+        "prepackage": "cd ../fe && yarn build",
+        "package": "electron-forge package",
+        "make": "electron-forge make",
+        "test": "jest"
+    },
+    "devDependencies": {
+        "@electron-forge/cli": "^6.0.0-beta.66",
+        "@electron-forge/maker-deb": "^6.0.0-beta.66",
+        "@electron-forge/maker-rpm": "^6.0.0-beta.66",
+        "@electron-forge/maker-squirrel": "^6.0.0-beta.66",
+        "@electron-forge/maker-zip": "^6.0.0-beta.66",
+        "electron": "^20.1.4",
+        "jest": "^29.0.3"
+    },
+    "dependencies": {
+        "axios": "^0.27.2",
+        "bunyan": "^1.8.15",
+        "electron-squirrel-startup": "^1.0.0",
+        "ethers": "^5.7.1",
+        "image-size": "^1.0.2",
+        "js-event-bus": "^1.1.1",
+        "jsdom": "^20.0.0",
+        "koa": "^2.13.4",
+        "koa-static": "^5.0.0",
+        "marked": "^4.1.0",
+        "moment": "^2.29.4",
+        "nunjucks": "^3.2.3",
+        "portfinder": "^1.0.32",
+        "uuid": "^9.0.0"
+    },
+    "config": {
+        "forge": {
+            "packagerConfig": {
+                "extraResource": [
+                    "../ipfsbin/",
+                    "../templates/",
+                    "../fe/dist/"
+                ]
+            },
+            "makers": [
+                {
+                    "name": "@electron-forge/maker-squirrel",
+                    "config": {
+                        "name": "planetjs"
+                    }
+                },
+                {
+                    "name": "@electron-forge/maker-zip",
+                    "platforms": [
+                        "darwin"
+                    ]
+                },
+                {
+                    "name": "@electron-forge/maker-deb",
+                    "config": {}
+                },
+                {
+                    "name": "@electron-forge/maker-rpm",
+                    "config": {}
+                }
+            ]
+        }
+    }
+}

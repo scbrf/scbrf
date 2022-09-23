@@ -1,0 +1,222 @@
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('./fonts/PressStart2P-Regular.ttf') format('TrueType');
+}
+
+@font-face {
+  font-family: 'dinkie';
+  src: url('./fonts/DinkieBitmap-9px.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'dinkie';
+  font-style: italic;
+  src: url('./fonts/DinkieBitmap-9pxItalic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'dinkie code';
+  src: url('./fonts/DinkieBitmap-9pxCode.woff2') format('woff2');
+}
+
+:root {
+  --background-color: #111;
+  --foreground-color: #fff;
+  --foreground-secondary-color: #eee;
+  --border-color: #e2e2e2;
+  --item-gap: 24px;
+}
+
+html {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: var(--background-color);
+  padding: 0;
+  margin: 0px;
+  font-family: helvetica neue,arial,hiragino sans gb,microsoft yahei,sans-serif;
+}
+
+a:link, a:visited, a:active {
+  color: #639bff;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #639bff;
+  text-decoration: underline;
+}
+
+code {
+  font-family: 'dinkie code';
+  font-size: 0.9em;
+}
+
+h1 {
+  color: var(--foreground-color);
+  font-size: 2em;
+}
+
+img {
+  max-width: 100%;
+}
+
+hr {
+  border: none;
+  height: 2px;
+  color: var(--border-color);
+  background-color: var(--border-color);
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.date {
+  font-size: 16px;
+  color: var(--foreground-secondary-color);
+}
+
+.wrapper {
+  padding: 20px;
+}
+
+.main {
+  max-width: calc(800px - env(safe-area-inset-left) - env(safe-area-inset-left));
+  margin: 0 auto;
+}
+
+.content {
+  line-height: 160%;
+  font-size: 18px;
+  color: var(--foreground-color);
+}
+
+.breadcrumb {
+  line-height: 160%;
+  font-size: 18px;
+  color: var(--foreground-color);
+  margin-bottom: 20px;
+  font-family: 'dinkie';
+}
+
+.chevron {
+  margin: 0px 8px;
+}
+
+p:first-child, ul:first-child, pre:first-child {
+  margin-top: 0;
+}
+
+p:last-child, ul:last-child, pre:last-child, .audio-container:last-child {
+  margin-bottom: 0;
+}
+
+.date {
+  margin: 20px 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 1);
+  text-align: center;
+  font-size: 18px;
+  font-family: "dinkie";
+}
+
+.bottom {
+  margin-top: 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  font-size: 14px;
+  font-family: "dinkie";
+}
+
+.site-header {
+  margin-bottom: 20px;
+}
+
+.site-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.site-avatar {
+}
+
+.site-avatar img {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  vertical-align: bottom;
+}
+
+.site-info {
+  flex: 1;
+}
+
+.site-title {
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 800;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.site-about {
+  font-size: 12px;
+  line-height: 160%;
+  text-align: left;
+}
+
+.video-container {
+  width: 100%;
+  padding-top: 56.25%;
+  height: 0;
+  position: relative;
+  border-radius: 2px;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 2px;
+}
+
+.audio-container {
+  margin-bottom: 20px;
+  line-height: 100%;
+}
+
+.audio {
+  width: 100%;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--item-gap);
+}
+
+.item-date {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 1);
+}
+
+.item-title {
+  font-size: 24px;
+}
+
+@media (max-width: 600px) {
+  .site-title {
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 1.5em;
+    line-break: anywhere;
+    word-break: break-all;
+  }
+}
