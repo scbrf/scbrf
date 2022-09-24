@@ -36,7 +36,14 @@ class Draft {
     }
 
     static fromArticle(article) {
-        return new Draft(article.planet, article, article)
+        const draft = new Draft(article.planet, article, article)
+        for (let attachment of ([...article.attachments, article.audioFilename, article.videoFilename].filter(a=>a))) {
+            require('fs').cpSync(
+                require('path').join(article.publicBase, attachment.name),
+                require('path').join(draft.attachmentsPath, attachment.name)
+            )
+        }
+        return draft
     }
 
     json() {

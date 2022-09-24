@@ -20,7 +20,9 @@ const OS = require('os').platform()
 let mainWindow
 
 
-if (require('electron-squirrel-startup')) return app.quit();
+if (require('electron-squirrel-startup')) {
+    return app.quit();
+}
 
 const lock = app.requestSingleInstanceLock()
 if (! lock) {
