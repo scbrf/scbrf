@@ -205,9 +205,13 @@ class Planet {
             await a.publicRender()
         }))
 
-        const cid = await ipfs.addDirectory(this.publicBasePath)
-        log.info('publish dir return:', cid)
-        await ipfs.publish(this.id, cid)
+        try {
+            const cid = await ipfs.addDirectory(this.publicBasePath)
+            log.info('publish dir return:', cid)
+            await ipfs.publish(this.id, cid)
+        } catch (ex) {
+            log.error('publish error', ex)
+        }
         this.publishing = false
         this.lastPublished = new Date().getTime()
         bus.emit('planets-change', null, this.id)

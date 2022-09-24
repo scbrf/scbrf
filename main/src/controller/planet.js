@@ -14,7 +14,7 @@ const log = bunyan.createLogger({name: "planetView"});
 const {bus} = require('../utils/events');
 
 
-class PlanetSidebarController { 
+class PlanetSidebarController {
     createView() {
         this.view = new BrowserView({
             webPreferences: {
@@ -47,12 +47,28 @@ class PlanetSidebarController {
             {
                 label: 'Check for update',
                 click: this.followPlanetUpdate.bind(this)
-            }, {
+            },
+            {
                 label: 'Copy URL',
                 click: () => {
                     clipboard.writeText(this.planetCtxMenuTargetPlanet.link)
                 }
-            }, {
+            },
+            {
+                label: 'Mark All as Read',
+                click: () => {
+                    const planet = FollowingPlanet.following.filter(p => p.id === this.planetCtxMenuTargetPlanet.id)[0]
+                    planet.articles.forEach(a => {
+                        if (a.read === false) {
+                            a.read = true
+                            a.save()
+                        }
+                    })
+                    bus.emit('allreadchange', null, planet.id)
+                    this.updateSidebarFollowing()
+                }
+            },
+            {
                 type: 'separator'
             }, {
                 label: 'Unfollow',
@@ -111,13 +127,15 @@ class PlanetSidebarController {
         ipcMain.on('setfocus', async (event, p) => {
             let articles,
                 title,
-                planet
+                planet = null
             if (p == 'today') {
                 articles = this.filterArticles((a) => moment(a.created).isSame(moment(), 'day'))
                 title = 'Today'
             } else if (p == 'unread') {
+                articles = this.filterArticles((a) => a.read === false)
                 title = 'Unread'
             } else if (p == 'starred') {
+                articles = this.filterArticles((a) => a.starred === true)
                 title = 'Starred'
             } else if (p.startsWith('my:')) {
                 articles = this.filterArticles((a) => a.planet.id === p.substring('my:'.length))
@@ -128,10 +146,8 @@ class PlanetSidebarController {
             } else {
                 log.error('unknow focus')
             }
-            if (planet) {
-                this.focusPlanet = planet
-                bus.emit('focusPlanet', null, planet.json())
-            }
+            this.focusPlanet = planet
+            bus.emit('focusPlanet', null, planet ? planet.json() : null)
             if (articles && articles.length > 0) {
                 if (! title) {
                     title = articles[0].planet.name
@@ -166,6 +182,12 @@ class PlanetSidebarController {
                     }))
                 })
             }
+        })
+        bus.on('article/read/change', () => {
+            this.updateSidebarFollowing()
+        })
+        bus.on('article/star/change', () => {
+            this.updateSidebarFollowing()
         })
         bus.on('ipfsOnlineState', (data) => { // log.info('ipfs online status change', data)
             this.ipfsOnlineState = data
@@ -318,7 +340,29 @@ class PlanetSidebarController {
         ]
         this.updateSidebarMyPlanets()
     }
+    getNumbers() {
+        const ret = {}
+        FollowingPlanet.following.forEach(p => {
+            p.articles.forEach(a => {
+                if (moment(a.created).isSame(moment(), 'day')) {
+                    ret.today = (ret.today || 0) + 1
+                }
+                if (a.read === false) {
+                    ret.read = (ret.read || 0) + 1
+                }
+                if ((a.starred === true)) {
+                    ret.starred = (ret.starred || 0) + 1
+                }
+            })
+            ret[`following:${
+                    p.id
+                }`] = p.articles.filter(a => a.read === false).length
+        })
+        return ret
+    }
     updateSidebarFollowing() {
+        const numbers = this.getNumbers()
+        this.view.webContents.send('numbers', numbers)
         this.view.webContents.send('following', FollowingPlanet.following.map(p => ({
             ...p.json(),
             busy: p.updating,

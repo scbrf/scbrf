@@ -1,5 +1,5 @@
 <template>
     <div class="w-screen h-screen flex items-center justify-center">
-        Empty Content
+        No Focus Content
     </div>
 </template>

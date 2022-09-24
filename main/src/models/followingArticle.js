@@ -13,8 +13,8 @@ class FollowingArticle {
         this.title = a.title
         this.content = a.content
         this.created = a.created
-        this.read = null
-        this.starred = null
+        this.read = a.read || false
+        this.starred = a.starred || false
         this.videoFilename = a.videoFilename
         this.audioFilename = a.audioFilename
         this.attachments = a.attachments

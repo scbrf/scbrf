@@ -8,9 +8,12 @@ export default function () {
     const articles = useArticlesStore()
     const topbar = useTopbarStore()
     const editor = useEditorStore()
+
     api.recieve('ipfsOnlineState', (p) => {
-        console.log('ipfsOnlineState', p[0])
-        ipfs.$patch(p[0]);
+        for (let key of Object.keys(p[0])) {
+            ipfs[key] = p[0][key];
+        }
+        // ipfs.$patch(p[0]); //seems has bug do not want to deep into
     })
     api.recieve('myplanets', (p) => {
         ipfs.planets = p[0];
@@ -18,11 +21,16 @@ export default function () {
     api.recieve('following', (p) => {
         ipfs.following = p[0]
     })
+    api.recieve('numbers', (p) => {
+        ipfs.numbers = p[0]
+    })
     api.recieve('articles', (p) => {
         articles.$patch(p[0])
     })
     api.recieve('topbar', (p) => {
-        topbar.$patch(p[0])
+        for (let key of Object.keys(p[0])) {
+            topbar[key] = p[0][key];
+        }
     })
     api.recieve('updateVideo', (p) => {
         editor.videoFilename = p[0]
@@ -34,6 +42,8 @@ export default function () {
         editor.attachments = p[0]
     })
     api.recieve('editor/update', p => {
-        editor.$patch(p[0])
+        for (let key of Object.keys(p[0])) {
+            editor[key] = p[0][key];
+        }
     })
 }

@@ -2,10 +2,11 @@
   <header class="h-12 flex bg-gray-100 dark:bg-gray-800">
     <div v-if="isWin" class="flex p-0 m-0">
       <XCircleIcon @click="closeWin" class="mt-4 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag"></XCircleIcon>
-      <MinusCircleIcon @click="minimalWin" class="mt-4 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag"></MinusCircleIcon>
+      <MinusCircleIcon @click="minimalWin" class="mt-4 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+      </MinusCircleIcon>
       <ViewColumnsIcon @click="triggleRootPanel" class="ml-4 mt-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag" />
     </div>
-    <div v-else  class="flex p-0 m-0">
+    <div v-else class="flex p-0 m-0">
       <ViewColumnsIcon @click="triggleRootPanel" class="ml-24 mt-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag" />
     </div>
   </header>
@@ -15,15 +16,18 @@
       <div class="p-1">
         <div @click="setFocus('today')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'today' ? ['bg-gray-300'] : [] ">
-          <SunIcon class="h-6 w-6 text-orange-500 mr-1" /> <span class="">Today</span>
+          <SunIcon class="h-6 w-6 text-orange-500 mr-1" /> <span class="flex-1">Today</span>
+          <span v-if="numbers.today"> {{ numbers.today }} </span>
         </div>
         <div @click="setFocus('unread')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'unread' ? ['bg-gray-300'] : [] ">
-          <CheckBadgeIcon class="h-6 w-6 text-blue-500 mr-1" /> <span class="">Unread</span>
+          <CheckBadgeIcon class="h-6 w-6 text-blue-500 mr-1" /> <span class="flex-1">Unread</span>
+          <span v-if="numbers.read"> {{ numbers.read }} </span>
         </div>
         <div @click="setFocus('starred')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'starred' ? ['bg-gray-300'] : [] ">
-          <StarIcon class="h-6 w-6 text-yellow-500 mr-1" /> <span class="">Starred</span>
+          <StarIcon class="h-6 w-6 text-yellow-500 mr-1" /> <span class="flex-1">Starred</span>
+          <span v-if="numbers.starred"> {{ numbers.starred }} </span>
         </div>
       </div>
     </div>
@@ -70,6 +74,7 @@
               d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
               fill="currentFill" />
           </svg>
+          <span v-else-if="numbers[`following:${p.id}`]"> {{ numbers[`following:${p.id}`] }} </span>
         </div>
       </div>
     </div>
@@ -97,10 +102,10 @@ export default {
     }
   },
   components: {
-    ViewColumnsIcon, SunIcon, CheckBadgeIcon, StarIcon, Avatar, PlusIcon,XCircleIcon,MinusCircleIcon
+    ViewColumnsIcon, SunIcon, CheckBadgeIcon, StarIcon, Avatar, PlusIcon, XCircleIcon, MinusCircleIcon
   },
   computed: {
-    ...mapState(useIPFSStore, ['online', 'peers', 'planets', 'following']),
+    ...mapState(useIPFSStore, ['online', 'peers', 'planets', 'following', 'numbers']),
     ...mapWritableState(useIPFSStore, ['focus']),
     isWin() {
       return (navigator.userAgent.indexOf("Win") != -1)
@@ -123,12 +128,12 @@ export default {
     triggleRootPanel() {
       api.send('triggleRootPanel',)
     },
-    closeWin(){
-            api.send('closeWin')
-        },
-        minimalWin(){
-          api.send('minimalWin')
-        }
+    closeWin() {
+      api.send('closeWin')
+    },
+    minimalWin() {
+      api.send('minimalWin')
+    }
 
   }
 }

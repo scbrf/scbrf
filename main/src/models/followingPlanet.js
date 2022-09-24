@@ -74,13 +74,24 @@ class FollowingPlanet {
         this.updating = true
         bus.emit('following-change', null, this.id)
 
-        // 更新 Following 的内容
-        const newPlanet = await FollowingPlanet.follow(this.link)
-        for (let i in FollowingPlanet.following) {
-            if (FollowingPlanet.following[i] === this) {
-                FollowingPlanet.following[i] = newPlanet
-                break
+        try { // 更新 Following 的内容
+            const newPlanet = await FollowingPlanet.follow(this.link)
+            for (let i in FollowingPlanet.following) {
+                if (FollowingPlanet.following[i] === this) {
+                    newPlanet.articles.forEach(a => {
+                        const oldarticle = FollowingPlanet.following[i].articles.filter(b => a.id === b.id)[0]
+                        if (oldarticle) {
+                            a.read = oldarticle.read
+                            a.starred = oldarticle.starred
+                        }
+                    })
+                    FollowingPlanet.following[i] = newPlanet
+                    break
+                }
             }
+        } catch (ex) {
+            this.updating = false
+            log.error('error when update', ex)
         }
 
         bus.emit('following-change', null, this.id)
@@ -115,7 +126,7 @@ class FollowingPlanet {
             })
             for (let name of articles) {
                 const article = FollowingArticle.load(name, planet)
-                if (article){
+                if (article) {
                     planet.articles.push(article)
                 }
             }

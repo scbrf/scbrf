@@ -15,18 +15,18 @@ const editorWebview = require('./editor/editorWebview')
 const {Planet, Draft, FollowingPlanet} = require('../models')
 
 class WebviewTopbar {
-    createView() { 
+    createView() {
         this.view = new BrowserView({
             webPreferences: {
                 preload: require('path').join(__dirname, '..', '..', 'preload.js')
             }
         })
- 
-        editorTopbar.createView() 
+
+        editorTopbar.createView()
         editorMain.createView()
         editorWebview.createView()
 
-        // this.view.webContents.openDevTools({ mode: 'undocked' })
+        // this.view.webContents.openDevTools({mode: 'undocked'})
         ipcMain.on('articleFocus', (_, article) => {
             this.view.webContents.send('topbar', {article})
         })
@@ -58,7 +58,11 @@ class WebviewTopbar {
         bus.on('focusPlanet', (planet) => {
             log.info('focus planet change', planet)
             this.focusPlanet = planet
-            this.view.webContents.send('topbar', {planet})
+            this.view.webContents.send('topbar', {
+                planet: {
+                    ...planet
+                }
+            })
         })
         this.articleCtxMenu = Menu.buildFromTemplate([
             {
@@ -69,10 +73,13 @@ class WebviewTopbar {
                 click: this.deleteArticle.bind(this)
             }
         ])
-        ipcMain.on('articleCtxMenu', (event, p) => {
+        ipcMain.on('articleCtxMenu', (event, a) => {
             const win = BrowserWindow.fromWebContents(event.sender)
-            this.articleCtxMenu.popup(win)
-            this.ctxArticle = p
+            this.ctxArticle = a
+            let planet = Planet.planets.filter(p => p.id === a.planet.id)[0]
+            if (planet) {
+                this.articleCtxMenu.popup(win)
+            }
         })
     }
     async deleteArticle() {
