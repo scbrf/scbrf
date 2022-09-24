@@ -26,7 +26,7 @@ class WebviewTopbar {
         editorMain.createView()
         editorWebview.createView()
 
-        this.view.webContents.openDevTools({ mode: 'undocked' })
+        // this.view.webContents.openDevTools({ mode: 'undocked' })
         ipcMain.on('articleFocus', (_, article) => {
             this.view.webContents.send('topbar', {article})
         })
