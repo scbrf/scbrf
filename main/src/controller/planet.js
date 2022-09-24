@@ -14,7 +14,7 @@ const log = bunyan.createLogger({name: "planetView"});
 const {bus} = require('../utils/events');
 
 
-class PlanetSidebarController {
+class PlanetSidebarController { 
     createView() {
         this.view = new BrowserView({
             webPreferences: {

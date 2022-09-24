@@ -79,10 +79,14 @@ class FollowingArticle {
     static load(name, planet) {
         const articlePath = require('path').join(planet.articlesPath, name)
         if (require('fs').existsSync(articlePath)) {
-            const json = JSON.parse(require('fs').readFileSync(articlePath).toString())
-            const article = FollowingArticle.create(json, planet)
-            article.summary = FollowingArticle.extractSummary(article, planet)
-            return article
+            try {
+                const json = JSON.parse(require('fs').readFileSync(articlePath).toString())
+                const article = FollowingArticle.create(json, planet)
+                article.summary = FollowingArticle.extractSummary(article, planet)
+                return article
+            } catch (ex) {
+                return null
+            }
         } else {
             log.info(`${name} not exists!`)
         }

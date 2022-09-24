@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain} = require('electron')
+const {app, BrowserWindow, ipcMain, Tray, Menu} = require('electron')
 const planet = require('./src/controller/planet')
 const articles = require('./src/controller/articles')
 const ipfs = require('./src/utils/ipfs')
@@ -11,13 +11,29 @@ const bunyan = require('bunyan');
 const log = bunyan.createLogger({name: "main"});
 
 let mainWindow
+
+const lock = app.requestSingleInstanceLock()
+if (!lock) {
+    app.quit()
+} else {
+    app.on('second-instance', ()=>{
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) {
+                mainWindow.restore()
+            }
+            mainWindow.focus()
+        }    
+    })
+}
+
 const createWindow = () => {
     mainWindow = new BrowserWindow({
         width: 1600,
-        height: 900,
+        height: 900, 
         vibrancy: 'sidebar',
         visualEffectState: 'followWindow',
         titleBarStyle: 'hidden',
+        icon:"resources/icon.png",
         trafficLightPosition: {
             x: 18,
             y: 18
@@ -42,6 +58,10 @@ const createWindow = () => {
     mainWindow.once('show', () => {
         bus.emit('rebounds')
     })
+
+    mainWindow.on('close', ()=>{
+        mainWindow = null;
+    })
 }
 
 async function initDirBase() {
@@ -51,6 +71,20 @@ async function initDirBase() {
     ipfs.constructor.REPO_PATH = require('path').join(BASE_ROOT, 'ipfs')
 }
 
+let tray = null
+
+
+const trayOpen = ()=>{
+    if (mainWindow) {
+        if (mainWindow.isMinimized()) {
+            mainWindow.restore()
+        }
+        mainWindow.focus()
+
+    } else {
+        createWindow();
+    }
+}
 app.whenReady().then(async () => {
     await initDirBase()
     await require('./src/utils/websrv').init()
@@ -65,7 +99,26 @@ app.whenReady().then(async () => {
     webviewTopbar.createView()
     audioPlayer.createView()
 
-    ipcMain.on('triggleRootPanel', () => {
+    tray = new Tray(require('path').join(__dirname, 'resources','icon.png'))
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Open', click: trayOpen},
+    { type: 'separator'},
+    { label: 'Quit', click:()=>{
+        app.quit()
+    }}
+  ])
+  tray.setToolTip('Scarborough is running ...')
+  tray.setContextMenu(contextMenu)
+  tray.on('click', trayOpen)
+
+    ipcMain.on('closeWin', (event)=>{
+        BrowserWindow.fromWebContents(event.sender).close()
+    })
+    ipcMain.on('minimalWin', (event)=>{
+        BrowserWindow.fromWebContents(event.sender).minimize()
+    })
+
+    ipcMain.on('triggleRootPanel', () => { 
         const views = mainWindow.getBrowserViews()
         let root
         if (views.indexOf(planet.view) >= 0) { // need remove planet view
@@ -130,12 +183,10 @@ app.whenReady().then(async () => {
     }, 300);
 })
 
-app.on('quit', async () => {
-    await ipfs.ipfsShutdown()
+app.on('window-all-closed', ()=>{
+
 })
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
+app.on('quit', async () => {
+    await ipfs.ipfsShutdown()
 })

@@ -1,6 +1,13 @@
 <template>
-  <header class="h-12 bg-gray-100 dark:bg-gray-800">
-    <ViewColumnsIcon @click="triggleRootPanel" class="ml-24 mt-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag" />
+  <header class="h-12 flex bg-gray-100 dark:bg-gray-800">
+    <div v-if="isWin" class="flex p-0 m-0">
+      <XCircleIcon @click="closeWin" class="mt-4 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag"></XCircleIcon>
+      <MinusCircleIcon @click="minimalWin" class="mt-4 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag"></MinusCircleIcon>
+      <ViewColumnsIcon @click="triggleRootPanel" class="ml-4 mt-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag" />
+    </div>
+    <div v-else  class="flex p-0 m-0">
+      <ViewColumnsIcon @click="triggleRootPanel" class="ml-24 mt-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag" />
+    </div>
   </header>
   <main class="p-4 flex flex-col flex-1 bg-gray-100 dark:bg-slate-600">
     <div>
@@ -79,7 +86,7 @@
 </template>
 <script>
 import Avatar from '../components/Avatar.vue'
-import { ViewColumnsIcon, SunIcon, CheckBadgeIcon, StarIcon, PlusIcon } from '@heroicons/vue/24/outline'
+import { ViewColumnsIcon, SunIcon, CheckBadgeIcon, StarIcon, PlusIcon, XCircleIcon, MinusCircleIcon } from '@heroicons/vue/24/outline'
 import { mapState, mapWritableState } from 'pinia';
 import { useIPFSStore } from '../stores/ipfs';
 
@@ -90,11 +97,14 @@ export default {
     }
   },
   components: {
-    ViewColumnsIcon, SunIcon, CheckBadgeIcon, StarIcon, Avatar, PlusIcon
+    ViewColumnsIcon, SunIcon, CheckBadgeIcon, StarIcon, Avatar, PlusIcon,XCircleIcon,MinusCircleIcon
   },
   computed: {
     ...mapState(useIPFSStore, ['online', 'peers', 'planets', 'following']),
-    ...mapWritableState(useIPFSStore, ['focus'])
+    ...mapWritableState(useIPFSStore, ['focus']),
+    isWin() {
+      return (navigator.userAgent.indexOf("Win") != -1)
+    }
   },
   methods: {
     showMenu() {
@@ -112,7 +122,14 @@ export default {
     },
     triggleRootPanel() {
       api.send('triggleRootPanel',)
-    }
+    },
+    closeWin(){
+            api.send('closeWin')
+        },
+        minimalWin(){
+          api.send('minimalWin')
+        }
+
   }
 }
 

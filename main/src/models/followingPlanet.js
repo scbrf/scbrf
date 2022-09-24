@@ -115,7 +115,9 @@ class FollowingPlanet {
             })
             for (let name of articles) {
                 const article = FollowingArticle.load(name, planet)
-                planet.articles.push(article)
+                if (article){
+                    planet.articles.push(article)
+                }
             }
             planet.articles.sort((a, b) => b.created - a.created)
             FollowingPlanet.following.push(planet)
