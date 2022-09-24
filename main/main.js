@@ -126,6 +126,7 @@ app.whenReady().then(async () => {
     })
     setTimeout(() => {
         createWindow()
+        rebounds()
     }, 300);
 })
 

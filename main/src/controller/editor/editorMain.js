@@ -97,7 +97,7 @@ class EditorTopbar {
     init(draft) {
         this.view.setBounds({x: 0, y: 48, width: 600, height: 552})
         this.view.webContents.loadURL(`${
-            require('../utils/websrv').WebRoot
+            require('../../utils/websrv').WebRoot
         }/editor/main`)
         this.view.setAutoResize({width: true, height: true})
         this.draft = draft

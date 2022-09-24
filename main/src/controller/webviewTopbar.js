@@ -15,18 +15,18 @@ const editorWebview = require('./editor/editorWebview')
 const {Planet, Draft, FollowingPlanet} = require('../models')
 
 class WebviewTopbar {
-    createView() {
+    createView() { 
         this.view = new BrowserView({
             webPreferences: {
                 preload: require('path').join(__dirname, '..', '..', 'preload.js')
             }
         })
-
-        editorTopbar.createView()
+ 
+        editorTopbar.createView() 
         editorMain.createView()
         editorWebview.createView()
 
-        // this.view.webContents.openDevTools({ mode: 'undocked' })
+        this.view.webContents.openDevTools({ mode: 'undocked' })
         ipcMain.on('articleFocus', (_, article) => {
             this.view.webContents.send('topbar', {article})
         })

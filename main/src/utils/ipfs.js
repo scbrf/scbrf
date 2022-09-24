@@ -1,4 +1,4 @@
-const {exec, spawn} = require('node:child_process');
+const {execFile, spawn} = require('node:child_process');
 const {bus} = require('./events');
 const axios = require('axios').default
 const bunyan = require('bunyan');
@@ -49,13 +49,9 @@ class IPFSDaemon { // 启动并监视IPFS Daemon
         let result = await this.api("name/resolve", {"arg": ipns})
         log.info('resolve ipns return', result)
         result = result.Path.trim()
-        if (result.startsWith('/ipfs/')) 
+        if (result.startsWith('/ipfs/')) {
             return result.substring('/ipfs/'.length)
-
-
-        
-
-
+        }
         log.error('resolve ipns return unknown', result)
     }
     async pin(cid) {
@@ -194,14 +190,10 @@ class IPFSDaemon { // 启动并监视IPFS Daemon
         });
     }
     async setSwarmConnMgr(cfg) {
-        return this.runIPFSCmd('config', 'Swarm.ConnMgr', `'${
-            JSON.stringify(cfg)
-        }'`, '--json')
+        return this.runIPFSCmd('config', 'Swarm.ConnMgr', JSON.stringify(cfg), '--json')
     }
     async setPeers(peers) {
-        return this.runIPFSCmd('config', 'Peering.Peers', `'${
-            JSON.stringify(peers)
-        }'`, '--json')
+        return this.runIPFSCmd('config', 'Peering.Peers', JSON.stringify(peers), '--json')
     }
     async updateGatewayPort(port) {
         return this.runIPFSCmd('config', 'Addresses.Gateway', `/ip4/127.0.0.1/tcp/${port}`)
@@ -211,7 +203,7 @@ class IPFSDaemon { // 启动并监视IPFS Daemon
         return this.runIPFSCmd('config', 'Addresses.API', `/ip4/127.0.0.1/tcp/${port}`)
     }
     async updateSwarmPort(port) {
-        return this.runIPFSCmd('config', 'Addresses.Swarm', "'" + JSON.stringify([`/ip4/0.0.0.0/tcp/${port}`, `/ip6/::/tcp/${port}`, `/ip4/0.0.0.0/udp/${port}/quic`, `/ip6/::/udp/${port}/quic`]) + "'", '--json')
+        return this.runIPFSCmd('config', 'Addresses.Swarm', JSON.stringify([`/ip4/0.0.0.0/tcp/${port}`, `/ip6/::/tcp/${port}`, `/ip4/0.0.0.0/udp/${port}/quic`, `/ip6/::/udp/${port}/quic`]), '--json')
     }
     async initIPFS() {
         return this.runIPFSCmd('init')
@@ -234,11 +226,7 @@ class IPFSDaemon { // 启动并监视IPFS Daemon
     async runIPFSCmd(...args) {
         process.env.IPFS_PATH = IPFSDaemon.REPO_PATH;
         return new Promise((resolve, reject) => {
-            exec(`${
-                IPFSDaemon.EXE_PATH
-            } ${
-                args.join(' ')
-            }`, (error, stdout, stderr) => {
+            execFile(IPFSDaemon.EXE_PATH, args, (error, stdout, stderr) => {
                 if (error) {
                     reject(error)
                     return;
