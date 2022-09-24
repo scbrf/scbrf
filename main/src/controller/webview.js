@@ -19,7 +19,7 @@ class Webview {
             log.info('need open url', url)
             // return { action: 'deny' };
         });
-        this.view.webContents.openDevTools({mode: 'undocked'})
+        // this.view.webContents.openDevTools({mode: 'undocked'})
         ipcMain.on('articleFocus', async (_, p) => {
             log.info('webview switch to url', p.url)
             await this.view.webContents.executeJavaScript(`(()=>{
