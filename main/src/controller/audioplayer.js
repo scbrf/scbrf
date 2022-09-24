@@ -12,7 +12,7 @@ class AudioPlayerController {
                 preload: require('path').join(__dirname, '..', '..', 'preload.js')
             }
         })
-        this.view.webContents.openDevTools({mode: 'undocked'})
+        // this.view.webContents.openDevTools({mode: 'undocked'})
         ipcMain.on('playAudio', (_, p) => {
             log.info('need play audio at', p.url, p.audioFilename)
             let base = p.url
