@@ -43,6 +43,16 @@ class Draft {
                 require('path').join(draft.attachmentsPath, attachment)
             )
         }
+        draft.attachments.forEach(a=>{
+            a.url = 'file://' + require('path').join(draft.attachmentsPath, a.name)
+        })
+        if (draft.audioFilename) {
+            draft.audioFilename =  'file://' + require('path').join(draft.attachmentsPath, require('path').basename(draft.audioFilename))
+        }
+        if (draft.videoFilename) {
+            draft.videoFilename =  'file://' + require('path').join(draft.attachmentsPath, require('path').basename(draft.videoFilename))
+        }
+
         return draft
     }
 

@@ -37,7 +37,7 @@ export default {
     },
     computed: {
         title() {
-            return (this.src || '').split("/").slice(-1)[0] || ''
+            return (this.src || '').split(/[/\\]/).slice(-1)[0] || ''
         }
     },
     components: {

@@ -49,7 +49,14 @@ const rebounds = (p = {}) => {
     const {root, player} = this.boundsProps
     const [width, height] = mainWindow.getSize()
     log.info('reounds with props', {root, player, width, height})
-    planet.view.setBounds({x: 0, y: 0, width: 300, height})
+    planet.view.setBounds({x: 0, y: 0, width: root ? 300 : 0, height})
+    planet.view.setBounds({x: 0, y: 0, width: root ? 300 : 0, height})
+    articles.view.setBounds({
+        x: root ? 300 : 0,
+        y: 0,
+        width: 300,
+        height
+    })
     articles.view.setBounds({
         x: root ? 300 : 0,
         y: 0,
@@ -178,14 +185,12 @@ app.whenReady().then(async () => {
         BrowserWindow.fromWebContents(event.sender).minimize()
     })
 
-    ipcMain.on('triggleRootPanel', () => {
+    ipcMain.on('triggleRootPanel', async () => {
         const views = mainWindow.getBrowserViews()
         let root
-        if (views.indexOf(planet.view) >= 0) { // need remove planet view
-            mainWindow.removeBrowserView(planet.view)
+        if (planet.view.getBounds().width > 0) { // need remove planet view
             root = false
         } else { // need append planet view
-            mainWindow.addBrowserView(planet.view)
             root = true
         }
         bus.emit('rebounds', null, {root})
