@@ -9,7 +9,7 @@ class ArticleController {
                 preload: require('path').join(__dirname, '..', '..', 'preload.js')
             }
         })
-        this.view.webContents.openDevTools({mode: 'undocked'})
+        // this.view.webContents.openDevTools({mode: 'undocked'})
         bus.on('focusInfo', (p) => {
             this.focusInfo = p
             this.view.webContents.send('articles', p)
