@@ -1,28 +1,32 @@
 const {BrowserView, ipcMain} = require('electron')
 const bunyan = require('bunyan');
 const {bus} = require('../utils/events');
+const { basename } = require('path');
 const log = bunyan.createLogger({name: "audioPlayer"});
 
 class AudioPlayerController {
     createView() {
         this.view = new BrowserView({
             webPreferences: {
+                webSecurity:false,
                 preload: require('path').join(__dirname, '..', '..', 'preload.js')
             }
         })
-        // this.view.webContents.openDevTools({mode: 'undocked'})
+        this.view.webContents.openDevTools({mode: 'undocked'})
         ipcMain.on('playAudio', (_, p) => {
-            const url = `${
-                p.url
-            }${
-                p.audioFilename
-            }`
+            log.info('need play audio at', p.url, p.audioFilename)
+            let base = p.url
+            if ((!p.url.endsWith('/')) && (!p.url.endsWith('\\'))) {
+                base = require('path').dirname(p.url)
+            }
+            const url =require('path').join(base, p.audioFilename)
+            log.info('real play at', url)
             this.view.webContents.executeJavaScript(`(()=>{
                 document.querySelector('#audiotitle').innerText = '${
                 p.audioFilename
             }'
                 const audio = document.querySelector('audio');
-                audio.src = '${url}' 
+                audio.src = '${url.replace(/\\/g, "\\\\")}' 
                 audio.play();
             })()`)
             bus.emit('rebounds', null, {player: true})
