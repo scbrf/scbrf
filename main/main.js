@@ -36,6 +36,44 @@ if (! lock) {
     })
 }
 
+const rebounds = (p = {}) => {
+    this.boundsProps = {
+        ...(this.boundsProp || {
+            root: true,
+            player: false
+        }),
+        ...p
+    }
+    const {root, player} = this.boundsProps
+    const [width, height] = mainWindow.getSize()
+    log.info('reounds with props', {root, player, width, height})
+    planet.view.setBounds({x: 0, y: 0, width: 300, height})
+    articles.view.setBounds({
+        x: root ? 300 : 0,
+        y: 0,
+        width: 300,
+        height
+    })
+    webviewTopbar.view.setBounds({
+        x: root ? 600 : 300,
+        y: 0,
+        width: root ? width - 600 : width - 300,
+        height: 48
+    })
+    audioPlayer.view.setBounds({
+        x: root ? 600 : 300,
+        y: 49,
+        width: root ? width - 600 : width - 300,
+        height: player ? 48 : 0
+    })
+    webview.view.setBounds({
+        x: root ? 600 : 300,
+        y: player ? 97 : 49,
+        width: root ? width - 600 : width - 300,
+        height: player ? height - 96 : height - 48
+    })
+};
+
 const createWindow = () => {
     mainWindow = new BrowserWindow({
         width: 1600,
@@ -72,6 +110,7 @@ const createWindow = () => {
     mainWindow.on('close', () => {
         mainWindow = null;
     })
+    rebounds()
 }
 
 async function initDirBase() {
@@ -150,43 +189,6 @@ app.whenReady().then(async () => {
         bus.emit('rebounds', null, {root})
     })
 
-    const rebounds = (p = {}) => {
-        this.boundsProps = {
-            ...(this.boundsProp || {
-                root: true,
-                player: false
-            }),
-            ...p
-        }
-        const {root, player} = this.boundsProps
-        const [width, height] = mainWindow.getSize()
-        log.info('reounds with props', {root, player, width, height})
-        planet.view.setBounds({x: 0, y: 0, width: 300, height})
-        articles.view.setBounds({
-            x: root ? 300 : 0,
-            y: 0,
-            width: 300,
-            height
-        })
-        webviewTopbar.view.setBounds({
-            x: root ? 600 : 300,
-            y: 0,
-            width: root ? width - 600 : width - 300,
-            height: 48
-        })
-        audioPlayer.view.setBounds({
-            x: root ? 600 : 300,
-            y: 49,
-            width: root ? width - 600 : width - 300,
-            height: player ? 48 : 0
-        })
-        webview.view.setBounds({
-            x: root ? 600 : 300,
-            y: player ? 97 : 49,
-            width: root ? width - 600 : width - 300,
-            height: player ? height - 96 : height - 48
-        })
-    };
     bus.on('rebounds', rebounds)
 
     app.on('activate', () => {
@@ -198,7 +200,6 @@ app.whenReady().then(async () => {
     })
     setTimeout(() => {
         createWindow()
-        rebounds()
     }, 300);
 })
 

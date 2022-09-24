@@ -73,7 +73,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  -webkit-app-region: drag;
 }
 
 @tailwind base;
@@ -82,4 +81,8 @@ body {
 
 .nodrag {
   -webkit-app-region: no-drag;
+}
+
+.drag {
+  -webkit-app-region: drag;
 }

@@ -42,7 +42,7 @@
     "config": {
         "forge": {
             "packagerConfig": {
-                "icon": "resources/icon.png",
+                "icon": "resources/icon",
                 "extraResource": [
                     "../ipfsbin/",
                     "../templates/",

@@ -1,5 +1,5 @@
 <template>
-    <div class="h-screen flex flex-col border-gray-200 border-r">
+    <div class="h-screen flex flex-col border-gray-200 border-r drag">
         <div class="bg-gray-100 p-2 h-12 dark:bg-slate-800">
             <div class="font-bold">
                 {{ title }}

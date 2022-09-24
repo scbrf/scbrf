@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-gray-100 h-12 flex items-center dark:bg-slate-800">
+    <div class="bg-gray-100 h-12 flex items-center dark:bg-slate-800 drag">
         <PencilSquareIcon @click="newArticle" v-if="isMyPlanet" class="w-6 h-6 ml-4 hover:text-gray-900 nodrag">
         </PencilSquareIcon>
         <ChartBarSquareIcon v-if="planet && planet.ipns && planet.p" class="w-6 h-6 ml-4 hover:text-gray-900 nodrag">

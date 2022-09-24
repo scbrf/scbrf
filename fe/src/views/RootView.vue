@@ -1,5 +1,5 @@
 <template>
-  <header class="h-12 flex bg-gray-100 dark:bg-gray-800">
+  <header class="h-12 flex bg-gray-100 dark:bg-gray-800 drag">
     <div v-if="isWin" class="flex p-0 m-0">
       <XCircleIcon @click="closeWin" class="mt-4 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag"></XCircleIcon>
       <MinusCircleIcon @click="minimalWin" class="mt-4 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
@@ -10,7 +10,7 @@
       <ViewColumnsIcon @click="triggleRootPanel" class="ml-24 mt-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag" />
     </div>
   </header>
-  <main class="p-4 flex flex-col flex-1 bg-gray-100 dark:bg-slate-600">
+  <main class="p-4 flex flex-col flex-1 bg-gray-100 dark:bg-slate-600 drag">
     <div>
       <div class="text-xs text-gray-400 font-sans font-bold">Smart Feeds</div>
       <div class="p-1">
