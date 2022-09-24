@@ -1,6 +1,8 @@
 {
-    "name": "planetjs",
-    "version": "1.0.0",
+    "name": "scarborough",
+    "version": "0.0.1",
+    "author": "yygqg.eth",
+    "description": "Clone of Livid(olivida.eth)'s Planet project",
     "license": "MIT",
     "main": "main.js",
     "scripts": {
