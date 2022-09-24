@@ -15,18 +15,18 @@ class AudioPlayerController {
         // this.view.webContents.openDevTools({mode: 'undocked'})
         ipcMain.on('playAudio', (_, p) => {
             log.info('need play audio at', p.url, p.audioFilename)
-            let base = p.url
-            if ((!p.url.endsWith('/')) && (!p.url.endsWith('\\'))) {
-                base = require('path').dirname(p.url)
+            let base = p.url.replace(/\\/g, '/')
+            if (!base.endsWith('/')) {
+                base = base.split("/").slice(0, -1).join("/") + "/"
             }
-            const url =require('path').join(base, p.audioFilename)
+            const url =`${base}${p.audioFilename}`
             log.info('real play at', url)
             this.view.webContents.executeJavaScript(`(()=>{
                 document.querySelector('#audiotitle').innerText = '${
                 p.audioFilename
             }'
                 const audio = document.querySelector('audio');
-                audio.src = '${url.replace(/\\/g, "\\\\")}' 
+                audio.src = '${url}' 
                 audio.play();
             })()`)
             bus.emit('rebounds', null, {player: true})
