@@ -9,7 +9,7 @@ class ArticleController {
                 preload: require('path').join(__dirname, '..', '..', 'preload.js')
             }
         })
-        // this.view.webContents.openDevTools({mode: 'undocked'})
+        this.view.webContents.openDevTools({mode: 'undocked'})
         bus.on('focusInfo', (p) => {
             this.focusInfo = p
             this.view.webContents.send('articles', p)
@@ -38,6 +38,9 @@ class ArticleController {
             }
         })
         ipcMain.on('articleFocus', async (_, article) => {
+            if (this.focusInfo) {
+                this.focusInfo.focus = article.id
+            }
             let planet = FollowingPlanet.following.filter(p => p.id === article.planet.id)[0]
             if (planet) {
                 const aa = planet.articles.filter(a => a.id === article.id)[0]

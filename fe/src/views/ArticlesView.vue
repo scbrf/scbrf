@@ -48,6 +48,11 @@ export default {
       return (navigator.userAgent.indexOf("Win") != -1)
     }
     },
+    watch: {
+        focus(){
+            console.log('focus change to', this.focus)
+        }
+    },
     methods: {
         date(t) {
             return monent(t).format('MMM D,YYYY')

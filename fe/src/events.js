@@ -25,7 +25,10 @@ export default function () {
         ipfs.numbers = p[0]
     })
     api.recieve('articles', (p) => {
-        articles.$patch(p[0])
+        console.log('set articles', p[0])
+        for (let key of Object.keys(p[0])) {
+            articles[key] = p[0][key];
+        }
     })
     api.recieve('topbar', (p) => {
         for (let key of Object.keys(p[0])) {
