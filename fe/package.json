@@ -1,6 +1,6 @@
 {
-  "name": "planetjs",
-  "version": "0.0.0",
+  "name": "scarborough",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

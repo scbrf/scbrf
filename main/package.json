@@ -52,7 +52,7 @@
                 {
                     "name": "@electron-forge/maker-squirrel",
                     "config": {
-                        "name": "planetjs"
+                        "name": "scarborough"
                     }
                 },
                 {
