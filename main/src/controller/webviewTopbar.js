@@ -90,13 +90,8 @@ class WebviewTopbar {
       }
       const article = planet.articles.filter((a) => a.id === this.ctxArticle.id)[0]
       planet.articles = planet.articles.filter((a) => a.id !== this.ctxArticle.id)
-      const articles = this.focusInfo.articles.filter((a) => a.id !== this.ctxArticle.id)
-      bus.emit('focusInfo', null, {
-        ...this.focusInfo,
-        focus: articles.length > 0 ? articles[0].id : '',
-        articles,
-      })
       await article.delete()
+      rt.planets = [...rt.planets]
     }
   }
   editArticle() {

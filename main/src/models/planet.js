@@ -65,10 +65,7 @@ class Planet {
     const articles = this.articles.filter((a) => a.id !== article.id)
     this.articles = [article, ...articles]
     this.sortArticles()
-    bus.emit('model/article/added', null, {
-      ...article.json(),
-      planet: this.json(),
-    })
+    rt.planets = [...rt.planets]
   }
 
   sortArticles() {
