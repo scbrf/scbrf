@@ -1,66 +1,86 @@
 const { ipcMain } = require('electron')
-const eb = require('js-event-bus')()
+const EvtBus = require('js-event-bus')
+const bunyan = require('bunyan')
+const log = bunyan.createLogger({ name: 'event center' })
 
-function bindIpcMainTable(that, table) {
-  for (let entry of table) {
-    ipcMain.on(Object.keys(entry)[0], Object.values(entry)[0].bind(that))
+class EventCenter {
+  //直接在这里定义一个事件名，注意时间名必须用 ev + 任意一个大写字母开头
+  /** App Event */
+  evCreateWindow //'tell mainwindow to create main window'
+  evTrayOpen //'tell mainwindow tray icon clicked'
+  evIPFSShutdown // 'tell ipfs module to shutdown ipfs'
+  evAppInit // 'tell all module now do init work, and the callback should be sync function'
+  evAppQuit // app quit
+
+  /**  Runtime event **/
+  evRuntimeFollowingChange // '增加或者删除了Following数据，following的某个article内容改变不会触发该事件'
+  evRuntimePlanetsChange // '增加或者删除了某个Planet，planet里的某个文章内容改变不会触发该事件'
+  evRuntimeNumbersChange // '左侧栏里展示的数字内容发生了变化'
+  evRuntimeIpfsOnlinePeersChange // 'ipfs online 或者 peer 状态发生了变化'
+  evRuntimeDraftChange // '对应于编辑器的draft实例发生了变化'
+  evRuntimeMiddleSidebarContentChange // '中间栏的标题或者内容发生了变化'
+  evRuntimeMiddleSidebarFocusChange // '中间栏的关注文章发生了变化'
+  evRuntimeSidebarFocusChange //'左侧栏的关注点发生了变化'
+
+  evRebounds // 重新排列窗口，比如当用户切换左边栏或者切换声音播放器的时候
+
+  //直接在这里定义歌 ipc 的通道名，必须以 ipc + 任意一个大写字母开头
+  ipcSetSidebarFocus //前端网页通过ipc通道设置侧边栏的 focus 节点
+  ipcSetMiddleSidebarFocus //通过ipc通道设置中间栏的 focus 节点
+  ipcCloseWin //关闭窗口
+  ipcMinimalWin //最小化
+  ipcTriggleRootPanel //打开或者关闭左边栏
+
+  ipcCreateFollowMenu //左边栏底端按钮用户点击加号，会弹出上下文菜单
+  ipcFollowingCtxMenu //用户在左边栏关注的某个Planet上点右键
+  ipcPlanetCtxMenu //用户在左边栏创建的某个Planet上点右键
+  ipcCreatePlanet //用户选择创建一个新的Planet菜单
+  ipcFollowPlanet //用户选择关注一个新的Planet菜单
+
+  constructor() {
+    this.bus = EvtBus()
+    this.eventNameInit()
+    this.ipcNameInit()
   }
-}
-
-function bindBusTable(that, table) {
-  for (let entry of table) {
-    eb.on(entry[0], entry[1].bind(that))
+  bindIpcMainTable(that, table) {
+    for (let entry of table) {
+      ipcMain.on(entry[0], entry[1].bind(that))
+    }
   }
-}
 
-function emit(ev) {
-  eb.emit(ev)
-}
+  bindBusTable(that, table) {
+    for (let entry of table) {
+      this.bus.on(entry[0], entry[1].bind(that))
+    }
+  }
 
-/**
- * 简化Model的声音，model只需要关注业务逻辑即可
- * @param {*} that 通常为某个类的 prototype
- * @param {*} model { name:{ default, emit } }
- */
-function initDataModel(that, model) {
-  var prototype = Object.getPrototypeOf(that)
-  for (let name in model) {
-    Object.defineProperty(prototype, name, {
-      get() {
-        //get 函数会直接返回一个内部private变量的值或者是默认的值
-        return this[`#${name}`] || model[name].default
-      },
-      set(v) {
-        //set 函数会设置这个内部private变量的值，如果定义了emit，则在值改变的时候emit一个事件
-        this[`#${name}`] = v
-        if (model[name].emit) {
-          emit(model[name].emit, null, { src: 'set' })
-        }
-      },
+  emit(ev) {
+    if (!(ev in this.events)) {
+      console.log(new Error().stack)
+      throw `Unknown event: ${ev}`
+    }
+    log.info('event emit', { ev, args: Array.prototype.slice.call(arguments, 1) })
+    this.bus.emit(ev, null, Array.prototype.slice.call(arguments, 1))
+  }
+
+  eventNameInit() {
+    this.events = {}
+    Object.keys(this).forEach((k) => {
+      if (k.match(/ev[A-Z]/)) {
+        this[k] = k
+        this.events[k] = k
+      }
     })
   }
-  //同时会定义一个set原型函数，这个函数可以同时设置多个值
-  //如果这些值对应相同的emit事件，则会被优化，避免事件多次emit
-  prototype.set = function (obj) {
-    const events = new Set()
-    for (let key in obj) {
-      if (key in model) {
-        this[`#${key}`] = obj[key]
-        if (model[key].emit) {
-          events.add(model[key].emit)
-        }
+  ipcNameInit() {
+    this.rpcNames = {}
+    Object.keys(this).forEach((k) => {
+      if (k.match(/ipc[A-Z]/)) {
+        this[k] = k
+        this.rpcNames[k] = k
       }
-    }
-    for (let ev of Array.from(events)) {
-      emit(ev, null, { src: 'set' })
-    }
+    })
   }
 }
 
-module.exports = {
-  bus: eb,
-  bindIpcMainTable,
-  bindBusTable,
-  emit,
-  initDataModel,
-}
+module.exports = new EventCenter()

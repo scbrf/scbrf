@@ -1,57 +1,30 @@
 const bunyan = require('bunyan')
 const log = bunyan.createLogger({ name: 'models/runtime' })
-const { bindIpcMainTable, initDataModel } = require('../utils/events')
-const FollowingPlanet = require('./followingPlanet')
-const Planet = require('./planet')
+const evt = require('../utils/events')
 const moment = require('moment')
 
 class Runtime {
-  constructor() {
-    //这个模块会emit这些事件
-    this.events = {
-      ipfsOnlinePeersChange: 'ipfs-online-peers-change',
-      draftChange: 'draft-change',
-      middleSidebarContentChange: 'middle-sidebar-content-change',
-      middleSidebarFocusChange: 'middle-sidebar-focus-change',
-      sidebarFocusChange: 'sidebar-focus-change',
-    }
-    //这个模块拥有下面这些属性定义
-    initDataModel(this, {
-      ipfsOnline: {
-        default: false,
-        emit: this.events.ipfsOnlinePeersChange,
-      },
-      ipfsPeers: {
-        default: 0,
-        emit: this.events.ipfsOnlinePeersChange,
-      },
-      draft: {
-        default: null,
-        emit: this.events.draftChange,
-      },
-      middleSideBarFocusArticle: {
-        default: null,
-        emit: this.events.middleSidebarFocusChange,
-      },
-      middleSideBarTitle: {
-        default: '',
-        emit: this.events.middleSidebarContentChange,
-      },
-      middleSideBarArticles: {
-        default: [],
-        emit: this.events.middleSidebarContentChange,
-      },
-      sidebarFocus: {
-        default: null,
-        emit: this.events.sidebarFocusChange,
-      },
-    })
+  ipfsOnline = [false, evt.evRuntimeIpfsOnlinePeersChange, 'ipfs 在线状态']
+  ipfsPeers = [0, evt.evRuntimeIpfsOnlinePeersChange, 'ipfs实例远端数量']
+  following = [[], evt.evRuntimeFollowingChange, '正在关注的Planet列表']
+  planets = [[], evt.evRuntimePlanetsChange, '自己创建的Planet列表']
+  numbers = [{}, evt.evRuntimeNumbersChange, '左侧边栏里显示的数量']
 
+  draft = [null, evt.evRuntimeDraftChange, '当前编辑窗口正在编辑的草稿']
+  middleSideBarFocusArticle = [null, evt.evRuntimeMiddleSidebarFocusChange, '正在浏览的文章']
+
+  middleSideBarTitle = ['', evt.evRuntimeMiddleSidebarContentChange, '中间窗口的标题']
+  middleSideBarArticles = [[], evt.evRuntimeMiddleSidebarContentChange, '中间窗口文章列表']
+  sidebarFocus = [null, evt.evRuntimeSidebarFocusChange, '左边栏关注内容']
+
+  constructor() {
     //这个模块定义了这些可以从前端传过来的事件
-    bindIpcMainTable(this, [
-      { setSidebarFocus: this.#onIpcSidebarFocus },
-      { setMiddleSidebarFocus: this.#onIpcMiddleSidebarFocus },
+    evt.bindIpcMainTable(this, [
+      [evt.ipcSetSidebarFocus, this.#onIpcSidebarFocus],
+      [evt.ipcSetMiddleSidebarFocus, this.#onIpcMiddleSidebarFocus],
     ])
+
+    this.initDataModel()
   }
 
   /**
@@ -61,7 +34,7 @@ class Runtime {
   #onIpcSidebarFocus(focus) {
     let sidebarFocus = focus
     if (focus === 'today') {
-      const articles = FollowingPlanet.following.reduce((r, p) => {
+      const articles = this.following.reduce((r, p) => {
         return [...r, ...p.articles.filter((a) => moment(a.created).isSame(moment(), 'day'))]
       }, [])
       articles.sort((a, b) => b.created - a.created)
@@ -72,7 +45,7 @@ class Runtime {
         middleSideBarFocusArticle: articles[0],
       })
     } else if (focus === 'unread') {
-      const articles = FollowingPlanet.following.reduce((r, p) => {
+      const articles = this.following.reduce((r, p) => {
         return [...r, ...p.articles.filter((a) => a.read === false)]
       }, [])
       this.set({
@@ -82,7 +55,7 @@ class Runtime {
         middleSideBarFocusArticle: articles[0],
       })
     } else if (focus === 'starred') {
-      const articles = FollowingPlanet.following.reduce((r, p) => {
+      const articles = this.following.reduce((r, p) => {
         return [...r, ...p.articles.filter((a) => a.starred === true)]
       }, [])
       this.set({
@@ -92,7 +65,7 @@ class Runtime {
         middleSideBarFocusArticle: articles[0],
       })
     } else if (focus.startsWith('my:')) {
-      const planet = Planet.planets.filter((a) => a.id === focus.substring('my:'.length))[0]
+      const planet = this.planets.filter((a) => a.id === focus.substring('my:'.length))[0]
       sidebarFocus = planet
       this.set({
         sidebarFocus,
@@ -101,7 +74,7 @@ class Runtime {
         middleSideBarFocusArticle: planet.articles[0],
       })
     } else if (focus.startsWith('following:')) {
-      const planet = FollowingPlanet.following.filter((p) => p.id === focus.substring('following:'.length))[0]
+      const planet = this.following.filter((p) => p.id === focus.substring('following:'.length))[0]
       sidebarFocus = planet
       this.set({
         sidebarFocus,
@@ -115,6 +88,53 @@ class Runtime {
   #onIpcMiddleSidebarFocus(focus) {
     //focus == article.id
     this.middleSideBarFocusArticle = this.middleSideBarArticles.filter((a) => a.id == focus)[0]
+  }
+
+  /**
+   * 简化Model的声音，model只需要关注业务逻辑即可
+   * @param {*} that 通常为某个类的 prototype
+   * @param {*} model { name:{ default, emit } }
+   */
+  initDataModel() {
+    const model = {}
+    for (let name of Object.keys(this)) {
+      if (this[name].length === 3 && typeof this[name][2] === 'string') {
+        const [defValue, event, desc] = this[name]
+        model[name] = this[name]
+        Object.defineProperty(this, name, {
+          get() {
+            //get 函数会直接返回一个内部private变量的值或者是默认的值
+            return this[`#${name}`] || defValue
+          },
+          set(v) {
+            //set 函数会设置这个内部private变量的值，如果定义了emit，则在值改变的时候emit一个事件
+            this[`#${name}`] = v
+            log.info('runtime change data model prop value', { key: name, v })
+            if (event) {
+              evt.emit(event, { src: 'set' })
+            }
+          },
+        })
+      }
+    }
+
+    //同时会定义一个set原型函数，这个函数可以同时设置多个值
+    //如果这些值对应相同的emit事件，则会被优化，避免事件多次emit
+    this.set = function (obj) {
+      const events = new Set()
+      for (let key in obj) {
+        if (key in model) {
+          this[`#${key}`] = obj[key]
+          log.info('runtime change data model prop value', { key, value: obj[key] })
+          if (model[key][1]) {
+            events.add(model[key][1])
+          }
+        }
+      }
+      for (let ev of Array.from(events)) {
+        evt.emit(ev, { src: 'set' })
+      }
+    }
   }
 }
 

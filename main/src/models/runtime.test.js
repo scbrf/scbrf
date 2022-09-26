@@ -5,13 +5,11 @@ ipcMain.on.mockImplementation((name, cb) => {
 })
 
 const runtime = require('./runtime')
-const { bus } = require('../utils/events')
-const FollowingPlanet = require('./followingPlanet')
-const Planet = require('./planet')
+const evt = require('../utils/events')
 
 test('ipfsOnline', () => {
   const cb = jest.fn()
-  bus.on(runtime.events.ipfsOnlinePeersChange, cb)
+  evt.bus.on(evt.evRuntimeIpfsOnlinePeersChange, cb)
   expect(runtime.ipfsOnline).toBe(false)
   runtime.ipfsOnline = true
   expect(runtime.ipfsOnline).toBe(true)
@@ -20,7 +18,7 @@ test('ipfsOnline', () => {
 
 test('ipfsPeers', () => {
   const cb = jest.fn()
-  bus.on(runtime.events.ipfsOnlinePeersChange, cb)
+  evt.bus.on(evt.evRuntimeIpfsOnlinePeersChange, cb)
   expect(runtime.ipfsPeers).toBe(0)
   runtime.ipfsPeers = 10
   expect(runtime.ipfsPeers).toBe(10)
@@ -29,7 +27,7 @@ test('ipfsPeers', () => {
 
 test('draft', () => {
   const cb = jest.fn()
-  bus.on(runtime.events.draftChange, cb)
+  evt.bus.on(evt.evRuntimeDraftChange, cb)
   expect(runtime.draft).toBe(null)
   runtime.draft = 5
   expect(runtime.draft).toBe(5)
@@ -38,7 +36,7 @@ test('draft', () => {
 
 test('middleSideBarFocusArticle', () => {
   const cb = jest.fn()
-  bus.on(runtime.events.middleSidebarFocusChange, cb)
+  evt.bus.on(evt.evRuntimeMiddleSidebarFocusChange, cb)
   expect(runtime.middleSideBarFocusArticle).toBe(null)
   runtime.middleSideBarFocusArticle = 5
   expect(runtime.middleSideBarFocusArticle).toBe(5)
@@ -47,7 +45,7 @@ test('middleSideBarFocusArticle', () => {
 
 test('middleSideBarTitle', () => {
   const cb = jest.fn()
-  bus.on(runtime.events.middleSidebarContentChange, cb)
+  evt.bus.on(evt.evRuntimeMiddleSidebarContentChange, cb)
   expect(runtime.middleSideBarTitle).toBe('')
   runtime.middleSideBarTitle = 5
   expect(runtime.middleSideBarTitle).toBe(5)
@@ -56,7 +54,7 @@ test('middleSideBarTitle', () => {
 
 test('middleSideBarArticles', () => {
   const cb = jest.fn()
-  bus.on(runtime.events.middleSidebarContentChange, cb)
+  evt.bus.on(evt.evRuntimeMiddleSidebarContentChange, cb)
   expect(runtime.middleSideBarArticles.length).toBe(0)
   runtime.middleSideBarArticles = [1, 2, 3]
   expect(runtime.middleSideBarArticles.length).toBe(3)
@@ -65,7 +63,7 @@ test('middleSideBarArticles', () => {
 
 test('sidebarFocus', () => {
   const cb = jest.fn()
-  bus.on(runtime.events.sidebarFocusChange, cb)
+  evt.bus.on(evt.evRuntimeSidebarFocusChange, cb)
   expect(runtime.sidebarFocus).toBe(null)
   runtime.sidebarFocus = 5
   expect(runtime.sidebarFocus).toBe(5)
@@ -74,7 +72,7 @@ test('sidebarFocus', () => {
 
 test('set', () => {
   const cb = jest.fn()
-  bus.on(runtime.events.middleSidebarContentChange, cb)
+  evt.bus.on(evt.evRuntimeMiddleSidebarContentChange, cb)
   runtime.set({
     middleSideBarArticles: [2, 3, 4, 5],
     middleSideBarTitle: 'new title',
@@ -87,7 +85,7 @@ test('set', () => {
 test('ipcSidebarFocus', () => {
   runtime.middleSideBarTitle = ''
   runtime.middleSideBarArticles = []
-  FollowingPlanet.following = [
+  runtime.following = [
     {
       id: 'test1',
       name: 'test',
@@ -98,35 +96,35 @@ test('ipcSidebarFocus', () => {
       ],
     },
   ]
-  ipcCBs['setSidebarFocus']('today')
+  ipcCBs['ipcSetSidebarFocus']('today')
   expect(runtime.sidebarFocus).toBe('today')
   expect(runtime.middleSideBarTitle).toBe('Today')
   expect(runtime.middleSideBarArticles.length).toBe(1)
   expect(runtime.middleSideBarArticles[0].title).toBe('test1')
   expect(runtime.middleSideBarFocusArticle.title).toBe('test1')
 
-  ipcCBs['setSidebarFocus']('unread')
+  ipcCBs['ipcSetSidebarFocus']('unread')
   expect(runtime.sidebarFocus).toBe('unread')
   expect(runtime.middleSideBarTitle).toBe('Unread')
   expect(runtime.middleSideBarArticles.length).toBe(1)
   expect(runtime.middleSideBarArticles[0].title).toBe('unread')
   expect(runtime.middleSideBarFocusArticle.title).toBe('unread')
 
-  ipcCBs['setSidebarFocus']('starred')
+  ipcCBs['ipcSetSidebarFocus']('starred')
   expect(runtime.sidebarFocus).toBe('starred')
   expect(runtime.middleSideBarTitle).toBe('Starred')
   expect(runtime.middleSideBarArticles.length).toBe(1)
   expect(runtime.middleSideBarArticles[0].title).toBe('starred')
   expect(runtime.middleSideBarFocusArticle.title).toBe('starred')
 
-  ipcCBs['setSidebarFocus']('following:test1')
+  ipcCBs['ipcSetSidebarFocus']('following:test1')
   expect(runtime.sidebarFocus.name).toBe('test')
   expect(runtime.middleSideBarTitle).toBe('test')
   expect(runtime.middleSideBarArticles.length).toBe(3)
   expect(runtime.middleSideBarArticles[0].title).toBe('test1')
   expect(runtime.middleSideBarFocusArticle.title).toBe('test1')
 
-  Planet.planets = [
+  runtime.planets = [
     {
       id: 'test2',
       name: 'test2',
@@ -136,13 +134,13 @@ test('ipcSidebarFocus', () => {
       ],
     },
   ]
-  ipcCBs['setSidebarFocus']('my:test2')
+  ipcCBs['ipcSetSidebarFocus']('my:test2')
   expect(runtime.sidebarFocus.name).toBe('test2')
   expect(runtime.middleSideBarTitle).toBe('test2')
   expect(runtime.middleSideBarArticles.length).toBe(2)
   expect(runtime.middleSideBarArticles[0].title).toBe('test2')
   expect(runtime.middleSideBarFocusArticle.title).toBe('test2')
 
-  ipcCBs['setMiddleSidebarFocus']('a2')
+  ipcCBs['ipcSetMiddleSidebarFocus']('a2')
   expect(runtime.middleSideBarFocusArticle.title).toBe('unread')
 })
