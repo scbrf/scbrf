@@ -62,7 +62,7 @@ export default {
             api.send('ipcSetMiddleSidebarFocus', a.id)
         },
         articleCtxMenu(a) {
-            api.send('articleCtxMenu', JSON.parse(JSON.stringify(a)))
+            api.send('ipcMyArticleCtxMenu', JSON.parse(JSON.stringify(a)))
         }
     }
 }

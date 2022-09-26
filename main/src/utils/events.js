@@ -37,6 +37,12 @@ class EventCenter {
   ipcCreatePlanet //用户选择创建一个新的Planet菜单
   ipcFollowPlanet //用户选择关注一个新的Planet菜单
 
+  ipcNewArticle //用户在某个Planet新建一个 article
+  ipcPlayAudio //用户指定播放音乐
+  ipcStopAudio //用户指定停止播放音乐
+  ipcPlanetInfo //用户查看某个Planet的信息
+  ipcMyArticleCtxMenu //用户在某个Article上点右键
+
   constructor() {
     this.bus = EvtBus()
     this.eventNameInit()
@@ -44,12 +50,20 @@ class EventCenter {
   }
   bindIpcMainTable(that, table) {
     for (let entry of table) {
+      if (!(entry[0] in this.rpcNames)) {
+        console.log(new Error().stack)
+        throw `Unknown event: ${entry[0]}`
+      }
       ipcMain.on(entry[0], entry[1].bind(that))
     }
   }
 
   bindBusTable(that, table) {
     for (let entry of table) {
+      if (!(entry[0] in this.events)) {
+        console.log(new Error().stack)
+        throw `Unknown event: ${entry[0]}`
+      }
       this.bus.on(entry[0], entry[1].bind(that))
     }
   }
@@ -60,7 +74,7 @@ class EventCenter {
       throw `Unknown event: ${ev}`
     }
     log.info('event emit', { ev, args: Array.prototype.slice.call(arguments, 1) })
-    this.bus.emit(ev, null, Array.prototype.slice.call(arguments, 1))
+    this.bus.emit(ev, null, ...Array.prototype.slice.call(arguments, 1))
   }
 
   eventNameInit() {

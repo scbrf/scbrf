@@ -40,13 +40,13 @@ export default {
     },
     methods: {
         playAudio() {
-            api.send('playAudio', JSON.parse(JSON.stringify(this.article)))
+            api.send('ipcPlayAudio', JSON.parse(JSON.stringify(this.article)))
         },
         newArticle() {
-            api.send('newArticle', JSON.parse(JSON.stringify(this.planet)))
+            api.send('ipcNewArticle', JSON.parse(JSON.stringify(this.planet)))
         },
         planetInfo() {
-            api.send('planetInfo', JSON.parse(JSON.stringify(this.planet)))
+            api.send('ipcPlanetInfo', JSON.parse(JSON.stringify(this.planet)))
         }
     }
 }

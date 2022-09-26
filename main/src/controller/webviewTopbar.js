@@ -5,11 +5,21 @@ const log = bunyan.createLogger({ name: 'topbar' })
 const editorTopbar = require('./editor/editorTopbar')
 const editorMain = require('./editor/editorMain')
 const editorWebview = require('./editor/editorWebview')
-const { Planet, Draft, FollowingPlanet } = require('../models')
+const rt = require('../models/runtime')
 
 class WebviewTopbar {
   constructor() {
-    evt.bindBusTable(this, [[evt.evAppInit, this.createView]])
+    evt.bindBusTable(this, [
+      [evt.evAppInit, this.createView],
+      [evt.evRuntimeMiddleSidebarFocusChange, this.updateUI],
+      [evt.evRuntimeSidebarFocusChange, this.updateUI],
+    ])
+
+    evt.bindIpcMainTable(this, [
+      [evt.ipcNewArticle, this.newArticle],
+      [evt.ipcPlanetInfo, this.planetInfo],
+      [evt.ipcMyArticleCtxMenu, this.showMyArticleCtxMenu],
+    ])
   }
   createView() {
     this.view = new BrowserView({
@@ -23,61 +33,47 @@ class WebviewTopbar {
     editorWebview.createView()
 
     // // this.view.webContents.openDevTools({mode: 'undocked'})
-    // ipcMain.on('articleFocus', (_, article) => {
-    //   this.view.webContents.send('topbar', { article })
-    // })
-    // ipcMain.on('newArticle', async (_, pp) => {
-    //   const planet = Planet.planets.filter((p) => p.id == pp.id)[0]
-    //   let draft = planet.drafts.length > 0 ? planet.drafts[0] : new Draft(planet)
-    //   log.info('when create new draft, created date is:', draft.created)
-    //   this.showCreateArticleDialog(draft)
-    // })
 
-    // ipcMain.on('planetInfo', async (event, pp) => {
-    //   let planet = Planet.planets.filter((p) => p.id == pp.id)[0]
-    //   if (!planet) {
-    //     planet = FollowingPlanet.following.filter((p) => p.id == pp.id)[0]
-    //   }
-    //   const win = BrowserWindow.fromWebContents(event.sender)
-    //   dialog.showMessageBoxSync(win, {
-    //     message: planet.about,
-    //     detail: `update at ${require('moment')(planet.lastRetrieved || planet.lastPublished).format(
-    //       'MMM D, YYYY HH:mm:ss'
-    //     )}`,
-    //     type: 'info',
-    //     buttons: ['OK'],
-    //     title: planet.name,
-    //     icon: planet.avatar ? planet.avatarPath : null,
-    //   })
-    // })
+    this.articleCtxMenu = Menu.buildFromTemplate([
+      {
+        label: 'Edit Article',
+        click: this.editArticle.bind(this),
+      },
+      {
+        label: 'Delete Article',
+        click: this.deleteArticle.bind(this),
+      },
+    ])
+  }
 
-    // bus.on('focusPlanet', (planet) => {
-    //   log.info('focus planet change', planet)
-    //   this.focusPlanet = planet
-    //   this.view.webContents.send('topbar', {
-    //     planet: {
-    //       ...planet,
-    //     },
-    //   })
-    // })
-    // this.articleCtxMenu = Menu.buildFromTemplate([
-    //   {
-    //     label: 'Edit Article',
-    //     click: this.editArticle.bind(this),
-    //   },
-    //   {
-    //     label: 'Delete Article',
-    //     click: this.deleteArticle.bind(this),
-    //   },
-    // ])
-    // ipcMain.on('articleCtxMenu', (event, a) => {
-    //   const win = BrowserWindow.fromWebContents(event.sender)
-    //   this.ctxArticle = a
-    //   let planet = Planet.planets.filter((p) => p.id === a.planet.id)[0]
-    //   if (planet) {
-    //     this.articleCtxMenu.popup(win)
-    //   }
-    // })
+  showMyArticleCtxMenu(event, a) {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    this.ctxArticle = a
+    this.articleCtxMenu.popup(win)
+  }
+
+  planetInfo(event) {
+    if (!rt.middleSideBarFocusArticle) return
+    let planet = rt.middleSideBarFocusArticle.planet
+    const win = BrowserWindow.fromWebContents(event.sender)
+    dialog.showMessageBoxSync(win, {
+      message: planet.about,
+      detail: `update at ${require('moment')(planet.lastRetrieved || planet.lastPublished).format(
+        'MMM D, YYYY HH:mm:ss'
+      )}`,
+      type: 'info',
+      buttons: ['OK'],
+      title: planet.name,
+      icon: planet.avatar ? planet.avatarPath : null,
+    })
+  }
+
+  newArticle() {
+    if (!rt.sidebarFocus) return
+    const planet = rt.sidebarFocus
+    let draft = planet.drafts.length > 0 ? planet.drafts[0] : new Draft(planet)
+    log.info('when create new draft, created date is:', draft.created)
+    this.showCreateArticleDialog(draft)
   }
   async deleteArticle() {
     const idx = dialog.showMessageBoxSync({
@@ -115,9 +111,7 @@ class WebviewTopbar {
     this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/topbar`)
     this.view.setAutoResize({ width: true })
     this.view.webContents.on('did-finish-load', () => {
-      if (this.focusPlanet) {
-        this.view.webContents.send('topbar', { planet: this.focusPlanet })
-      }
+      this.updateUI()
     })
   }
   async showCreateArticleDialog(draft) {
@@ -149,6 +143,19 @@ class WebviewTopbar {
     editorWebview.init(draft)
 
     ArticleEditorDialog.show()
+  }
+  updateUI() {
+    if (!this.view) return
+    this.view.webContents.send('topbar', {
+      planet: rt.sidebarFocus ? rt.sidebarFocus.json() : {},
+      article: rt.middleSideBarFocusArticle
+        ? {
+            ...rt.middleSideBarFocusArticle.json(),
+            url: rt.middleSideBarFocusArticle.url,
+            planet: rt.middleSideBarFocusArticle.planet.json(),
+          }
+        : {},
+    })
   }
 }
 

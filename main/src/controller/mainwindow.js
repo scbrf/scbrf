@@ -71,6 +71,7 @@ class MainWindowController {
     evt.emit('rebounds', { root })
   }
   rebounds(p) {
+    log.info('need rebound', arguments)
     this.boundsProps = {
       ...(this.boundsProp || {
         root: true,

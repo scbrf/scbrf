@@ -10,7 +10,7 @@ export default {
     },
     methods: {
         stopAudio() {
-            api.send('stopAudio')
+            api.send('ipcStopAudio')
         },
     }
 }
