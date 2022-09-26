@@ -10,4 +10,7 @@ module.exports = {
   ipcMain: {
     on: jest.fn(),
   },
+  Menu: {
+    buildFromTemplate: jest.fn(),
+  },
 }

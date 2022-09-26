@@ -96,28 +96,33 @@ test('ipcSidebarFocus', () => {
       ],
     },
   ]
-  ipcCBs['ipcSetSidebarFocus']('today')
+  expect(runtime.numbers.today).toBe(1)
+  expect(runtime.numbers.read).toBe(1)
+  expect(runtime.numbers.starred).toBe(1)
+  expect(runtime.numbers[`following:test1`]).toBe(1)
+
+  ipcCBs['ipcSetSidebarFocus'](null, 'today')
   expect(runtime.sidebarFocus).toBe('today')
   expect(runtime.middleSideBarTitle).toBe('Today')
   expect(runtime.middleSideBarArticles.length).toBe(1)
   expect(runtime.middleSideBarArticles[0].title).toBe('test1')
   expect(runtime.middleSideBarFocusArticle.title).toBe('test1')
 
-  ipcCBs['ipcSetSidebarFocus']('unread')
+  ipcCBs['ipcSetSidebarFocus'](null, 'unread')
   expect(runtime.sidebarFocus).toBe('unread')
   expect(runtime.middleSideBarTitle).toBe('Unread')
   expect(runtime.middleSideBarArticles.length).toBe(1)
   expect(runtime.middleSideBarArticles[0].title).toBe('unread')
   expect(runtime.middleSideBarFocusArticle.title).toBe('unread')
 
-  ipcCBs['ipcSetSidebarFocus']('starred')
+  ipcCBs['ipcSetSidebarFocus'](null, 'starred')
   expect(runtime.sidebarFocus).toBe('starred')
   expect(runtime.middleSideBarTitle).toBe('Starred')
   expect(runtime.middleSideBarArticles.length).toBe(1)
   expect(runtime.middleSideBarArticles[0].title).toBe('starred')
   expect(runtime.middleSideBarFocusArticle.title).toBe('starred')
 
-  ipcCBs['ipcSetSidebarFocus']('following:test1')
+  ipcCBs['ipcSetSidebarFocus'](null, 'following:test1')
   expect(runtime.sidebarFocus.name).toBe('test')
   expect(runtime.middleSideBarTitle).toBe('test')
   expect(runtime.middleSideBarArticles.length).toBe(3)
@@ -134,13 +139,13 @@ test('ipcSidebarFocus', () => {
       ],
     },
   ]
-  ipcCBs['ipcSetSidebarFocus']('my:test2')
+  ipcCBs['ipcSetSidebarFocus'](null, 'my:test2')
   expect(runtime.sidebarFocus.name).toBe('test2')
   expect(runtime.middleSideBarTitle).toBe('test2')
   expect(runtime.middleSideBarArticles.length).toBe(2)
   expect(runtime.middleSideBarArticles[0].title).toBe('test2')
   expect(runtime.middleSideBarFocusArticle.title).toBe('test2')
 
-  ipcCBs['ipcSetMiddleSidebarFocus']('a2')
+  ipcCBs['ipcSetMiddleSidebarFocus'](null, 'a2')
   expect(runtime.middleSideBarFocusArticle.title).toBe('unread')
 })

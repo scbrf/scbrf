@@ -24,13 +24,36 @@ class Runtime {
       [evt.ipcSetMiddleSidebarFocus, this.#onIpcMiddleSidebarFocus],
     ])
 
-    evt.bindBusTable(this, [[evt.evRuntimeSidebarFocusChange, this.updateMiddleSidebarOnChange]])
+    evt.bindBusTable(this, [
+      [evt.evRuntimeSidebarFocusChange, this.updateMiddleSidebarOnChange],
+      [evt.evRuntimeFollowingChange, this.updateNumber],
+      [evt.evRuntimePlanetsChange, this.updateNumber],
+    ])
 
     this.initDataModel()
   }
 
+  updateNumber() {
+    const ret = {}
+    this.following.forEach((p) => {
+      p.articles.forEach((a) => {
+        if (moment(a.created).isSame(moment(), 'day')) {
+          ret.today = (ret.today || 0) + 1
+        }
+        if (a.read === false) {
+          ret.read = (ret.read || 0) + 1
+        }
+        if (a.starred === true) {
+          ret.starred = (ret.starred || 0) + 1
+        }
+      })
+      ret[`following:${p.id}`] = p.articles.filter((a) => a.read === false).length
+    })
+    this.numbers = ret
+  }
+
   updateMiddleSidebarOnChange() {
-    const focus = this.sidebarFocus
+    const focus = this.sidebarFocus || ''
     if (focus.articles) {
       this.set({
         middleSideBarTitle: focus.name,
@@ -75,12 +98,12 @@ class Runtime {
    * @param {*} focus
    */
   #onIpcSidebarFocus(_, focus) {
-    let sidebarFocus = focus
+    let sidebarFocus = focus || ''
     log.info('ipc set sidebar focus', focus, arguments)
-    if (focus.startsWith('my:')) {
+    if (sidebarFocus.startsWith('my:')) {
       const planet = this.planets.filter((a) => a.id === focus.substring('my:'.length))[0]
       sidebarFocus = planet
-    } else if (focus.startsWith('following:')) {
+    } else if (sidebarFocus.startsWith('following:')) {
       const planet = this.following.filter((p) => p.id === focus.substring('following:'.length))[0]
       sidebarFocus = planet
     }
