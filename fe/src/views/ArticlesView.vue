@@ -59,7 +59,7 @@ export default {
         },
         setFocus(a) {
             this.focus = a.id
-            api.send('ipcSetMiddleSidebarFocus', JSON.parse(JSON.stringify(a)))
+            api.send('ipcSetMiddleSidebarFocus', a.id)
         },
         articleCtxMenu(a) {
             api.send('articleCtxMenu', JSON.parse(JSON.stringify(a)))

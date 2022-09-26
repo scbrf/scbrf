@@ -2,10 +2,14 @@ const { BrowserView, ipcMain, BrowserWindow } = require('electron')
 const bunyan = require('bunyan')
 const evt = require('../utils/events')
 const log = bunyan.createLogger({ name: 'webview' })
+const rt = require('../models/runtime')
 
 class Webview {
   constructor() {
-    evt.bindBusTable(this, [[evt.evAppInit, this.createView]])
+    evt.bindBusTable(this, [
+      [evt.evAppInit, this.createView],
+      [evt.evRuntimeMiddleSidebarFocusChange, this.loadWeb],
+    ])
   }
   createView() {
     this.view = new BrowserView({
@@ -48,8 +52,16 @@ class Webview {
     // })
   }
   init() {
-    this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/loading`)
     this.view.setAutoResize({ height: true, width: true })
+    this.loadWeb()
+  }
+  async loadWeb() {
+    if (!this.view) return
+    if (rt.middleSideBarFocusArticle) {
+      this.view.webContents.loadURL(rt.middleSideBarFocusArticle.url, { userAgent: 'Planet/JS' })
+    } else {
+      this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/loading`, { userAgent: 'Planet/JS' })
+    }
   }
 }
 
