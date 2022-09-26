@@ -20,13 +20,7 @@ class ScarboroughApp {
     //首先设置所有内容保存的根目录
     await this.initDirBase()
     //加载已经保存的内容
-    await FollowingPlanet.loadFollowing()
-    await Planet.loadPlanets()
-    if (rt.planets.length > 0) {
-      rt.sidebarFocus = `my:${rt.planets[0].id}`
-    } else {
-      rt.sidebarFocus = 'today'
-    }
+    await this.loadAll()
 
     //启动定期更新和定期发布
     FollowingPlanet.startUpdate()
@@ -37,6 +31,16 @@ class ScarboroughApp {
     evt.emit(evt.evAppInit)
     //创建并且显示主窗口
     evt.emit(evt.evCreateWindow)
+  }
+
+  async loadAll() {
+    await FollowingPlanet.loadFollowing()
+    await Planet.loadPlanets()
+    if (rt.planets.length > 0) {
+      rt.sidebarFocus = rt.planets[0]
+    } else {
+      rt.sidebarFocus = 'today'
+    }
   }
 
   async initDirBase() {

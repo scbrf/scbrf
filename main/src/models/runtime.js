@@ -24,22 +24,25 @@ class Runtime {
       [evt.ipcSetMiddleSidebarFocus, this.#onIpcMiddleSidebarFocus],
     ])
 
+    evt.bindBusTable(this, [[evt.evRuntimeSidebarFocusChange, this.updateMiddleSidebarOnChange]])
+
     this.initDataModel()
   }
 
-  /**
-   * 私有函数。 传入的参数是字符串 today unread starred 或者 my:xxxxx follow:xxxx
-   * @param {*} focus
-   */
-  #onIpcSidebarFocus(focus) {
-    let sidebarFocus = focus
-    if (focus === 'today') {
+  updateMiddleSidebarOnChange() {
+    const focus = this.sidebarFocus
+    if (focus.articles) {
+      this.set({
+        middleSideBarTitle: focus.name,
+        middleSideBarArticles: focus.articles,
+        middleSideBarFocusArticle: focus.articles[0],
+      })
+    } else if (focus === 'today') {
       const articles = this.following.reduce((r, p) => {
         return [...r, ...p.articles.filter((a) => moment(a.created).isSame(moment(), 'day'))]
       }, [])
       articles.sort((a, b) => b.created - a.created)
       this.set({
-        sidebarFocus,
         middleSideBarTitle: 'Today',
         middleSideBarArticles: articles,
         middleSideBarFocusArticle: articles[0],
@@ -48,8 +51,8 @@ class Runtime {
       const articles = this.following.reduce((r, p) => {
         return [...r, ...p.articles.filter((a) => a.read === false)]
       }, [])
+      articles.sort((a, b) => b.created - a.created)
       this.set({
-        sidebarFocus,
         middleSideBarTitle: 'Unread',
         middleSideBarArticles: articles,
         middleSideBarFocusArticle: articles[0],
@@ -58,35 +61,33 @@ class Runtime {
       const articles = this.following.reduce((r, p) => {
         return [...r, ...p.articles.filter((a) => a.starred === true)]
       }, [])
+      articles.sort((a, b) => b.created - a.created)
       this.set({
-        sidebarFocus,
         middleSideBarTitle: 'Starred',
         middleSideBarArticles: articles,
         middleSideBarFocusArticle: articles[0],
       })
-    } else if (focus.startsWith('my:')) {
-      const planet = this.planets.filter((a) => a.id === focus.substring('my:'.length))[0]
-      sidebarFocus = planet
-      this.set({
-        sidebarFocus,
-        middleSideBarTitle: planet.name,
-        middleSideBarArticles: planet.articles,
-        middleSideBarFocusArticle: planet.articles[0],
-      })
-    } else if (focus.startsWith('following:')) {
-      const planet = this.following.filter((p) => p.id === focus.substring('following:'.length))[0]
-      sidebarFocus = planet
-      this.set({
-        sidebarFocus,
-        middleSideBarTitle: planet.name,
-        middleSideBarArticles: planet.articles,
-        middleSideBarFocusArticle: planet.articles[0],
-      })
     }
   }
 
-  #onIpcMiddleSidebarFocus(focus) {
-    //focus == article.id
+  /**
+   * 私有函数。 传入的参数是字符串 today unread starred 或者 my:xxxxx follow:xxxx
+   * @param {*} focus
+   */
+  #onIpcSidebarFocus(_, focus) {
+    let sidebarFocus = focus
+    log.info('ipc set sidebar focus', focus, arguments)
+    if (focus.startsWith('my:')) {
+      const planet = this.planets.filter((a) => a.id === focus.substring('my:'.length))[0]
+      sidebarFocus = planet
+    } else if (focus.startsWith('following:')) {
+      const planet = this.following.filter((p) => p.id === focus.substring('following:'.length))[0]
+      sidebarFocus = planet
+    }
+    this.sidebarFocus = sidebarFocus
+  }
+
+  #onIpcMiddleSidebarFocus(_, focus) {
     this.middleSideBarFocusArticle = this.middleSideBarArticles.filter((a) => a.id == focus)[0]
   }
 

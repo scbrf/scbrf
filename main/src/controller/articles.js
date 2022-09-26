@@ -72,6 +72,7 @@ class ArticleController {
     this.view.webContents.send('articles', this.focusInfo)
   }
   updateMiddleSidebarUI() {
+    if (!this.view) return
     this.view.webContents.send('articles', {
       title: rt.middleSideBarTitle,
       articles: rt.middleSideBarArticles.map((a) => ({

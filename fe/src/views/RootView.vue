@@ -117,7 +117,7 @@ export default {
     },
     setFocus(value) {
       this.focus = value
-      api.send('setfocus', value)
+      api.send('ipcSetSidebarFocus', value)
     },
     planetCtxMenu(p) {
       api.send('planetCtxMenu', JSON.parse(JSON.stringify(p)))

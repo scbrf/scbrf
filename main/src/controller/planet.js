@@ -18,7 +18,7 @@ class PlanetSidebarController {
       [evt.evRuntimeSidebarFocusChange, this.updateFocus],
     ])
 
-    this.buildMenu()
+    this.createMenu()
     evt.bindIpcMainTable(this, [
       [evt.ipcCreateFollowMenu, (e) => this.createFollowMenu.popup(winFromEvt(e))],
       [evt.ipcFollowingCtxMenu, this.popupAndStoreP.bind(this, this.followingMenu)],
@@ -218,7 +218,7 @@ class PlanetSidebarController {
     // this.view.webContents.openDevTools()
   }
 
-  buildMenu() {
+  createMenu() {
     this.createFollowMenu = Menu.buildFromTemplate([
       {
         label: 'Create Planet',

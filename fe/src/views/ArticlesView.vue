@@ -45,11 +45,11 @@ export default {
 
         isWin() {
             //windows 版本滚动条会占用内容区域
-      return (navigator.userAgent.indexOf("Win") != -1)
-    }
+            return (navigator.userAgent.indexOf("Win") != -1)
+        }
     },
     watch: {
-        focus(){
+        focus() {
             console.log('focus change to', this.focus)
         }
     },
@@ -59,7 +59,7 @@ export default {
         },
         setFocus(a) {
             this.focus = a.id
-            api.send('articleFocus', JSON.parse(JSON.stringify(a)))
+            api.send('ipcSetMiddleSidebarFocus', JSON.parse(JSON.stringify(a)))
         },
         articleCtxMenu(a) {
             api.send('articleCtxMenu', JSON.parse(JSON.stringify(a)))
