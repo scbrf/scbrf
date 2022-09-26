@@ -2,6 +2,7 @@ const marked = require('marked')
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
 const log = require('../utils/log')('models/drafr')
+const rt = require('./runtime')
 
 const uuid = require('uuid').v4
 const Article = require('./article')
@@ -138,6 +139,11 @@ class Draft {
     } else {
       this.planet.removeDraft(this)
     }
+    rt.set({
+      middleSideBarArticles: this.planet.articles,
+      middleSideBarFocusArticle: article,
+    })
+
     this.planet.publish()
   }
 

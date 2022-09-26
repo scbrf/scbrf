@@ -99,7 +99,7 @@ class Runtime {
    */
   #onIpcSidebarFocus(_, focus) {
     let sidebarFocus = focus || ''
-    log.info('ipc set sidebar focus', focus, arguments)
+    log.info('ipc set sidebar focus', focus)
     if (sidebarFocus.startsWith('my:')) {
       const planet = this.planets.filter((a) => a.id === focus.substring('my:'.length))[0]
       sidebarFocus = planet

@@ -89,7 +89,24 @@ class WebviewTopbar {
       const article = planet.articles.filter((a) => a.id === this.ctxArticle.id)[0]
       planet.articles = planet.articles.filter((a) => a.id !== this.ctxArticle.id)
       await article.delete()
-      rt.planets = [...rt.planets]
+      //删除操作一般只会影响当前列表
+      const articles = rt.middleSideBarArticles.filter((a) => a.id !== article.id)
+      let focusArticle
+      if (rt.middleSideBarFocusArticle && article.id === rt.middleSideBarFocusArticle.id) {
+        for (let i = 0; i < rt.middleSideBarArticles.length; i++) {
+          if (rt.middleSideBarArticles[i].id === article.id) {
+            if (i > 0) {
+              focusArticle = rt.middleSideBarArticles[i - 1]
+            } else if (rt.middleSideBarArticles.length > 0) {
+              focusArticle = rt.middleSideBarArticles[1]
+            }
+          }
+        }
+      }
+      rt.set({
+        middleSideBarArticles: articles,
+        middleSideBarFocusArticle: focusArticle,
+      })
     }
   }
   editArticle() {
