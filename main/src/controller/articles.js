@@ -1,10 +1,15 @@
 const { BrowserView, Menu, ipcMain, BrowserWindow } = require('electron')
 const { FollowingPlanet } = require('../models')
 const evt = require('../utils/events')
+const rt = require('../models/runtime')
 
 class ArticleController {
   constructor() {
-    evt.bindBusTable(this, [[evt.evAppInit, this.createView]])
+    evt.bindBusTable(this, [
+      [evt.evAppInit, this.createView],
+      [evt.evRuntimeMiddleSidebarContentChange, this.updateMiddleSidebarUI],
+      [evt.evRuntimeMiddleSidebarFocusChange, this.updateMiddleSidebarUI],
+    ])
   }
 
   createView() {
@@ -14,26 +19,22 @@ class ArticleController {
       },
     })
     // this.view.webContents.openDevTools({mode: 'undocked'})
-    // bus.on('focusInfo', (p) => {
-    //   this.focusInfo = p
-    //   this.view.webContents.send('articles', p)
-    // })
     // bus.on('allreadchange', (pid) => {
     //   this.updateFocusState(FollowingPlanet.following.filter((p) => p.id === pid)[0].articles)
     // })
-    // this.view.webContents.on('did-finish-load', () => {
-    //   this.view.webContents.send('articles', this.focusInfo)
-    // })
-    // this.followingArticleCtxMenu = Menu.buildFromTemplate([
-    //   {
-    //     label: 'Trigger Read',
-    //     click: this.triggerRead.bind(this),
-    //   },
-    //   {
-    //     label: 'Trigger Star',
-    //     click: this.triggerStar.bind(this),
-    //   },
-    // ])
+    this.view.webContents.on('did-finish-load', () => {
+      this.updateMiddleSidebarUI()
+    })
+    this.followingArticleCtxMenu = Menu.buildFromTemplate([
+      {
+        label: 'Trigger Read',
+        click: this.triggerRead.bind(this),
+      },
+      {
+        label: 'Trigger Star',
+        click: this.triggerStar.bind(this),
+      },
+    ])
     // ipcMain.on('articleCtxMenu', (event, a) => {
     //   const win = BrowserWindow.fromWebContents(event.sender)
     //   this.ctxArticle = a
@@ -69,6 +70,17 @@ class ArticleController {
       }
     }
     this.view.webContents.send('articles', this.focusInfo)
+  }
+  updateMiddleSidebarUI() {
+    this.view.webContents.send('articles', {
+      title: rt.middleSideBarTitle,
+      articles: rt.middleSideBarArticles.map((a) => ({
+        ...a.json(),
+        url: a.url,
+        planet: a.planet.json(),
+      })),
+      focus: rt.middleSideBarFocusArticle ? rt.middleSideBarFocusArticle.id : '',
+    })
   }
   async triggerRead() {
     const planet = FollowingPlanet.following.filter((p) => p.id === this.ctxArticle.planet.id)[0]

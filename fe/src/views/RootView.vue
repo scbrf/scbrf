@@ -123,7 +123,7 @@ export default {
       api.send('planetCtxMenu', JSON.parse(JSON.stringify(p)))
     },
     followingCtxMenu(p) {
-      api.send('followingCtxMenu', JSON.parse(JSON.stringify(p)))
+      api.send('ipcFollowingCtxMenu', JSON.parse(JSON.stringify(p)))
     },
     triggleRootPanel() {
       api.send('triggleRootPanel',)

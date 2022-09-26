@@ -18,6 +18,7 @@ class PlanetSidebarController {
       [evt.evRuntimeSidebarFocusChange, this.updateFocus],
     ])
 
+    this.buildMenu()
     evt.bindIpcMainTable(this, [
       [evt.ipcCreateFollowMenu, (e) => this.createFollowMenu.popup(winFromEvt(e))],
       [evt.ipcFollowingCtxMenu, this.popupAndStoreP.bind(this, this.followingMenu)],
@@ -28,6 +29,7 @@ class PlanetSidebarController {
   }
 
   popupAndStoreP(menu, e, p) {
+    console.log(menu, e, p)
     const win = BrowserWindow.fromWebContents(e.sender)
     menu.popup(win)
     this.planetCtxMenuTargetPlanet = p
@@ -71,73 +73,6 @@ class PlanetSidebarController {
       this.updateSidebarFollowing()
       this.updateFocus()
     })
-    this.createFollowMenu = Menu.buildFromTemplate([
-      {
-        label: 'Create Planet',
-        click: this.showCreatePlanetDialog.bind(this),
-      },
-      {
-        type: 'separator',
-      },
-      {
-        label: 'Follow Planet',
-        click: this.showFollowPlanetDialog.bind(this),
-      },
-    ])
-
-    this.followingMenu = Menu.buildFromTemplate([
-      {
-        label: 'Check for update',
-        click: this.followPlanetUpdate.bind(this),
-      },
-      {
-        label: 'Copy URL',
-        click: () => {
-          clipboard.writeText(this.planetCtxMenuTargetPlanet.link)
-        },
-      },
-      {
-        label: 'Mark All as Read',
-        click: () => {
-          const planet = rt.following.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)[0]
-          planet.articles.forEach((a) => {
-            if (a.read === false) {
-              a.read = true
-              a.save()
-            }
-          })
-          bus.emit('allreadchange', null, planet.id)
-          this.updateSidebarFollowing()
-        },
-      },
-      {
-        type: 'separator',
-      },
-      {
-        label: 'Unfollow',
-        click: this.UnfollowPlanet.bind(this),
-      },
-    ])
-
-    this.planetMenu = Menu.buildFromTemplate([
-      {
-        label: 'Copy IPNS',
-        click: () => {
-          clipboard.writeText(this.planetCtxMenuTargetPlanet.ipns)
-        },
-      },
-      {
-        label: 'Publish',
-        click: this.publishPlanet.bind(this),
-      },
-      {
-        type: 'separator',
-      },
-      {
-        label: 'Delete',
-        click: this.DeletePlanet.bind(this),
-      },
-    ])
   }
   async publishPlanet() {
     const planet = rt.planets.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)[0]
@@ -281,6 +216,76 @@ class PlanetSidebarController {
     this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/root`)
     this.view.setAutoResize({ height: true })
     // this.view.webContents.openDevTools()
+  }
+
+  buildMenu() {
+    this.createFollowMenu = Menu.buildFromTemplate([
+      {
+        label: 'Create Planet',
+        click: this.showCreatePlanetDialog.bind(this),
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Follow Planet',
+        click: this.showFollowPlanetDialog.bind(this),
+      },
+    ])
+
+    this.followingMenu = Menu.buildFromTemplate([
+      {
+        label: 'Check for update',
+        click: this.followPlanetUpdate.bind(this),
+      },
+      {
+        label: 'Copy URL',
+        click: () => {
+          clipboard.writeText(this.planetCtxMenuTargetPlanet.link)
+        },
+      },
+      {
+        label: 'Mark All as Read',
+        click: () => {
+          const planet = rt.following.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)[0]
+          planet.articles.forEach((a) => {
+            if (a.read === false) {
+              a.read = true
+              a.save()
+            }
+          })
+          bus.emit('allreadchange', null, planet.id)
+          this.updateSidebarFollowing()
+        },
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Unfollow',
+        click: this.UnfollowPlanet.bind(this),
+      },
+    ])
+
+    this.planetMenu = Menu.buildFromTemplate([
+      {
+        label: 'Copy IPNS',
+        click: () => {
+          clipboard.writeText(this.planetCtxMenuTargetPlanet.ipns)
+        },
+      },
+      {
+        label: 'Publish',
+        click: this.publishPlanet.bind(this),
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Delete',
+        click: this.DeletePlanet.bind(this),
+      },
+    ])
   }
 }
 module.exports = new PlanetSidebarController()
