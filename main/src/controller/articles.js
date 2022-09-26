@@ -57,7 +57,7 @@ class ArticleController {
   }
 
   markFocusReaded() {
-    if (rt.middleSideBarFocusArticle.read === false) {
+    if (rt.middleSideBarFocusArticle && rt.middleSideBarFocusArticle.read === false) {
       this.ctxArticle = rt.middleSideBarFocusArticle
       this.triggerRead()
     }
