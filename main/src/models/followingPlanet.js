@@ -72,7 +72,7 @@ class FollowingPlanet {
       return false
     }
     this.updating = true
-    bus.emit('following-change', null, this.id)
+    rt.following = [...rt.following]
 
     try {
       // 更新 Following 的内容
@@ -95,7 +95,7 @@ class FollowingPlanet {
       log.error('error when update', ex)
     }
 
-    bus.emit('following-change', null, this.id)
+    rt.following = [...rt.following]
   }
 
   static startUpdate() {

@@ -29,7 +29,6 @@ class PlanetSidebarController {
   }
 
   popupAndStoreP(menu, e, p) {
-    console.log(menu, e, p)
     const win = BrowserWindow.fromWebContents(e.sender)
     menu.popup(win)
     this.planetCtxMenuTargetPlanet = p
@@ -89,7 +88,7 @@ class PlanetSidebarController {
       if (planet.length > 0) {
         await planet[0].delete()
       }
-      this.updateSidebarMyPlanets()
+      rt.planets = [...rt.planets]
     }
   }
   async followPlanetUpdate() {
@@ -109,6 +108,7 @@ class PlanetSidebarController {
       if (planet.length > 0) {
         await planet[0].delete()
       }
+      rt.following = [...rt.following]
     }
   }
   showFollowPlanetDialog() {
@@ -254,8 +254,7 @@ class PlanetSidebarController {
               a.save()
             }
           })
-          bus.emit('allreadchange', null, planet.id)
-          this.updateSidebarFollowing()
+          rt.following = [...rt.following]
         },
       },
       {

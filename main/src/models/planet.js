@@ -193,7 +193,7 @@ class Planet {
       return
     }
     this.publishing = true
-    bus.emit('planets-change', null, this.id)
+    rt.planets = [...rt.planets]
     await this.savePublic()
     await this.publicRender()
     await Promise.all(
@@ -212,7 +212,7 @@ class Planet {
     }
     this.publishing = false
     this.lastPublished = new Date().getTime()
-    bus.emit('planets-change', null, this.id)
+    rt.planets = [...rt.planets]
   }
   static startPublish() {
     setInterval(() => {

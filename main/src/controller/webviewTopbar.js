@@ -49,7 +49,10 @@ class WebviewTopbar {
   showMyArticleCtxMenu(event, a) {
     const win = BrowserWindow.fromWebContents(event.sender)
     this.ctxArticle = a
-    this.articleCtxMenu.popup(win)
+    let planet = rt.planets.filter((p) => p.id === a.planet.id)[0]
+    if (planet) {
+      this.articleCtxMenu.popup(win)
+    }
   }
 
   planetInfo(event) {
