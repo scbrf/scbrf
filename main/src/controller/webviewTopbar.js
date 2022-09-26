@@ -160,7 +160,7 @@ class WebviewTopbar {
   updateUI() {
     if (!this.view) return
     this.view.webContents.send('topbar', {
-      planet: rt.sidebarFocus ? rt.sidebarFocus.json() : {},
+      planet: rt.sidebarFocus && rt.sidebarFocus.json ? rt.sidebarFocus.json() : {},
       article: rt.middleSideBarFocusArticle
         ? {
             ...rt.middleSideBarFocusArticle.json(),
