@@ -223,26 +223,23 @@ class Draft {
   }
 
   async publishAttachments(article) {
-    if (!require('fs').existsSync(article.publicBase)) {
-      log.info('create public dir', article.publicBase)
-      const ret = require('fs').mkdirSync(article.publicBase, { recursive: true })
-      log.info('sync create dir return', ret)
-    } else {
-      log.info('public dir is ready', article.publicBase)
+    if (require('fs').existsSync(article.publicBase)) {
+      //首先将用到的Public目录的文件拷贝过来
+      if (this.audioFilename && this.audioFilename.startsWith(article.publicBase)) {
+        const target = require('path').join(this.attachmentsPath, require('path').basename(this.audioFilename))
+        require('fs').renameSync(this.audioFilename, target)
+        this.audioFilename = target
+      }
+      if (this.videoFilename && this.videoFilename.startsWith(article.publicBase)) {
+        const target = require('path').join(this.attachmentsPath, require('path').basename(this.videoFilename))
+        require('fs').renameSync(this.videoFilename, target)
+        this.videoFilename = target
+      }
+      //将剩余的Public目录整个删除重建
+      require('fs').rmSync(article.publicBase, { recursive: true, force: true })
     }
-    //首先将用到的Public目录的文件拷贝过来
-    if (this.audioFilename && this.audioFilename.startsWith(article.publicBase)) {
-      const target = require('path').join(this.attachmentsPath, require('path').basename(this.audioFilename))
-      require('fs').renameSync(this.audioFilename, target)
-      this.audioFilename = target
-    }
-    if (this.videoFilename && this.videoFilename.startsWith(article.publicBase)) {
-      const target = require('path').join(this.attachmentsPath, require('path').basename(this.videoFilename))
-      require('fs').renameSync(this.videoFilename, target)
-      this.videoFilename = target
-    }
-    //将剩余的Public目录整个删除重建
-    require('fs').rmSync(article.publicBase, { recursive: true, force: true })
+
+    require('fs').mkdirSync(article.publicBase, { recursive: true })
 
     //再将其用到的文件拷贝过去
     for (let item of this.attachments || []) {
