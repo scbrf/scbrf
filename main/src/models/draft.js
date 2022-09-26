@@ -223,9 +223,12 @@ class Draft {
   }
 
   async publishAttachments(article) {
-    const items = require('fs').readdirSync(this.attachmentsPath)
     if (!require('fs').existsSync(article.publicBase)) {
-      require('fs').mkdirSync(article.publicBase, { recursive: true })
+      log.info('create public dir', article.publicBase)
+      const ret = require('fs').mkdirSync(article.publicBase, { recursive: true })
+      log.info('sync create dir return', ret)
+    } else {
+      log.info('public dir is ready', article.publicBase)
     }
     //首先将用到的Public目录的文件拷贝过来
     if (this.audioFilename && this.audioFilename.startsWith(article.publicBase)) {

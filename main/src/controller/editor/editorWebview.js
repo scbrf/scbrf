@@ -1,20 +1,27 @@
 const { BrowserView, ipcMain } = require('electron')
 const marked = require('marked')
 const log = require('../../utils/log')('editorwebview')
+const rt = require('../../models/runtime')
+const evt = require('../../utils/events')
 
 class EditorTopbar {
+  constructor() {
+    evt.bindIpcMainTable(this, [[evt.ipcDraftSave, this.tryUpdateWebView]])
+  }
+
+  tryUpdateWebView(_, p) {
+    if (p === this._draft) {
+      return
+    }
+    this._draft = p
+    this.updateWebview()
+  }
+
   createView() {
     this.view = new BrowserView({
       webPreferences: {
         preload: require('path').join(__dirname, '..', '..', '..', 'preload.js'),
       },
-    })
-    ipcMain.on('draft', async (_, p) => {
-      if (p === this._draft) {
-        return
-      }
-      this._draft = p
-      this.updateWebview(p)
     })
   }
   async runJS(func) {
@@ -113,12 +120,10 @@ class EditorTopbar {
     }, html)
   }
 
-  init(draft) {
+  init() {
     this.view.setBounds({ x: 600, y: 48, width: 600, height: 552 })
     this.view.setAutoResize({ width: true, height: true, horizontal: true })
-    this.draft = draft
-    this.draft.save()
-    this.view.webContents.loadFile(this.draft.previewPath)
+    this.view.webContents.loadFile(rt.draft.previewPath)
   }
 }
 

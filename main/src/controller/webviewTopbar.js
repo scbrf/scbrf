@@ -72,12 +72,14 @@ class WebviewTopbar {
     })
   }
 
-  newArticle() {
+  async newArticle() {
     if (!rt.sidebarFocus) return
     const planet = rt.sidebarFocus
     let draft = planet.drafts.length > 0 ? planet.drafts[0] : new Draft(planet)
     log.info('when create new draft, created date is:', draft.created)
-    this.showCreateArticleDialog(draft)
+    rt.draft = draft
+    await rt.draft.save()
+    this.showCreateArticleDialog()
   }
   async deleteArticle() {
     const idx = dialog.showMessageBoxSync({
@@ -109,7 +111,7 @@ class WebviewTopbar {
       })
     }
   }
-  editArticle() {
+  async editArticle() {
     const planet = rt.planets.filter((p) => p.id === this.ctxArticle.planet.id)[0]
     const article = planet.articles.filter((a) => a.id === this.ctxArticle.id)[0]
     let draft
@@ -119,6 +121,7 @@ class WebviewTopbar {
       draft = Draft.fromArticle(article)
     }
     rt.draft = draft
+    await rt.draft.save()
     this.showCreateArticleDialog()
   }
   init() {

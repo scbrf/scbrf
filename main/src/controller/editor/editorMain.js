@@ -19,7 +19,7 @@ class EditorTopbar {
 
   async removeAttachment(_, { name }) {
     log.info('draft need remove attachment', name)
-    await this.draft.removeAttachment(name)
+    await rt.draft.removeAttachment(name)
   }
 
   async addVideo() {
@@ -78,7 +78,7 @@ class EditorTopbar {
     win.close()
   }
 
-  async save() {
+  async save(_, p) {
     const draft = JSON.parse(p)
     rt.draft.content = draft.content
     rt.draft.title = draft.title

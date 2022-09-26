@@ -2,14 +2,15 @@
     <div>
         <div class="bg-gray-100 dark:bg-slate-800 h-12 flex items-center border-b">
             <div v-if="isWin" class="flex p-0 m-0">
-      <XCircleIcon @click="closeWin" class="mt-1 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag"></XCircleIcon>
-      <ArrowUpCircleIcon @click="publish" class="ml-4 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
-            </ArrowUpCircleIcon>
-    </div>
-    <div v-else  class="flex p-0 m-0">
-        <ArrowUpCircleIcon @click="publish" class="ml-24 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
-            </ArrowUpCircleIcon>
-    </div>
+                <XCircleIcon @click="closeWin" class="mt-1 ml-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+                </XCircleIcon>
+                <ArrowUpCircleIcon @click="publish" class="ml-4 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+                </ArrowUpCircleIcon>
+            </div>
+            <div v-else class="flex p-0 m-0">
+                <ArrowUpCircleIcon @click="publish" class="ml-24 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+                </ArrowUpCircleIcon>
+            </div>
 
             <div class="flex-1"></div>
             <PhotoIcon @click="attachPhoto" class="mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
@@ -21,32 +22,32 @@
     </div>
 </template>
 <script>
-import { ArrowUpCircleIcon, FilmIcon, PhotoIcon, MicrophoneIcon,XCircleIcon } from '@heroicons/vue/24/outline'
+import { ArrowUpCircleIcon, FilmIcon, PhotoIcon, MicrophoneIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 
 export default {
     components: {
-        ArrowUpCircleIcon, FilmIcon, PhotoIcon, MicrophoneIcon,XCircleIcon
+        ArrowUpCircleIcon, FilmIcon, PhotoIcon, MicrophoneIcon, XCircleIcon
     },
     computed: {
         isWin() {
-      return (navigator.userAgent.indexOf("Win") != -1)
-    }
+            return (navigator.userAgent.indexOf("Win") != -1)
+        }
     },
     methods: {
         attachFilm() {
-            api.send('attachFilm')
+            api.send('ipcDraftAddVideo')
         },
         attachAudio() {
-            api.send('attachAudio')
+            api.send('ipcDraftAddAudio')
         },
         attachPhoto() {
-            api.send('attachPhoto')
+            api.send('ipcDraftAddPhoto')
         },
         publish() {
-            api.send('editor/publish')
+            api.send('ipcDraftPublish')
         },
-        closeWin(){
-            api.send('closeWin')
+        closeWin() {
+            api.send('ipcCloseWin')
         }
     }
 }

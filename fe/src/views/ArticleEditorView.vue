@@ -23,7 +23,7 @@ export default {
     },
     methods: {
         save() {
-            api.send("ipcSaveDraft", JSON.stringify({
+            api.send("ipcDraftSave", JSON.stringify({
                 title: this.title,
                 content: this.content,
                 attachments: this.attachments,
