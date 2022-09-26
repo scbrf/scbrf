@@ -42,6 +42,13 @@ class EventCenter {
   ipcPlanetInfo //用户查看某个Planet的信息
   ipcMyArticleCtxMenu //用户在某个Article上点右键
 
+  ipcDraftPublish //发布草稿
+  ipcDraftSave //保存草稿
+  ipcDraftAddPhoto //增加图片
+  ipcDraftAddAudio //增加声音
+  ipcDraftAddVideo //增加视频
+  ipcRemoveAttachment //移除附件
+
   constructor() {
     this.bus = EvtBus()
     this.eventNameInit()

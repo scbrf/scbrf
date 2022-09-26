@@ -38,28 +38,21 @@ class Draft {
 
   static fromArticle(article) {
     const draft = new Draft(article.planet, article, article)
-    for (let attachment of [
-      ...article.attachments.map((a) => a.name),
-      article.audioFilename,
-      article.videoFilename,
-    ].filter((a) => a)) {
+    for (let attachment of article.attachments) {
       require('fs').cpSync(
-        require('path').join(article.publicBase, attachment),
-        require('path').join(draft.attachmentsPath, attachment)
+        require('path').join(article.publicBase, attachment.name),
+        require('path').join(draft.attachmentsPath, attachment.name)
       )
     }
     draft.attachments.forEach((a) => {
       a.url = 'file://' + require('path').join(draft.attachmentsPath, a.name)
     })
-    if (draft.audioFilename) {
-      draft.audioFilename =
-        'file://' + require('path').join(draft.attachmentsPath, require('path').basename(draft.audioFilename))
+    if (article.audioFilename) {
+      draft.audioFilename = require('path').join(article.publicBase, article.audioFilename)
     }
-    if (draft.videoFilename) {
-      draft.videoFilename =
-        'file://' + require('path').join(draft.attachmentsPath, require('path').basename(draft.videoFilename))
+    if (article.videoFilename) {
+      draft.videoFilename = require('path').join(article.publicBase, article.videoFilename)
     }
-
     return draft
   }
 
@@ -123,6 +116,10 @@ class Draft {
    */
   async publish() {
     const article = Article.fromDraft(this)
+    if (!this.article) {
+      this.article = article
+    }
+    await this.confirmBigFileCopy()
     log.info('when publish, created time is', {
       draft: this.created,
       article: article.created,
@@ -143,28 +140,121 @@ class Draft {
       middleSideBarArticles: this.planet.articles,
       middleSideBarFocusArticle: article,
     })
-
     this.planet.publish()
   }
 
-  async publishAttachments(article) {
-    const items = await new Promise((resolve) => {
-      require('fs').readdir(this.attachmentsPath, (err, files) => {
-        resolve(files)
-      })
+  copyOK(path) {
+    return !path || path.startsWith(this.attachmentsPath) || path.startsWith(this.article.publicBase)
+  }
+
+  async confirmBigFileCopy() {
+    let startat = new Date().getTime()
+    while (!this.copyOK(this.audioFilename)) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      if (new Date().getTime() - startat > 5000) {
+        startat = new Date().getTime()
+        log.error('confirm big copy takes too long!', this.audioFilename)
+      }
+    }
+    while (!this.copyOK(this.videoFilename)) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      if (new Date().getTime() - startat > 5000) {
+        startat = new Date().getTime()
+        log.error('confirm big copy takes too long!', this.audioFilename)
+      }
+    }
+  }
+
+  //在编辑的时候移除附件
+  async removeAttachment(name) {
+    if (name === this.audioFilename) {
+      this.audioFilename = null
+    } else if (name === this.videoFilename) {
+      this.videoFilename = null
+    } else {
+      this.attachments = this.attachments.filter((a) => a.name === name)
+    }
+    this.save()
+  }
+
+  async attachAudio(fullpath) {
+    if (this.audioFilename && !this.audioFilename.startsWith(this.attachmentsPath)) {
+      throw new Error('Conflict')
+    }
+    const basename = require('path').basename(fullpath)
+    this.audioFilename = fullpath
+    const target = require('path').join(this.attachmentsPath, basename)
+    require('fs').copyFile(fullpath, target, () => {
+      this.audioFilename = target
+      this.save()
     })
+    this.save()
+  }
+
+  async addPhotos(pathes) {
+    for (let path of pathes) {
+      const basename = require('path').basename(path)
+      const filter = this.attachments.filter((a) => a.basename === basename)
+      if (filter.length === 0) {
+        require('fs').copyFileSync(path, require('path').join(this.attachmentsPath, basename))
+        this.attachments.push({
+          size: require('image-size')(path),
+          created: new Date().getTime(),
+          name: basename,
+          type: 'image',
+          url: 'file://' + require('path').join(this.attachmentsPath, basename),
+        })
+      }
+    }
+  }
+
+  async attachVideo(fullpath) {
+    if (this.videoFilename && !this.videoFilename.startsWith(this.attachmentsPath)) {
+      throw new Error('Conflict')
+    }
+    const basename = require('path').basename(fullpath)
+    this.videoFilename = fullpath
+    const target = require('path').join(this.attachmentsPath, basename)
+    require('fs').copyFile(fullpath, target, () => {
+      this.videoFilename = target
+      this.save()
+    })
+    this.save()
+  }
+
+  async publishAttachments(article) {
+    const items = require('fs').readdirSync(this.attachmentsPath)
     if (!require('fs').existsSync(article.publicBase)) {
       require('fs').mkdirSync(article.publicBase, { recursive: true })
     }
-    for (let item of items) {
-      if (item === 'preview.html') {
-        continue
-      }
+    //首先将用到的Public目录的文件拷贝过来
+    if (this.audioFilename && this.audioFilename.startsWith(article.publicBase)) {
+      const target = require('path').join(this.attachmentsPath, require('path').basename(this.audioFilename))
+      require('fs').renameSync(this.audioFilename, target)
+      this.audioFilename = target
+    }
+    if (this.videoFilename && this.videoFilename.startsWith(article.publicBase)) {
+      const target = require('path').join(this.attachmentsPath, require('path').basename(this.videoFilename))
+      require('fs').renameSync(this.videoFilename, target)
+      this.videoFilename = target
+    }
+    //将剩余的Public目录整个删除重建
+    require('fs').rmSync(article.publicBase, { recursive: true, force: true })
 
+    //再将其用到的文件拷贝过去
+    for (let item of this.attachments || []) {
       require('fs').renameSync(
-        require('path').join(this.attachmentsPath, item),
-        require('path').join(article.publicBase, item)
+        require('path').join(this.attachmentsPath, item.name),
+        require('path').join(article.publicBase, item.name)
       )
+    }
+    if (this.audioFilename) {
+      const target = require('path').join(article.publicBase, require('path').basename(this.audioFilename))
+      require('fs').renameSync(this.audioFilename, target)
+    }
+    if (this.videoFilename) {
+      const target = require('path').join(article.publicBase, require('path').basename(this.videoFilename))
+      require('fs').renameSync(this.videoFilename, target)
     }
   }
 }

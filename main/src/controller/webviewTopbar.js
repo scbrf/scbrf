@@ -118,7 +118,8 @@ class WebviewTopbar {
     } else {
       draft = Draft.fromArticle(article)
     }
-    this.showCreateArticleDialog(draft)
+    rt.draft = draft
+    this.showCreateArticleDialog()
   }
   init() {
     this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/topbar`)
@@ -127,7 +128,7 @@ class WebviewTopbar {
       this.updateUI()
     })
   }
-  async showCreateArticleDialog(draft) {
+  async showCreateArticleDialog() {
     const win = BrowserWindow.fromWebContents(this.view.webContents)
     const ArticleEditorDialog = new BrowserWindow({
       parent: win,
@@ -147,13 +148,13 @@ class WebviewTopbar {
     })
 
     ArticleEditorDialog.addBrowserView(editorTopbar.view)
-    editorTopbar.init(draft)
+    editorTopbar.init()
 
     ArticleEditorDialog.addBrowserView(editorMain.view)
-    editorMain.init(draft)
+    editorMain.init()
 
     ArticleEditorDialog.addBrowserView(editorWebview.view)
-    editorWebview.init(draft)
+    editorWebview.init()
 
     ArticleEditorDialog.show()
   }

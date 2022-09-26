@@ -105,6 +105,12 @@ class Article {
 
   static fromDraft(draft) {
     const article = new Article(draft.planet, draft)
+    if (article.audioFilename) {
+      article.audioFilename = require('path').basename(article.audioFilename)
+    }
+    if (article.videoFilename) {
+      article.videoFilename = require('path').basename(article.videoFilename)
+    }
     return article
   }
 
