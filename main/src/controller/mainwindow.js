@@ -1,6 +1,5 @@
 const { BrowserWindow } = require('electron')
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'mainwindow' })
+const log = require('../utils/log')('mainwindow')
 const evt = require('../utils/events')
 const planet = require('./planet')
 const articles = require('./articles')

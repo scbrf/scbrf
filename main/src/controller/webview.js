@@ -1,7 +1,7 @@
 const { BrowserView } = require('electron')
-const bunyan = require('bunyan')
 const evt = require('../utils/events')
-const log = bunyan.createLogger({ name: 'webview' })
+const log = require('../utils/log')('webview')
+
 const rt = require('../models/runtime')
 
 class Webview {

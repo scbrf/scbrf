@@ -1,10 +1,11 @@
 const { BrowserView, ipcMain, BrowserWindow, Menu, diaog, dialog } = require('electron')
 const evt = require('../utils/events')
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'topbar' })
+const log = require('../utils/log')('topbar')
+
 const editorTopbar = require('./editor/editorTopbar')
 const editorMain = require('./editor/editorMain')
 const editorWebview = require('./editor/editorWebview')
+const { Draft } = require('../models')
 const rt = require('../models/runtime')
 
 class WebviewTopbar {
@@ -84,10 +85,7 @@ class WebviewTopbar {
       buttons: ['Cancel', 'Delete'],
     })
     if (idx) {
-      let planet = Planet.planets.filter((p) => p.id === this.ctxArticle.planet.id)[0]
-      if (!planet) {
-        planet = FollowingPlanet.following.filter((p) => p.id === this.ctxArticle.planet.id)[0]
-      }
+      let planet = rt.planets.filter((p) => p.id === this.ctxArticle.planet.id)[0]
       const article = planet.articles.filter((a) => a.id === this.ctxArticle.id)[0]
       planet.articles = planet.articles.filter((a) => a.id !== this.ctxArticle.id)
       await article.delete()
@@ -95,7 +93,7 @@ class WebviewTopbar {
     }
   }
   editArticle() {
-    const planet = Planet.planets.filter((p) => p.id === this.ctxArticle.planet.id)[0]
+    const planet = rt.planets.filter((p) => p.id === this.ctxArticle.planet.id)[0]
     const article = planet.articles.filter((a) => a.id === this.ctxArticle.id)[0]
     let draft
     if (article.drafts.length > 0) {

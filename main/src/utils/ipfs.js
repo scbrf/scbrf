@@ -1,8 +1,7 @@
 const { execFile, spawn } = require('node:child_process')
 const evt = require('./events')
 const axios = require('axios').default
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'ipfs' })
+const log = require('../utils/log')('ipfs')
 
 const OS = require('os').platform()
 const EXE_FILE = OS === 'darwin' ? 'ipfs-amd64' : OS == 'win32' ? 'ipfs.exe' : 'ipfs'
@@ -142,7 +141,7 @@ class IPFSDaemon {
   }
 
   async updateOnlineStatus() {
-    log.info('update online status')
+    log.debug('update online status')
     let url = `http://127.0.0.1:${this.APIPort}/webui`
     const rsp = await axios.get(url, {
       headers: {
@@ -173,12 +172,12 @@ class IPFSDaemon {
   }
 
   async api(path, args, options) {
-    log.info('api request to ipfs with', { path, args })
+    log.debug('api request to ipfs with', { path, args })
     let url = `http://127.0.0.1:${this.APIPort}/api/v0/${path}`
     if (args) {
       url += '?' + require('querystring').encode(args)
     }
-    log.info('api with request with url', url)
+    log.debug('api with request with url', url)
     const rsp = await axios.post(url, null, options)
     return rsp.data
   }

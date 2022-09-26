@@ -1,8 +1,8 @@
 const marked = require('marked')
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'models/followingArticle' })
+const log = require('../utils/log')('models/followingArticle')
+
 const uuid = require('uuid').v4
 const ipfs = require('../utils/ipfs')
 

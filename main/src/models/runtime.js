@@ -1,5 +1,5 @@
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'models/runtime' })
+const log = require('../utils/log')('models/runtime')
+
 const evt = require('../utils/events')
 const moment = require('moment')
 
@@ -133,7 +133,7 @@ class Runtime {
           set(v) {
             //set 函数会设置这个内部private变量的值，如果定义了emit，则在值改变的时候emit一个事件
             this[`#${name}`] = v
-            log.info('runtime change data model prop value', { key: name, v })
+            log.debug('runtime change data model prop value', { key: name, v })
             if (event) {
               evt.emit(event, { src: 'set' })
             }
@@ -149,7 +149,7 @@ class Runtime {
       for (let key in obj) {
         if (key in model) {
           this[`#${key}`] = obj[key]
-          log.info('runtime change data model prop value', { key, value: obj[key] })
+          log.debug('runtime change data model prop value', { key, value: obj[key] })
           if (model[key][1]) {
             events.add(model[key][1])
           }

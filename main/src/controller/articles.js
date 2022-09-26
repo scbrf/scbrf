@@ -38,7 +38,7 @@ class ArticleController {
   showArticlesCtxMenu(event, a) {
     const win = BrowserWindow.fromWebContents(event.sender)
     this.ctxArticle = a
-    let planet = FollowingPlanet.following.filter((p) => p.id === a.planet.id)[0]
+    let planet = rt.following.filter((p) => p.id === a.planet.id)[0]
     if (planet) {
       this.followingArticleCtxMenu.popup(win)
     }

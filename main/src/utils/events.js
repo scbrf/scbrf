@@ -1,7 +1,6 @@
 const { ipcMain } = require('electron')
 const EvtBus = require('js-event-bus')
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'event center' })
+const log = require('../utils/log')('event center')
 
 class EventCenter {
   //直接在这里定义一个事件名，注意时间名必须用 ev + 任意一个大写字母开头
@@ -73,7 +72,7 @@ class EventCenter {
       console.log(new Error().stack)
       throw `Unknown event: ${ev}`
     }
-    log.info('event emit', { ev, args: Array.prototype.slice.call(arguments, 1) })
+    log.debug('event emit', { ev, args: Array.prototype.slice.call(arguments, 1) })
     this.bus.emit(ev, null, ...Array.prototype.slice.call(arguments, 1))
   }
 

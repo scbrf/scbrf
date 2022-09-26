@@ -1,8 +1,8 @@
 const { BrowserView, Menu, clipboard, BrowserWindow, dialog } = require('electron')
 const { Planet, FollowingPlanet } = require('../models')
 
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'planetView' })
+const log = require('../utils/log')('planetView')
+
 const evt = require('../utils/events')
 const rt = require('../models/runtime')
 

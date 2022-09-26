@@ -1,7 +1,6 @@
 const { BrowserView, ipcMain } = require('electron')
-const bunyan = require('bunyan')
 const evt = require('../utils/events')
-const log = bunyan.createLogger({ name: 'audioPlayer' })
+const log = require('../utils/log')('audioPlayer')
 
 class AudioPlayerController {
   constructor() {

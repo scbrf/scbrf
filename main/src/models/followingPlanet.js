@@ -1,6 +1,6 @@
 const { default: axios } = require('axios')
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'models/followingPlanet' })
+const log = require('../utils/log')('models/followingPlanet')
+
 const uuid = require('uuid').v4
 const ipfs = require('../utils/ipfs')
 const wallet = require('../utils/wallet')

@@ -1,6 +1,6 @@
 const marked = require('marked')
-const bunyan = require('bunyan')
-const log = bunyan.createLogger({ name: 'models/planet' })
+const log = require('../utils/log')('models/planet')
+
 const uuid = require('uuid').v4
 const ipfs = require('../utils/ipfs')
 const rt = require('./runtime')
