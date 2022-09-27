@@ -20,6 +20,8 @@ class Planet {
     this.created = params.created || now
     this.updated = params.updated || now
     this.ipns = params.ipns || null
+    this.githubUsername = params.githubUsername || null
+    this.twitterUsername = params.twitterUsername || null
     this.lastPublished = params.lastPublished || now
     this.articles = []
     this.drafts = []
@@ -136,6 +138,8 @@ class Planet {
       template: this.template,
       created: this.created,
       updated: this.updated,
+      githubUsername: this.githubUsername,
+      twitterUsername: this.twitterUsername,
       lastPublished: this.lastPublished,
     }
   }

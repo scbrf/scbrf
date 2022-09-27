@@ -19,6 +19,8 @@ class FollowingPlanet {
     this.cid = params.cid || ''
     this.created = params.created
     this.updated = params.updated
+    this.githubUsername = params.githubUsername || null
+    this.twitterUsername = params.twitterUsername || null
     this.lastRetrieved = params.lastRetrieved || new Date().getTime()
     this.articles = []
 
@@ -49,6 +51,8 @@ class FollowingPlanet {
       created: this.created,
       updated: this.updated,
       lastRetrieved: this.lastRetrieved,
+      githubUsername: this.githubUsername,
+      twitterUsername: this.twitterUsername
     }
   }
 
