@@ -67,7 +67,7 @@ class MainWindowController {
       // need append planet view
       root = true
     }
-    evt.emit('rebounds', { root })
+    evt.emit(evt.evRebounds, { root })
   }
   rebounds(p) {
     log.info('need rebound', arguments)

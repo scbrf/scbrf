@@ -1,6 +1,6 @@
 {
     "name": "scarborough",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "author": "yygqg.eth",
     "description": "Clone of Livid(olivida.eth)'s Planet project",
     "license": "MIT",
@@ -11,8 +11,9 @@
         "start:watch": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='..' nodemon --watch main.js --watch ./src --exec 'yarn start'",
         "prepackage": "cd ../fe && yarn build",
         "package": "electron-forge package",
+        "premake": "cd ../fe && yarn build",
         "make": "electron-forge make",
-        "test": "jest"
+        "test": "jest --roots=./src"
     },
     "devDependencies": {
         "@electron-forge/cli": "^6.0.0-beta.66",

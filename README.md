@@ -11,6 +11,6 @@ Scarborough 的灵感来源是 [Livid 的 Planet](https://github.com/Planetable/
 >4. cd main && yarn && yarn start 
 
 如果要打包：
-> 1. cd main && yarn package && yarn build
+> 1. cd main && yarn build
 
 

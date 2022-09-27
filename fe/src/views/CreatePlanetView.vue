@@ -42,10 +42,10 @@ export default {
     },
     methods: {
         doclose() {
-            api.send('closeCreateDialog')
+            api.send('ipcCloseWin')
         },
         doCreate() {
-            api.send('createPlanet', { name: this.name, about: this.about, template: this.template })
+            api.send('ipcCreatePlanet', { name: this.name, about: this.about, template: this.template })
         }
     }
 }
