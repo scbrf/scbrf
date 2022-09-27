@@ -1,4 +1,4 @@
-const { BrowserView, ipcMain, BrowserWindow, Menu, dialog } = require('electron')
+const { BrowserView, ipcMain, BrowserWindow, Menu, dialog, app } = require('electron')
 const evt = require('../utils/events')
 const log = require('../utils/log')('topbar')
 
@@ -22,6 +22,7 @@ class WebviewTopbar {
       [evt.ipcPlanetInfo, this.planetInfo],
       [evt.ipcMyArticleCtxMenu, this.showMyArticleCtxMenu],
       [evt.ipcSetAvatar, this.setPlanetAvatar],
+      [evt.ipcDownloadMenu, this.showDownloadMenu],
     ])
   }
   createView() {
@@ -47,6 +48,40 @@ class WebviewTopbar {
         click: this.deleteArticle.bind(this),
       },
     ])
+  }
+
+  showDownloadMenu(event) {
+    if (!rt.middleSideBarFocusArticle) return
+    if (!rt.middleSideBarFocusArticle.attachments) return
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const downloadMenu = Menu.buildFromTemplate(
+      Array.from(
+        new Set([
+          ...rt.middleSideBarFocusArticle.attachments.map((a) => a.name || a),
+          ...(rt.middleSideBarFocusArticle.audioFilename ? [rt.middleSideBarFocusArticle.audioFilename] : []),
+          ...(rt.middleSideBarFocusArticle.videoFilename ? [rt.middleSideBarFocusArticle.videoFilename] : []),
+        ])
+      ).map((item) => ({
+        label: item,
+        click: () => {
+          this.downloadAttachment(item)
+        },
+      }))
+    )
+    downloadMenu.popup(win)
+  }
+
+  async downloadAttachment(item) {
+    let base = rt.middleSideBarFocusArticle.url
+    if (base.endsWith('.html')) {
+      base = base.slice(0, -5)
+    }
+    if (!base.endsWith('/')) {
+      base = base + '/'
+    }
+    const url = base + item
+    const localFile = require('path').join(app.getPath('downloads'), item)
+    await require('../utils/download')(url, localFile, { open: true })
   }
 
   showMyArticleCtxMenu(event, a) {

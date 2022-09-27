@@ -211,15 +211,6 @@ class Planet {
     this.lastPublished = new Date().getTime()
     rt.planets = [...rt.planets]
   }
-  static startPublish() {
-    setInterval(() => {
-      for (let planet of Planet.planets) {
-        if (planet.articles.length > 0) {
-          planet.publish()
-        }
-      }
-    }, 30 * 60 * 1000) // 每30分钟重新发布一次本地 Planet
-  }
   static async loadPlanets() {
     Planet.planets = []
     const planets = await new Promise((resolve) => {

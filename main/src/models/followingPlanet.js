@@ -98,14 +98,6 @@ class FollowingPlanet {
     rt.following = [...rt.following]
   }
 
-  static startUpdate() {
-    setInterval(() => {
-      for (let planet of rt.following) {
-        planet.update()
-      }
-    }, 5 * 60 * 1000) // 每5分钟检查一次 follow 的内容更新
-  }
-
   /**
    * 从本地存储中加载已经保存的关注内容
    * 静态方法，将改变Runtime的值
@@ -233,13 +225,7 @@ class FollowingPlanet {
 
   async downloadAvatar(url) {
     try {
-      const rsp = await require('axios').get(url, { responseType: 'stream' })
-      const writer = require('fs').createWriteStream(this.avatarPath)
-      rsp.data.pipe(writer)
-      await new Promise((resolve, reject) => {
-        writer.on('finish', resolve)
-        writer.on('error', reject)
-      })
+      await require('../utils/download')(url, this.avatarPath)
       this.avatar = require('path').basename(this.avatarPath)
     } catch (ex) {
       log.error(`download avatar from ${url} fail`, ex)

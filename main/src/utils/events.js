@@ -51,6 +51,7 @@ class EventCenter {
   ipcDraftVideoContextMenu //弹出视频菜单
 
   ipcSetAvatar //设置Planet的头像
+  ipcDownloadMenu //显示下载菜单
 
   constructor() {
     this.bus = EvtBus()

@@ -3,6 +3,7 @@ const evt = require('../utils/events')
 const { FollowingPlanet, Planet } = require('../models')
 const ipfs = require('../utils/ipfs')
 const rt = require('../models/runtime')
+require('./upmanager')
 require('./mainwindow')
 
 class ScarboroughApp {
@@ -21,10 +22,6 @@ class ScarboroughApp {
     await this.initDirBase()
     //加载已经保存的内容
     await this.loadAll()
-
-    //启动定期更新和定期发布
-    FollowingPlanet.startUpdate()
-    Planet.startPublish()
     //启动前端页面服务器
     await require('../utils/websrv').init()
     //各个模块这个时候可以按需做自己的初始化工作

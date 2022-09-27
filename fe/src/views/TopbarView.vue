@@ -9,8 +9,9 @@
         <div class="flex-1"></div>
         <SpeakerWaveIcon v-if="hasAudio" @click="playAudio" class="w-6 h-6 ml-4 hover:text-gray-900 nodrag">
         </SpeakerWaveIcon>
-        <button v-if="hasAttachment" class="flex shrink-0 items-center px-2 rounded border-2 ml-4">
-            <PaperClipIcon class="w-5 h-5 hover:text-gray-900 nodrag"></PaperClipIcon>
+        <button v-if="hasAttachment" @click="showDownloadMenu"
+            class="flex shrink-0 items-center px-2 hover:text-gray-900 hover:bg-slate-200 rounded border-2 ml-4 nodrag">
+            <PaperClipIcon class="w-5 h-5"></PaperClipIcon>
             <span class="ml-2"> {{ article.attachments.length }}</span>
         </button>
         <div class="flex-1"></div>
@@ -47,6 +48,9 @@ export default {
         },
         planetInfo() {
             api.send('ipcPlanetInfo', JSON.parse(JSON.stringify(this.planet)))
+        },
+        showDownloadMenu() {
+            api.send('ipcDownloadMenu')
         }
     }
 }
