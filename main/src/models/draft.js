@@ -185,7 +185,7 @@ class Draft {
     } else if (targetName === require('path').basename(`${this.videoFilename}`)) {
       this.videoFilename = null
     } else {
-      this.attachments = this.attachments.filter((a) => a.name === name)
+      this.attachments = this.attachments.filter((a) => a.name !== name)
     }
     this.save()
   }

@@ -48,6 +48,7 @@ class EventCenter {
   ipcDraftAddAudio //增加声音
   ipcDraftAddVideo //增加视频
   ipcDraftRemoveAttachment //移除附件
+  ipcDraftVideoContextMenu //弹出视频菜单
 
   constructor() {
     this.bus = EvtBus()

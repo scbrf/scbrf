@@ -120,7 +120,7 @@ export default {
       api.send('ipcSetSidebarFocus', value)
     },
     planetCtxMenu(p) {
-      api.send('planetCtxMenu', JSON.parse(JSON.stringify(p)))
+      api.send('ipcPlanetCtxMenu', JSON.parse(JSON.stringify(p)))
     },
     followingCtxMenu(p) {
       api.send('ipcFollowingCtxMenu', JSON.parse(JSON.stringify(p)))

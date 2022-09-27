@@ -1,4 +1,4 @@
-const { BrowserView, ipcMain, dialog, BrowserWindow } = require('electron')
+const { BrowserView, dialog, BrowserWindow, Menu } = require('electron')
 const log = require('../../utils/log')('editor')
 const evt = require('../../utils/events')
 const rt = require('../../models/runtime')
@@ -12,9 +12,15 @@ class EditorTopbar {
       [evt.ipcDraftAddAudio, this.addAudio],
       [evt.ipcDraftAddVideo, this.addVideo],
       [evt.ipcDraftRemoveAttachment, this.removeAttachment],
+      [evt.ipcDraftVideoContextMenu, this.showVideoCtxMenu],
     ])
 
     evt.bindBusTable(this, [[evt.evRuntimeDraftChange, this.updateUI]])
+  }
+
+  showVideoCtxMenu(e) {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    this.videoCtxMenu.popup(win)
   }
 
   async removeAttachment(_, { name }) {
@@ -94,6 +100,15 @@ class EditorTopbar {
       },
     })
     // this.view.webContents.openDevTools()
+    this.videoCtxMenu = Menu.buildFromTemplate([
+      {
+        label: 'Delete',
+        click: async () => {
+          await rt.draft.removeAttachment(rt.draft.videoFilename)
+          this.updateUI()
+        },
+      },
+    ])
   }
   init() {
     this.view.setBounds({ x: 0, y: 48, width: 600, height: 552 })
