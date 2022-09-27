@@ -6,5 +6,6 @@ export const usePlanetInfoStore = defineStore("planetinfo", {
     updateat: 0,
     title: "",
     icon: "",
+    isMine: false,
   }),
 });

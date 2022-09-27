@@ -1,5 +1,5 @@
 <template>
-    <div class="avatar" :class="image ? [] : ['placeholder']">
+    <div class="avatar" @click="$emit('click')" :class="image ? [] : ['placeholder']">
         <div class="rounded-full w-6" :class="!image? ['bg-neutral-focus', 'text-neutral-content', ...parentClass] :
         parentClass">
             <span v-if="!image">{{ placeholder.substr(0,1) }}</span>
@@ -10,6 +10,7 @@
 <script>
 export default {
     props: ['placeholder', 'image', 'extraClass'],
+    emits: ['click'],
     computed: {
         parentClass() {
             return (this.extraClass || '').split(',')

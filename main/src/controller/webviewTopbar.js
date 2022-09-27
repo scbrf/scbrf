@@ -1,4 +1,4 @@
-const { BrowserView, ipcMain, BrowserWindow, Menu, diaog, dialog } = require('electron')
+const { BrowserView, ipcMain, BrowserWindow, Menu, dialog } = require('electron')
 const evt = require('../utils/events')
 const log = require('../utils/log')('topbar')
 
@@ -7,6 +7,7 @@ const editorMain = require('./editor/editorMain')
 const editorWebview = require('./editor/editorWebview')
 const { Draft } = require('../models')
 const rt = require('../models/runtime')
+const Jimp = require('jimp')
 
 class WebviewTopbar {
   constructor() {
@@ -20,6 +21,7 @@ class WebviewTopbar {
       [evt.ipcNewArticle, this.newArticle],
       [evt.ipcPlanetInfo, this.planetInfo],
       [evt.ipcMyArticleCtxMenu, this.showMyArticleCtxMenu],
+      [evt.ipcSetAvatar, this.setPlanetAvatar],
     ])
   }
   createView() {
@@ -56,9 +58,44 @@ class WebviewTopbar {
     }
   }
 
+  async setPlanetAvatar(event) {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const pathes = dialog.showOpenDialogSync(win, {
+      message: 'attach a photo',
+      filters: [
+        {
+          name: 'Images',
+          extensions: ['jpeg', 'jpg', 'png', 'gif'],
+        },
+      ],
+      properties: ['openFile'],
+    })
+    if (pathes && pathes.length > 0) {
+      const image = await Jimp.read(pathes[0])
+      log.info('need store avatar at:', rt.sidebarFocus.avatarPath)
+      image.resize(256, 256).quality(80).write(rt.sidebarFocus.avatarPath)
+      rt.sidebarFocus.avatar = 'avatar.png'
+      await rt.sidebarFocus.save()
+      evt.emit(evt.evRuntimePlanetsChange)
+      evt.emit(evt.evRuntimeSidebarFocusChange)
+      this.updatePlanetInfoWin(win)
+      rt.sidebarFocus.publish()
+    }
+  }
+
+  updatePlanetInfoWin(win) {
+    const planet = rt.sidebarFocus
+    win.webContents.send('planetInfo', {
+      about: require('marked').parse(planet.about),
+      updateat: planet.lastRetrieved || planet.lastPublished,
+      title: planet.name,
+      icon: planet.avatar ? planet.avatarPath : null,
+      isMine: !!rt.planets.filter((p) => p.id === planet.id)[0],
+    })
+  }
+
   planetInfo() {
     if (!rt.sidebarFocus) return
-    const planet = rt.sidebarFocus
     const win = BrowserWindow.fromWebContents(this.view.webContents)
     const planetInfoDialog = new BrowserWindow({
       parent: win,
@@ -73,15 +110,10 @@ class WebviewTopbar {
         preload: require('path').join(__dirname, '..', '..', 'preload.js'),
       },
     })
-    // createPlanetDialog.webContents.openDevTools({ mode: 'undocked' })
+    // planetInfoDialog.webContents.openDevTools({ mode: 'undocked' })
     planetInfoDialog.loadURL(`${require('../utils/websrv').WebRoot}/dialog/planet/info`)
     planetInfoDialog.webContents.on('did-finish-load', () => {
-      planetInfoDialog.webContents.send('planetInfo', {
-        about: require('marked').parse(planet.about),
-        updateat: planet.lastRetrieved || planet.lastPublished,
-        title: planet.name,
-        icon: planet.avatar ? planet.avatarPath : null,
-      })
+      this.updatePlanetInfoWin(planetInfoDialog)
       planetInfoDialog.show()
     })
     // planetInfoDialog.webContents.openDevTools({ mode: 'undocked' })

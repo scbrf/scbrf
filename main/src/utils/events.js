@@ -50,6 +50,8 @@ class EventCenter {
   ipcDraftRemoveAttachment //移除附件
   ipcDraftVideoContextMenu //弹出视频菜单
 
+  ipcSetAvatar //设置Planet的头像
+
   constructor() {
     this.bus = EvtBus()
     this.eventNameInit()
