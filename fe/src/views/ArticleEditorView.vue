@@ -10,7 +10,7 @@
         <div v-if="attachments.length" class="bg-gray-100 flex dark:bg-slate-800 overflow-x-auto">
             <div v-for="a in attachments" @click="addPhoto(a)" :key="a.url" class="relative group">
                 <img class="w-16 h-10 mx-2 my-2" :src="a.url" />
-                <XCircleIcon @click="removeAttachment(a.name) "
+                <XCircleIcon @click.prevent.stop="removeAttachment(a.name) "
                     class="absolute w-4 h-4 text-blue-500 bg-white rounded-full top-1 right-1 hidden group-hover:inline">
                 </XCircleIcon>
             </div>
