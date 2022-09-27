@@ -171,6 +171,19 @@ class Test {
       'return document.body.querySelector("strong")'
     );
     if (!strong) throw new Error("markdown error!");
+
+    await this.switchTo("/editor/topbar");
+    await driver.findElement(By.css(".e2e-photo")); //just make sure the btn is there
+    const photo = `/Users/wwq/Downloads/dwebservices-api-key.png`;
+    await driver.executeScript(`api.send('ipcDraftAddPhoto', ['${photo}'])`);
+
+    await this.switchTo("/editor/main");
+    const image = await driver.findElement(By.css("img"));
+    await image.click();
+    const webimg = await driver.executeScript(
+      'return document.body.querySelector("img")'
+    );
+    if (!webimg) throw new Error("attach photo seems fail!");
   }
 
   async start() {

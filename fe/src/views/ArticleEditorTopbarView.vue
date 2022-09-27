@@ -13,11 +13,14 @@
             </div>
 
             <div class="flex-1"></div>
-            <PhotoIcon @click="attachPhoto" class="mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+            <PhotoIcon @click="attachPhoto"
+                class="e2e-photo mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
             </PhotoIcon>
-            <MicrophoneIcon @click="attachAudio" class="mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+            <MicrophoneIcon @click="attachAudio"
+                class="e2e-audio mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
             </MicrophoneIcon>
-            <FilmIcon @click="attachFilm" class="mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag"></FilmIcon>
+            <FilmIcon @click="attachFilm" class="e2e-video mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+            </FilmIcon>
         </div>
     </div>
 </template>

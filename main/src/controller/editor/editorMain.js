@@ -61,17 +61,19 @@ class EditorTopbar {
     }
   }
 
-  async addPhoto() {
-    const pathes = dialog.showOpenDialogSync(BrowserWindow.fromBrowserView(this.view), {
-      message: 'attach a photo',
-      filters: [
-        {
-          name: 'Images',
-          extensions: ['jpeg', 'jpg', 'png', 'gif'],
-        },
-      ],
-      properties: ['multiSelections', 'openFile'],
-    })
+  async addPhoto(event, pathes) {
+    if (!pathes) {
+      pathes = dialog.showOpenDialogSync(BrowserWindow.fromWebContents(event.sender), {
+        message: 'attach a photo',
+        filters: [
+          {
+            name: 'Images',
+            extensions: ['jpeg', 'jpg', 'png', 'gif'],
+          },
+        ],
+        properties: ['multiSelections', 'openFile'],
+      })
+    }
     if (pathes && pathes.length > 0) {
       await rt.draft.addPhotos(pathes)
       rt.draft.save()
