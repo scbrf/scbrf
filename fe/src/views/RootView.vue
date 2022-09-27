@@ -133,7 +133,7 @@ export default {
       api.send('ipcCloseWin')
     },
     minimalWin() {
-      api.send('minimalWin')
+      api.send('ipcMinimalWin')
     }
 
   }

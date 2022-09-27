@@ -1,11 +1,11 @@
-const evt = require('./events')
+const evt = require('../utils/events')
 const { Tray, app, Menu } = require('electron')
 class TrayIcon {
   constructor() {
-    evt.bindBusTable(this, [evt.evAppInit, this.init])
+    evt.bindBusTable(this, [[evt.evAppInit, this.init]])
   }
   init() {
-    if (OS !== 'win32') return
+    if (process.platform !== 'win32') return
     const tray = new Tray(require('path').join(__dirname, '..', '..', 'resources', 'icon.png'))
     const contextMenu = Menu.buildFromTemplate([
       {

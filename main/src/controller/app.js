@@ -5,6 +5,7 @@ const ipfs = require('../utils/ipfs')
 const rt = require('../models/runtime')
 require('./upmanager')
 require('./mainwindow')
+require('./trayIcon')
 
 class ScarboroughApp {
   constructor() {
