@@ -1,13 +1,14 @@
 <template>
     <div class="w-screen h-screen flex flex-col items-stretch border-r">
-        <video v-if="videoFilename" class="w-screen" style="height:56.25vw;" controls :src="videoFilename"></video>
-        <AudioPlayer v-if="audioFilename" @delete="removeAttachment(audioFilename)" :src="audioFilename" />
+        <video v-if="videoFilename" class="w-screen" style="height:56.25vw;" controls
+            :src="fixUrl(videoFilename)"></video>
+        <AudioPlayer v-if="audioFilename" @delete="removeAttachment(audioFilename)" :src="fixUrl(audioFilename)" />
         <input @input="save" v-model="title" placeholder="Title"
             class="!outline-none dark:bg-slate-900 p-2 border-b nodrag" />
         <textarea @input="save" v-model="content"
             class="!outline-none flex-1 nodrag dark:bg-slate-800 p-2">hello</textarea>
-        <div v-if="attachments.length" class="bg-gray-100 dark:bg-slate-800 ">
-            <img v-for="a in attachments" @click="addPhoto(a)" class="w-16 h-10 m-4" :key="a.url" :src="a.url" />
+        <div v-if="attachments.length" class="bg-gray-100 flex dark:bg-slate-800 ">
+            <img v-for="a in attachments" @click="addPhoto(a)" class="w-16 h-10 ml-2 my-2" :key="a.url" :src="a.url" />
         </div>
     </div>
 </template>
@@ -30,6 +31,10 @@ export default {
                 audioFilename: this.audioFilename,
                 videoFilename: this.videoFilename
             }));
+        },
+        fixUrl(path) {
+            if (path.startsWith('/')) return `file://${path}`
+            return path
         },
         addPhoto(a) {
             const basename = a.name

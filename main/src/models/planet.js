@@ -41,6 +41,7 @@ class Planet {
 
   // 加载 Drafts 里面的所有 Draft
   async loadDrafts() {
+    this.drafts = []
     const drafts = await new Promise((resolve) => {
       require('fs').readdir(this.draftsPath, (err, files) => {
         resolve(files)
@@ -235,7 +236,7 @@ class Planet {
         })
       })
       for (let name of articles) {
-        const article = Article.load(name, planet)
+        const article = await Article.load(name, planet)
         if (article) {
           planet.articles.push(article)
         }

@@ -25,13 +25,14 @@ class Article {
     this.publicIndexPath = require('path').join(this.publicBase, 'index.html')
   }
 
-  static load(name, planet) {
+  static async load(name, planet) {
     if (!name.endsWith('.json')) {
       return
     }
     const articlePath = require('path').join(planet.articlesPath, name)
     const json = JSON.parse(require('fs').readFileSync(articlePath).toString())
     const article = new Article(planet, json)
+    // await article.loadDrafts()
     return article
   }
 

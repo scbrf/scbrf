@@ -11,7 +11,7 @@ class EditorTopbar {
       [evt.ipcDraftAddPhoto, this.addPhoto],
       [evt.ipcDraftAddAudio, this.addAudio],
       [evt.ipcDraftAddVideo, this.addVideo],
-      [evt.ipcRemoveAttachment, this.removeAttachment],
+      [evt.ipcDraftRemoveAttachment, this.removeAttachment],
     ])
 
     evt.bindBusTable(this, [[evt.evRuntimeDraftChange, this.updateUI]])
@@ -20,6 +20,7 @@ class EditorTopbar {
   async removeAttachment(_, { name }) {
     log.info('draft need remove attachment', name)
     await rt.draft.removeAttachment(name)
+    this.updateUI()
   }
 
   async addVideo() {
@@ -68,7 +69,7 @@ class EditorTopbar {
     if (pathes && pathes.length > 0) {
       await rt.draft.addPhotos(pathes)
       rt.draft.save()
-      evt.emit(evt.evRuntimeDraftChange)
+      this.updateUI()
     }
   }
 
@@ -103,6 +104,7 @@ class EditorTopbar {
     })
   }
   updateUI() {
+    if (!this.view) return
     this.view.webContents.send('editor/update', rt.draft.json())
   }
 }

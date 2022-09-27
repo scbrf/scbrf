@@ -37,21 +37,33 @@ class Draft {
   }
 
   static fromArticle(article) {
-    const draft = new Draft(article.planet, article, article)
-    for (let attachment of article.attachments) {
-      require('fs').cpSync(
-        require('path').join(article.publicBase, attachment.name),
-        require('path').join(draft.attachmentsPath, attachment.name)
-      )
+    const draftPath = require('path').join(article.draftsPath, article.id, 'Draft.json')
+    let draft
+    if (require('fs').existsSync(draftPath)) {
+      const json = JSON.parse(require('fs').readFileSync(draftPath).toString())
+      draft = new Draft(article.planet, article, json)
+    } else {
+      draft = new Draft(article.planet, article, article)
+    }
+
+    for (let attachment of draft.attachments) {
+      const attachmentPath = require('path').join(draft.attachmentsPath, attachment.name)
+      if (!require('fs').existsSync(attachmentPath)) {
+        require('fs').cpSync(require('path').join(article.publicBase, attachment.name), attachmentPath)
+      }
     }
     draft.attachments.forEach((a) => {
       a.url = 'file://' + require('path').join(draft.attachmentsPath, a.name)
     })
-    if (article.audioFilename) {
-      draft.audioFilename = require('path').join(article.publicBase, article.audioFilename)
+    if (draft.audioFilename) {
+      if (!require('fs').existsSync(draft.audioFilename)) {
+        draft.audioFilename = require('path').join(article.publicBase, article.audioFilename)
+      }
     }
     if (article.videoFilename) {
-      draft.videoFilename = require('path').join(article.publicBase, article.videoFilename)
+      if (!require('fs').existsSync(draft.videoFilename)) {
+        draft.videoFilename = require('path').join(article.publicBase, article.videoFilename)
+      }
     }
     return draft
   }
@@ -167,9 +179,10 @@ class Draft {
 
   //在编辑的时候移除附件
   async removeAttachment(name) {
-    if (name === this.audioFilename) {
+    const targetName = require('path').basename(name)
+    if (targetName === require('path').basename(`${this.audioFilename}`)) {
       this.audioFilename = null
-    } else if (name === this.videoFilename) {
+    } else if (targetName === require('path').basename(`${this.videoFilename}`)) {
       this.videoFilename = null
     } else {
       this.attachments = this.attachments.filter((a) => a.name === name)
