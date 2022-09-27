@@ -1,5 +1,4 @@
 const { BrowserView, Menu, ipcMain, BrowserWindow } = require('electron')
-const { FollowingPlanet } = require('../models')
 const evt = require('../utils/events')
 const rt = require('../models/runtime')
 
