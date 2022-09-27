@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "electron-chromedriver": "^20.0.0",
+    "selenium-webdriver": "^4.4.0"
+  },
+  "dependencies": {
+    "robotjs": "^0.6.0"
+  }
+}
