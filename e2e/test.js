@@ -13,14 +13,18 @@ const driver = new webdriver.Builder()
   .build();
 
 class Test {
-  async switchTo(name) {
+  async switchTo(name, prefix = false) {
     const s1 = await driver.getAllWindowHandles();
     for (let s of s1) {
       await driver.switchTo().window(s);
       const url = await driver.getCurrentUrl();
-      if (url.endsWith(name)) return s;
+      if (prefix) {
+        if (url.startsWith(name)) return s;
+      } else {
+        if (url.endsWith(name)) return s;
+      }
     }
-    throw new Error("window not found", name);
+    throw new Error("window not found: " + name);
   }
 
   async sleep(s) {
@@ -146,6 +150,27 @@ class Test {
     await this.sleep(0.3);
     const newPlanet = await driver.findElement(By.css("span.ml-2"));
     await newPlanet.click();
+    await this.switchTo("/topbar");
+    await this.sleep(0.3);
+    const newArticle = await driver.findElement(By.css(".e2e-new"));
+    await newArticle.click();
+    await this.sleep(0.3);
+    await this.testArticleEditor();
+  }
+
+  async testArticleEditor() {
+    const editorWebview = await this.switchTo("file://", true);
+    await this.switchTo("/editor/main");
+    const title = await driver.findElement(By.css("input"));
+    await title.sendKeys("hello from scarborough");
+    const cnt = await driver.findElement(By.css("textarea"));
+    await cnt.sendKeys("P1 \n\n**P2**");
+    await driver.switchTo().window(editorWebview);
+    await this.sleep(0.3);
+    const strong = await driver.executeScript(
+      'return document.body.querySelector("strong")'
+    );
+    if (!strong) throw new Error("markdown error!");
   }
 
   async start() {
@@ -169,9 +194,10 @@ new Test()
   .then(async () => {
     console.log("run e2e succ");
   })
-  .then(() => {
-    driver.quit();
-  })
   .catch((r) => {
     console.log("run e2e fail", r);
+  })
+  .then(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    driver.quit();
   });
