@@ -22,7 +22,7 @@ class Wallet {
       log.info(`resolve content hash return ${ipns}`)
       return ipns
     } else {
-      log.error('get resolve fail!')
+      log.error('ens resolve fail!', ens)
     }
   }
 

@@ -2,12 +2,14 @@ import { useIPFSStore } from "./stores/ipfs";
 import { useArticlesStore } from "./stores/articles";
 import { useTopbarStore } from "./stores/topbar";
 import { useEditorStore } from "./stores/editor";
+import { usePlanetInfoStore } from "./stores/planetinfo";
 
 export default function () {
   const ipfs = useIPFSStore();
   const articles = useArticlesStore();
   const topbar = useTopbarStore();
   const editor = useEditorStore();
+  const planetinfo = usePlanetInfoStore();
 
   api.recieve("ipfsOnlineState", (p) => {
     for (let key of Object.keys(p[0])) {
@@ -46,6 +48,11 @@ export default function () {
   api.recieve("editor/update", (p) => {
     for (let key of Object.keys(p[0])) {
       editor[key] = p[0][key];
+    }
+  });
+  api.recieve("planetInfo", (p) => {
+    for (let key of Object.keys(p[0])) {
+      planetinfo[key] = p[0][key];
     }
   });
 }

@@ -39,7 +39,8 @@
           @click="setFocus(`my:${planet.id}`)"
           class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1 nodrag cursor-default"
           :class="focus == `my:${planet.id}` ? ['bg-gray-300'] : [] ">
-          <Avatar :image="planet.avatar" :placeholder="planet.name" /> <span class="ml-2">{{ planet.name }}</span>
+          <Avatar :image="planet.avatar" :placeholder="planet.name" extraClass="text-xs" /> <span class="ml-2">{{
+          planet.name }}</span>
           <div class="flex-1"></div>
           <svg v-if="planet.busy" aria-hidden="true"
             class="mr-2 w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101"
@@ -62,7 +63,7 @@
           @click="setFocus(`following:${p.id}`)"
           class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == `following:${p.id}` ? ['bg-gray-300'] : [] ">
-          <Avatar :image="p.avatar" :placeholder="p.name" /> <span class="ml-2">{{ p.name }}</span>
+          <Avatar :image="p.avatar" :placeholder="p.name" extraClass="text-xs" /> <span class="ml-2">{{ p.name }}</span>
           <div class="flex-1"></div>
           <svg v-if="p.busy" aria-hidden="true"
             class="mr-2 w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101"
@@ -113,7 +114,7 @@ export default {
   },
   methods: {
     showMenu() {
-      api.send('createFollowMenu')
+      api.send('ipcCreateFollowMenu')
     },
     setFocus(value) {
       this.focus = value
@@ -126,10 +127,10 @@ export default {
       api.send('ipcFollowingCtxMenu', JSON.parse(JSON.stringify(p)))
     },
     triggleRootPanel() {
-      api.send('triggleRootPanel',)
+      api.send('ipcTriggleRootPanel',)
     },
     closeWin() {
-      api.send('closeWin')
+      api.send('ipcCloseWin')
     },
     minimalWin() {
       api.send('minimalWin')

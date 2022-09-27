@@ -23,8 +23,8 @@ class PlanetSidebarController {
       [evt.ipcCreateFollowMenu, (e) => this.createFollowMenu.popup(winFromEvt(e))],
       [evt.ipcFollowingCtxMenu, this.popupAndStoreP.bind(this, this.followingMenu)],
       [evt.ipcPlanetCtxMenu, this.popupAndStoreP.bind(this, this.planetMenu)],
-      [evt.ipcCreatePlanet, this.closeWinAndRun.bind(this, this.createPlanet)],
-      [evt.ipcFollowPlanet, this.closeWinAndRun.bind(this, this.followWithProgress)],
+      [evt.ipcCreatePlanet, this.closeWinAndRun.bind(this, this.createPlanet.bind(this))],
+      [evt.ipcFollowPlanet, this.closeWinAndRun.bind(this, this.followWithProgress.bind(this))],
     ])
   }
 
@@ -37,14 +37,14 @@ class PlanetSidebarController {
   async closeWinAndRun(func, e, p) {
     const win = BrowserWindow.fromWebContents(e.sender)
     try {
-      await func(p)
+      await func(p, win)
       win.close()
     } catch (ex) {
       log.error('error', ex)
     }
   }
 
-  async followWithProgress(p) {
+  async followWithProgress(p, win) {
     const progressFunc = (msg) => {
       win.webContents.executeJavaScript(`(()=>{
                     document.querySelector('.msg').innerText = '${msg}';

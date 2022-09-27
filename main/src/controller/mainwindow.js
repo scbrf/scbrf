@@ -15,7 +15,7 @@ class MainWindowController {
       [evt.evTrayOpen, this.activeOrCreateWindow],
     ])
     evt.bindIpcMainTable(this, [
-      [evt.ipcMinimalWin, (e) => BrowserWindow.fromWebContents(e.sender).close()],
+      [evt.ipcCloseWin, (e) => BrowserWindow.fromWebContents(e.sender).close()],
       [evt.ipcMinimalWin, (e) => BrowserWindow.fromWebContents(e.sender).minimize()],
       [evt.ipcTriggleRootPanel, this.triggerRootPabel],
     ])

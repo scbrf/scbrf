@@ -30,11 +30,11 @@ export default {
     },
     methods: {
         doclose() {
-            api.send('closeCreateDialog')
+            api.send('ipcCloseWin')
         },
         doFollow() {
             this.following = true
-            api.send('followPlanet', { follow: this.follow })
+            api.send('ipcFollowPlanet', { follow: this.follow })
         }
     }
 }

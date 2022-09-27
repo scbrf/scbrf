@@ -211,20 +211,24 @@ class FollowingPlanet {
   static async followENS(link, cb) {
     cb(`resolve ens to ipns ...`)
     const ipns = await wallet.resolveENS(link)
-    cb(`done, following ipns ...`)
-    const planet = await FollowingPlanet.followIPNSorDNSLink(ipns, cb)
-    planet.planetType = '.ens'
-    planet.link = link
-    if (!planet.avatar) {
-      let avatarUrl = await wallet.resolveAvatar(link)
-      if (avatarUrl) {
-        await planet.downloadAvatar(avatarUrl)
+    if (ipns) {
+      cb(`done, following ipns ...`)
+      const planet = await FollowingPlanet.followIPNSorDNSLink(ipns, cb)
+      planet.planetType = '.ens'
+      planet.link = link
+      if (!planet.avatar) {
+        let avatarUrl = await wallet.resolveAvatar(link)
+        if (avatarUrl) {
+          await planet.downloadAvatar(avatarUrl)
+        }
       }
+      await planet.save()
+      await Promise.all(planet.articles.map((a) => a.save()))
+      log.info('follow planet done!')
+      return planet
+    } else {
+      cb(`resolve ens fail!`)
     }
-    await planet.save()
-    await Promise.all(planet.articles.map((a) => a.save()))
-    log.info('follow planet done!')
-    return planet
   }
 
   async downloadAvatar(url) {

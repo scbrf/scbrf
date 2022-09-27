@@ -56,20 +56,49 @@ class WebviewTopbar {
     }
   }
 
-  planetInfo(event) {
-    if (!rt.middleSideBarFocusArticle) return
-    let planet = rt.middleSideBarFocusArticle.planet
-    const win = BrowserWindow.fromWebContents(event.sender)
-    dialog.showMessageBoxSync(win, {
-      message: planet.about,
-      detail: `update at ${require('moment')(planet.lastRetrieved || planet.lastPublished).format(
-        'MMM D, YYYY HH:mm:ss'
-      )}`,
-      type: 'info',
-      buttons: ['OK'],
-      title: planet.name,
-      icon: planet.avatar ? planet.avatarPath : null,
+  planetInfo() {
+    if (!rt.sidebarFocus) return
+    const planet = rt.sidebarFocus
+    const win = BrowserWindow.fromWebContents(this.view.webContents)
+    const planetInfoDialog = new BrowserWindow({
+      parent: win,
+      x: win.getPosition()[0] + win.getSize()[0] / 2 - 200,
+      y: win.getPosition()[1] + win.getSize()[1] / 2 - 150,
+      width: 400,
+      height: 300,
+      frame: false,
+      resizable: false,
+      webPreferences: {
+        webSecurity: false,
+        preload: require('path').join(__dirname, '..', '..', 'preload.js'),
+      },
     })
+    // createPlanetDialog.webContents.openDevTools({ mode: 'undocked' })
+    planetInfoDialog.loadURL(`${require('../utils/websrv').WebRoot}/dialog/planet/info`)
+    planetInfoDialog.webContents.on('did-finish-load', () => {
+      planetInfoDialog.webContents.send('planetInfo', {
+        about: require('marked').parse(planet.about),
+        updateat: planet.lastRetrieved || planet.lastPublished,
+        title: planet.name,
+        icon: planet.avatar ? planet.avatarPath : null,
+      })
+      planetInfoDialog.show()
+    })
+    // planetInfoDialog.webContents.openDevTools({ mode: 'undocked' })
+
+    // if (!rt.middleSideBarFocusArticle) return
+    // let planet = rt.middleSideBarFocusArticle.planet
+    // const win = BrowserWindow.fromWebContents(event.sender)
+    // dialog.showMessageBoxSync(win, {
+    //   message: planet.about,
+    //   detail: `update at ${require('moment')(planet.lastRetrieved || planet.lastPublished).format(
+    //     'MMM D, YYYY HH:mm:ss'
+    //   )}`,
+    //   type: 'info',
+    //   buttons: ['OK'],
+    //   title: planet.name,
+    //   icon: planet.avatar ? planet.avatarPath : null,
+    // })
   }
 
   async newArticle() {
