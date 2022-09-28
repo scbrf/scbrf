@@ -36,7 +36,7 @@ class EditorTopbar {
         filters: [
           {
             name: 'Movies',
-            extensions: ['mkv', 'avi', 'mp4'],
+            extensions: ['mkv', 'avi', 'mp4', 'm4v'],
           },
         ],
       })
