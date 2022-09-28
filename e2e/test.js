@@ -154,6 +154,32 @@ class Test {
     }
   }
 
+  async markStarred() {
+    await this.switchTo("/root");
+    await this.expectElemNotExists(By.css("e2e-starred"));
+
+    await this.switchTo("/articles");
+    const post_2 = await driver.findElement(By.css(".e2e-post-1"));
+    await driver.actions().contextClick(post_2).perform();
+    await this.clickCtxMenu(2);
+
+    await this.switchTo("/root");
+    let starred = await driver.findElement(By.css(".e2e-starred"));
+    const value = parseInt(await starred.getText());
+    if (value !== 1) {
+      throw new Error(`should be  remark as starred  ${value}`);
+    }
+
+    //reverse
+    await this.switchTo("/articles");
+    const post2 = await driver.findElement(By.css(".e2e-post-1"));
+    await driver.actions().contextClick(post2).perform();
+    await this.clickCtxMenu(2);
+
+    await this.switchTo("/root");
+    await this.expectElemNotExists(By.css("e2e-starred"));
+  }
+
   async markRead() {
     await this.switchTo("/root");
     let unread = await driver.findElement(By.css(".e2e-unread"));
@@ -229,6 +255,7 @@ class Test {
   async followLivid() {
     await this.followBasic();
     await this.markRead();
+    await this.markStarred();
     await this.unfollow();
   }
 
