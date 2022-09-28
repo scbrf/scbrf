@@ -17,17 +17,17 @@
         <div @click="setFocus('today')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'today' ? ['bg-gray-300'] : [] ">
           <SunIcon class="h-6 w-6 text-orange-500 mr-1" /> <span class="flex-1">Today</span>
-          <span v-if="numbers.today"> {{ numbers.today }} </span>
+          <span v-if="numbers.today" class="e2e-today"> {{ numbers.today }} </span>
         </div>
         <div @click="setFocus('unread')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'unread' ? ['bg-gray-300'] : [] ">
           <CheckBadgeIcon class="h-6 w-6 text-blue-500 mr-1" /> <span class="flex-1">Unread</span>
-          <span v-if="numbers.read"> {{ numbers.read }} </span>
+          <span class="e2e-unread" v-if="numbers.read"> {{ numbers.read }} </span>
         </div>
         <div @click="setFocus('starred')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'starred' ? ['bg-gray-300'] : [] ">
           <StarIcon class="h-6 w-6 text-yellow-500 mr-1" /> <span class="flex-1">Starred</span>
-          <span v-if="numbers.starred"> {{ numbers.starred }} </span>
+          <span v-if="numbers.starred" class="e2e-starred"> {{ numbers.starred }} </span>
         </div>
       </div>
     </div>
@@ -35,10 +35,10 @@
     <div>
       <div class="text-xs text-gray-400 font-sans font-bold">My Planets</div>
       <div class="p-1">
-        <div v-for="planet in planets" @contextmenu="planetCtxMenu(planet)" :key="planet.id"
+        <div v-for="(planet,idx) in planets" :key="planet.id" @contextmenu="planetCtxMenu(planet)"
           @click="setFocus(`my:${planet.id}`)"
           class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1 nodrag cursor-default"
-          :class="focus == `my:${planet.id}` ? ['bg-gray-300'] : [] ">
+          :class="focus == `my:${planet.id}` ? ['bg-gray-300', `e2e-mp-${idx}`] : [`e2e-mp-${idx}`] ">
           <Avatar :image="planet.avatar" :placeholder="planet.name" extraClass="text-xs" /> <span class="ml-2">{{
           planet.name }}</span>
           <div class="flex-1"></div>
@@ -59,10 +59,10 @@
     <div class="flex-1">
       <div class="text-xs text-gray-400 font-sans font-bold">Following Planets</div>
       <div class="p-1">
-        <div @contextmenu="followingCtxMenu(p)" v-for="p in following" :key="p.id"
+        <div v-for="(p, idx) in following" :key="p.id" @contextmenu="followingCtxMenu(p)"
           @click="setFocus(`following:${p.id}`)"
           class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
-          :class="focus == `following:${p.id}` ? ['bg-gray-300'] : [] ">
+          :class="focus == `following:${p.id}` ? ['bg-gray-300', `e2e-fp-${idx}`] : [`e2e-fp-${idx}`] ">
           <Avatar :image="p.avatar" :placeholder="p.name" extraClass="text-xs" /> <span class="ml-2">{{ p.name }}</span>
           <div class="flex-1"></div>
           <svg v-if="p.busy" aria-hidden="true"

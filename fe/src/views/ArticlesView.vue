@@ -13,7 +13,7 @@
                 class="mb-1 rounded px-4 py-1 nodrag flex"
                 :class="focus === a.id ? ['bg-blue-500', `e2e-post-${idx}`] : [`e2e-post-${idx}`]">
                 <StarIcon v-if="a.starred === true" class="w-4 h-4 mr-2 mt-2 text-yellow-400"></StarIcon>
-                <div v-else-if="a.read === false" class=" w-2 h-2 mr-4 mt-2 rounded-full bg-green-500">
+                <div v-else-if="a.read === false" class="w-2 h-2 mr-4 mt-2 rounded-full bg-green-500">
                 </div>
                 <div v-else class="w-4 h-4 mr-2"></div>
                 <div style="text-align: justify;" :style="{maxWidth: isWin ? '200px' : '228px'}">

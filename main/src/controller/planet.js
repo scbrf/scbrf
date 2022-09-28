@@ -101,6 +101,8 @@ class PlanetSidebarController {
     const idx = dialog.showMessageBoxSync({
       message: `Are you sure you want to unfollow ${this.planetCtxMenuTargetPlanet.name} ?`,
       buttons: ['Cancel', 'Unfollow'],
+      defaultId: 1,
+      cancelId: 0,
     })
     if (idx) {
       const planet = rt.following.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)
@@ -153,7 +155,7 @@ class PlanetSidebarController {
     const { follow } = param
     this.cancelFollow = false
     const planet = await FollowingPlanet.follow(follow, progresscb)
-    if (!this.cancelFollow) {
+    if (planet && !this.cancelFollow) {
       rt.following = [planet, ...rt.following]
     }
   }
@@ -255,6 +257,7 @@ class PlanetSidebarController {
             }
           })
           rt.following = [...rt.following]
+          evt.emit(evt.evRuntimeMiddleSidebarContentChange)
         },
       },
       {

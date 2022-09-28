@@ -118,14 +118,13 @@ class Test {
           return;
         }
       } catch (ex) {
-        console.log("winclose meet error, skip", ex);
         await this.sleep(1);
       }
     }
     throw new Error(`wait win ${name} timeout`);
   }
 
-  async followLivid() {
+  async followBasic() {
     await this.switchTo("/root");
     const addIcon = await driver.findElement(
       locateWith(By.css(".h-4")).toRightOf(By.css(".bg-green-500"))
@@ -153,6 +152,79 @@ class Test {
     if (url.endsWith("/loading")) {
       throw new Error("webview should load livid's first post");
     }
+  }
+
+  async markRead() {
+    await this.switchTo("/root");
+    let unread = await driver.findElement(By.css(".e2e-unread"));
+    let value1 = parseInt(await unread.getText());
+
+    await this.switchTo("/articles");
+    const post2 = await driver.findElement(By.css(".e2e-post-1"));
+    await post2.click();
+
+    await this.switchTo("/root");
+    unread = await driver.findElement(By.css(".e2e-unread"));
+    const value2 = parseInt(await unread.getText());
+    if (value2 !== value1 - 1) {
+      throw new Error(`should be auto mark readed ${value2} vs ${value1}`);
+    }
+
+    await this.switchTo("/articles");
+    const post_2 = await driver.findElement(By.css(".e2e-post-1"));
+    await driver.actions().contextClick(post_2).perform();
+    await this.clickCtxMenu(1);
+
+    await this.switchTo("/root");
+    unread = await driver.findElement(By.css(".e2e-unread"));
+    const value3 = parseInt(await unread.getText());
+    if (value3 !== value1) {
+      throw new Error(`should be  remark as unread  ${value3} vs ${value1}`);
+    }
+
+    await this.switchTo("/root");
+    const planet = await driver.findElement(By.css(".e2e-fp-0"));
+    await driver.actions().contextClick(planet).perform();
+    await this.clickCtxMenu(3);
+    unread = await driver.executeScript(
+      "return document.querySelector('.e2e-unread')"
+    );
+    if (unread) {
+      throw new Error("should be dispared when all readed");
+    }
+
+    await this.switchTo("/articles");
+    await this.sleep(0.3);
+    const greenPoint = await this.elemExists(By.css(".bg-green-500"));
+    if (greenPoint) {
+      throw new Error("articles should be all mark readed!");
+    }
+  }
+
+  async elemExists(el) {
+    try {
+      return await driver.findElement(el);
+    } catch (ex) {
+      return false;
+    }
+  }
+
+  async unfollow() {
+    await this.switchTo("/root");
+    let planet = await driver.findElement(By.css(".e2e-fp-0"));
+    await driver.actions().contextClick(planet).perform();
+    await this.clickCtxMenu(4);
+    await this.acceptAlert();
+    planet = await this.elemExists(By.css(".e2e-fp-0"));
+    if (planet) {
+      throw new Error("planet should be unfollowed");
+    }
+  }
+
+  async followLivid() {
+    await this.followBasic();
+    await this.markRead();
+    await this.unfollow();
   }
 
   async createPlanet() {
@@ -324,6 +396,27 @@ class Test {
     await this.e2eClose("/editor/topbar", 10);
   }
 
+  async acceptAlert() {
+    robot.keyTap("enter");
+  }
+
+  async testDeleteArticle() {
+    await this.switchTo("/articles");
+    await this.sleep(0.3);
+    const firstpost = await driver.findElement(By.css(".e2e-post-0"));
+    await driver.actions().contextClick(firstpost).perform();
+    await this.clickCtxMenu(2);
+    await this.sleep(0.3);
+    await this.acceptAlert();
+    await this.sleep(1);
+    const testpost = await driver.executeScript(
+      'return document.querySelector(".e2e-post-0")'
+    );
+    if (testpost) {
+      throw new Error("post should has been deleted!");
+    }
+  }
+
   async testArticleEditor() {
     await this.testEditorBasic();
     await this.testEditorPhotoAttach();
@@ -332,13 +425,35 @@ class Test {
     await this.testPublish();
     await this.testPlanetDraftKeep();
     await this.testEditArticle();
+    await this.testDeleteArticle();
+  }
+
+  async testSetAvatar() {
+    await this.switchTo("/topbar");
+    await this.sleep(0.3);
+    const newArticle = await driver.findElement(By.css(".e2e-info"));
+    await newArticle.click();
+    await this.sleep(0.3);
+    await this.switchTo("/planet/info");
+    await this.sleep(0.3);
+    await driver.executeScript(
+      'api.send("ipcSetAvatar", ["/Users/wwq/Pictures/Img0009.JPG"])'
+    );
+    await this.sleep(0.5);
+    await driver.findElement(By.css("img")); //just make sure it is there
+    const ok = await driver.findElement(By.css("button"));
+    await ok.click();
+    await this.winClose("/planet/info", 5);
+    await this.switchTo("/root");
+    await this.sleep(0.3);
+    await driver.findElement(By.css("img")); //just make sure it is there
   }
 
   async start() {
     await this.waitIpfs();
-    // await this.followLivid();
-    await this.createPlanet();
-    await this.sleep();
+    // await this.createPlanet();
+    // await this.testSetAvatar();
+    await this.followLivid();
   }
 }
 

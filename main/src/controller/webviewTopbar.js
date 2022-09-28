@@ -93,18 +93,20 @@ class WebviewTopbar {
     }
   }
 
-  async setPlanetAvatar(event) {
+  async setPlanetAvatar(event, pathes) {
     const win = BrowserWindow.fromWebContents(event.sender)
-    const pathes = dialog.showOpenDialogSync(win, {
-      message: 'attach a photo',
-      filters: [
-        {
-          name: 'Images',
-          extensions: ['jpeg', 'jpg', 'png', 'gif'],
-        },
-      ],
-      properties: ['openFile'],
-    })
+    if (!pathes) {
+      pathes = dialog.showOpenDialogSync(win, {
+        message: 'attach a photo',
+        filters: [
+          {
+            name: 'Images',
+            extensions: ['jpeg', 'jpg', 'png', 'gif'],
+          },
+        ],
+        properties: ['openFile'],
+      })
+    }
     if (pathes && pathes.length > 0) {
       const image = await Jimp.read(pathes[0])
       log.info('need store avatar at:', rt.sidebarFocus.avatarPath)
@@ -180,6 +182,8 @@ class WebviewTopbar {
     const idx = dialog.showMessageBoxSync({
       message: `Are you sure you want to delete ${this.ctxArticle.title}, this could not be undone ?`,
       buttons: ['Cancel', 'Delete'],
+      defaultId: 1,
+      cancelId: 0,
     })
     if (idx) {
       let planet = rt.planets.filter((p) => p.id === this.ctxArticle.planet.id)[0]
