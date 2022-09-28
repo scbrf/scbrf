@@ -161,7 +161,6 @@ class PlanetSidebarController {
     createPlanetDialog.loadURL(`${require('../utils/websrv').WebRoot}/dialog/planet/create`)
     createPlanetDialog.webContents.on('did-finish-load', () => {
       if (rt.planetEditing) {
-        console.log(rt.planetEditing)
         createPlanetDialog.webContents.send('create-edit-planet', rt.planetEditing.json())
       }
     })

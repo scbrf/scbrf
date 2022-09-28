@@ -46,6 +46,7 @@ class Draft {
       draft = new Draft(article.planet, article, article)
     }
 
+    //对于图片附件，认为是小附件，直接复制以避免冲突
     for (let attachment of draft.attachments) {
       const attachmentPath = require('path').join(draft.attachmentsPath, attachment.name)
       if (!require('fs').existsSync(attachmentPath)) {
@@ -55,6 +56,9 @@ class Draft {
     draft.attachments.forEach((a) => {
       a.url = 'file://' + require('path').join(draft.attachmentsPath, a.name)
     })
+
+
+    //对于大文件，直接引用，提高效率
     if (draft.audioFilename) {
       if (!require('fs').existsSync(draft.audioFilename)) {
         draft.audioFilename = require('path').join(article.publicBase, article.audioFilename)
@@ -185,7 +189,7 @@ class Draft {
     } else if (targetName === require('path').basename(`${this.videoFilename}`)) {
       this.videoFilename = null
     } else {
-      this.attachments = this.attachments.filter((a) => a.name !== name)
+      this.attachments = this.attachments.filter((a) => a.name !== targetName)
     }
     this.save()
   }
@@ -235,7 +239,39 @@ class Draft {
     this.save()
   }
 
+  async publishAttachmentsWin32(article) {
+    if (!require('fs').existsSync(article.publicBase)){
+      require('fs').mkdirSync(article.publicBase, { recursive: true })
+    }
+
+    for (let item of article.attachments || []) {
+      require('fs').cpSync(
+        require('path').join(this.attachmentsPath, item.name),
+        require('path').join(article.publicBase, item.name)
+      )
+    }
+    if (this.audioFilename && !this.audioFilename.startsWith(article.publicBase)) {
+      require('fs').cpSync(this.audioFilename,
+        require('path').join(article.publicBase, require('path').basename(this.audioFilename))
+      )
+    }
+    if (this.videoFilename && !this.videoFilename.startsWith(article.publicBase)) {
+      require('fs').cpSync(this.videoFilename,
+        require('path').join(article.publicBase, require('path').basename(this.videoFilename))
+      )
+    }
+  }
+
   async publishAttachments(article) {
+    //由于windows系统对于重命名或者删除操作过于严格的限制，这里直接进行拷贝，不做复杂判断
+    //可能造成的后果就是Public目录里可能遗留一些没有用到的文件，这个问题可以通过后期在适当时机整理public目录
+    //进行优化
+
+    if (process.platform === 'win32') {
+      this.publishAttachmentsWin32(article)
+      return
+    }
+
     if (require('fs').existsSync(article.publicBase)) {
       //首先将用到的Public目录的文件拷贝过来
       if (this.audioFilename && this.audioFilename.startsWith(article.publicBase)) {

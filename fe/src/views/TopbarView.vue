@@ -37,7 +37,7 @@ export default {
             return this.article.attachments && this.article.attachments.length > 0
         },
         isMyPlanet() {
-            return this.planet && (!this.planet.planetType)
+            return this.planet && this.planet.name && (!this.planet.planetType)
         }
     },
     methods: {

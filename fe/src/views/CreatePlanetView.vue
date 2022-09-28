@@ -22,7 +22,7 @@
         <div class="flex flex-row p-2">
             <button class="btn btn-sm btn-ghost" @click="doclose">Close</button>
             <div class="flex-1"></div>
-            <button class="btn btn-sm btn-ghost" @click="doCreate" :disabled="!validate">Create</button>
+            <button class="btn btn-sm btn-ghost" @click="doCreate" :disabled="!validate">{{ id?'Update' :'Create'}}</button>
         </div>
     </div>
 </template>

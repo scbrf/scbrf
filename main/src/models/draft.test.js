@@ -113,8 +113,13 @@ test('remove juke files', async () => {
   fs.rmSync = jest.fn()
   await draft.removeAttachment('b.png')
   await draft.publish()
-  expect(targets.length).toBe(1)
-  expect(fs.rmSync).toHaveBeenCalledTimes(2) //rm public and rm draft
+  if (process.platform === 'win32') {
+    expect(targets.length).toBe(0)
+    expect(fs.rmSync).toHaveBeenCalledTimes(1) //rm draft
+  } else{
+    expect(targets.length).toBe(1)
+    expect(fs.rmSync).toHaveBeenCalledTimes(2) //rm public and rm draft
+  }
 })
 
 test('load old draft on create new', async () => {})
