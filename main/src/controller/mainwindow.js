@@ -1,4 +1,4 @@
-const { BrowserWindow } = require('electron')
+const { BrowserWindow, app } = require('electron')
 const log = require('../utils/log')('mainwindow')
 const evt = require('../utils/events')
 const planet = require('./planet')
@@ -18,6 +18,7 @@ class MainWindowController {
       [evt.ipcCloseWin, (e) => BrowserWindow.fromWebContents(e.sender).close()],
       [evt.ipcMinimalWin, (e) => BrowserWindow.fromWebContents(e.sender).minimize()],
       [evt.ipcTriggleRootPanel, this.triggerRootPabel],
+      [evt.ipcAppQuit, () => app.quit()],
     ])
   }
   createWindow() {

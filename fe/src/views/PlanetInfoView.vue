@@ -5,17 +5,17 @@
             <div class="flex-1"> </div>
             <XCircleIcon @click="close" class="w-5 h-5"> </XCircleIcon>
         </div>
-        <div class="flex justify-center">
+        <div class="flex justify-center mt-2">
             <Avatar @click="setAvatar" :image="fixPath(icon)" extraClass="w-16 h-16 text-3xl" :placeholder="title" />
         </div>
-        <div class="flex justify-center text-xl mt-2 font-bold">
+        <div class="flex justify-center text-xl my-2 font-bold">
             {{title}}
         </div>
         <div class="flex justify-center text-sm font-black leading-6 mt-2 text-justify" v-html="about">
         </div>
         <div class="flex-1"></div>
         <div class="flex justify-center">
-            <button @click="close">OK</button>
+            <button class="btn btn-ghost btn-sm" @click="close">OK</button>
         </div>
     </div>
 </template>

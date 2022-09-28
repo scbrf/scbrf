@@ -53,6 +53,8 @@ class EventCenter {
   ipcSetAvatar //设置Planet的头像
   ipcDownloadMenu //显示下载菜单
 
+  ipcAppQuit //app 安全退出
+
   constructor() {
     this.bus = EvtBus()
     this.eventNameInit()

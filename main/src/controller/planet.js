@@ -81,6 +81,8 @@ class PlanetSidebarController {
     const idx = dialog.showMessageBoxSync({
       message: `Are you sure you want to delete ${this.planetCtxMenuTargetPlanet.name}, this could not be undone ?`,
       buttons: ['Cancel', 'Delete'],
+      defaultId: 1,
+      cancelId: 0,
     })
     if (idx) {
       const planet = rt.planets.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)

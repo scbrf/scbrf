@@ -6,7 +6,8 @@ const driver = new webdriver.Builder()
   .withCapabilities({
     build: "MultipleWindowsInSelenium",
     "goog:chromeOptions": {
-      binary: "/Applications/scarborough.app/Contents/MacOS/scarborough",
+      binary:
+        "/Users/wwq/code/self/scbrf/main/out/scarborough-darwin-x64/scarborough.app/Contents/MacOS/scarborough",
     },
   })
   .forBrowser("chrome")
@@ -281,7 +282,6 @@ class Test {
     await this.sleep(0.3);
     const newPlanet = await driver.findElement(By.css("span.ml-2"));
     await newPlanet.click();
-    await this.testArticleEditor();
   }
 
   async testEditorBasic() {
@@ -481,12 +481,63 @@ class Test {
     await driver.findElement(By.css("img")); //just make sure it is there
   }
 
+  async editPlanet() {
+    await this.switchTo("/root");
+    await this.sleep(0.3);
+    const planet = await driver.findElement(By.css(".e2e-mp-0"));
+    await driver.actions().contextClick(planet).perform();
+    await this.clickCtxMenu(3);
+
+    await this.switchTo("/planet/create");
+    const titleDom = await driver.findElement(By.css(".text-center"));
+    const title = await titleDom.getText();
+    if (!title.startsWith("Edit")) {
+      throw new Error("dialog should be in edit mode");
+    }
+    const input = await driver.findElement(By.css("input"));
+    await input.sendKeys("new Title");
+    const cnt = await driver.findElement(By.css("textarea"));
+    await cnt.sendKeys("new cnt");
+    const btn = await driver.findElement(
+      locateWith(By.css("button")).toRightOf(By.css("button"))
+    );
+    await btn.click();
+    await this.winClose("/planet/create", 10);
+
+    await this.switchTo("/root");
+    await this.sleep(0.3);
+    const planet0 = await driver.findElement(By.css(".e2e-mp-0"));
+    const text = await planet0.getText();
+    if (!text.indexOf("new Title")) {
+      throw new Error("should has new title!");
+    }
+  }
+
+  async deletePlanet() {
+    await this.switchTo("/root");
+    await this.sleep(0.3);
+    const planet = await driver.findElement(By.css(".e2e-mp-0"));
+    await driver.actions().contextClick(planet).perform();
+    await this.clickCtxMenu(4);
+    await this.sleep(0.5);
+    await this.acceptAlert();
+    await this.expectElemNotExists(By.css(".e2e-mp-0"));
+  }
+
   async start() {
     await this.waitIpfs();
-    // await this.createPlanet();
-    // await this.testSetAvatar();
-    await this.followLivid();
+    await this.createPlanet();
+    await this.editPlanet();
+    await this.testArticleEditor();
+    await this.testSetAvatar();
+    await this.deletePlanet();
+
+    // await this.followLivid();
   }
+}
+
+async function safeQuit() {
+  await driver.executeScript('api.send("ipcAppQuit")');
 }
 
 new Test()
@@ -498,6 +549,8 @@ new Test()
     console.log("run e2e fail", r);
   })
   .then(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await safeQuit();
     await new Promise((resolve) => setTimeout(resolve, 5000));
     driver.quit();
   });
