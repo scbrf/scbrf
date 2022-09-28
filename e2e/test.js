@@ -6,8 +6,17 @@ const driver = new webdriver.Builder()
   .withCapabilities({
     build: "MultipleWindowsInSelenium",
     "goog:chromeOptions": {
-      binary:
-        "/Users/wwq/code/self/scbrf/main/out/scarborough-darwin-x64/scarborough.app/Contents/MacOS/scarborough",
+      binary: require("path").join(
+        __dirname,
+        "..",
+        "main",
+        "out",
+        "scarborough-darwin-x64",
+        "scarborough.app",
+        "Contents",
+        "MacOS",
+        "scarborough"
+      ),
     },
   })
   .forBrowser("chrome")
@@ -126,6 +135,7 @@ class Test {
   }
 
   async followBasic() {
+    const webview = await this.switchTo("/empty");
     await this.switchTo("/root");
     const addIcon = await driver.findElement(
       locateWith(By.css(".h-4")).toRightOf(By.css(".bg-green-500"))
@@ -143,14 +153,13 @@ class Test {
     await followBtn.click();
     await this.winClose("/planet/follow", 300);
 
-    const webview = await this.switchTo("/loading");
     await this.switchTo("/root");
     const livid = await driver.findElement(By.css("span.ml-2"));
     await livid.click();
 
     await driver.switchTo().window(webview);
     const url = await driver.getCurrentUrl();
-    if (url.endsWith("/loading")) {
+    if (url.endsWith("/empty")) {
       throw new Error("webview should load livid's first post");
     }
   }
@@ -307,7 +316,7 @@ class Test {
   async testEditorPhotoAttach() {
     await this.switchTo("/editor/topbar");
     await driver.findElement(By.css(".e2e-photo")); //just make sure the btn is there
-    const photo = `/Users/wwq/Downloads/dwebservices-api-key.png`;
+    const photo = require("path").join(__dirname, "attachments", "image.png");
     await driver.executeScript(`api.send('ipcDraftAddPhoto', ['${photo}'])`);
 
     await this.switchTo("/editor/main");
@@ -328,7 +337,7 @@ class Test {
   async testEditorAudioAttach() {
     await this.switchTo("/editor/topbar");
     await driver.findElement(By.css(".e2e-audio")); //just make sure the btn is there
-    const audio = `/Users/wwq/Downloads/第41期 我在传统纸媒当记者三十年.mp3`;
+    const audio = require("path").join(__dirname, "attachments", "audio.mp3");
     await driver.executeScript(`api.send('ipcDraftAddAudio', ['${audio}'])`);
 
     await this.switchTo("/editor/main");
@@ -338,7 +347,7 @@ class Test {
   async testEditorVideoAttach() {
     await this.switchTo("/editor/topbar");
     await driver.findElement(By.css(".e2e-video")); //just make sure the btn is there
-    const video = `/Users/wwq/Downloads/浪费.MP4`;
+    const video = require("path").join(__dirname, "attachments", "video.mp4");
     await driver.executeScript(`api.send('ipcDraftAddVideo', ['${video}'])`);
 
     await this.switchTo("/editor/main");
@@ -468,9 +477,8 @@ class Test {
     await this.sleep(0.3);
     await this.switchTo("/planet/info");
     await this.sleep(0.3);
-    await driver.executeScript(
-      'api.send("ipcSetAvatar", ["/Users/wwq/Pictures/Img0009.JPG"])'
-    );
+    const avatar = require("path").join(__dirname, "attachments", "avatar.jpg");
+    await driver.executeScript(`api.send("ipcSetAvatar", ["${avatar}"])`);
     await this.sleep(0.5);
     await driver.findElement(By.css("img")); //just make sure it is there
     const ok = await driver.findElement(By.css("button"));
@@ -531,8 +539,7 @@ class Test {
     await this.testArticleEditor();
     await this.testSetAvatar();
     await this.deletePlanet();
-
-    // await this.followLivid();
+    await this.followLivid();
   }
 }
 
