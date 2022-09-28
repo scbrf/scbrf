@@ -209,16 +209,21 @@ class Test {
     }
   }
 
+  async expectElemNotExists(el) {
+    const ret = await this.elemExists(el);
+    if (ret) {
+      throw new Error("expect el not exists fail!");
+    }
+  }
+
   async unfollow() {
     await this.switchTo("/root");
     let planet = await driver.findElement(By.css(".e2e-fp-0"));
     await driver.actions().contextClick(planet).perform();
     await this.clickCtxMenu(4);
     await this.acceptAlert();
-    planet = await this.elemExists(By.css(".e2e-fp-0"));
-    if (planet) {
-      throw new Error("planet should be unfollowed");
-    }
+    await this.expectElemNotExists(By.css(".e2e-fp-0"));
+    await this.expectElemNotExists(By.css(".e2e-post-0"));
   }
 
   async followLivid() {

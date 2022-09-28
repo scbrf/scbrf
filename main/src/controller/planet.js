@@ -106,11 +106,19 @@ class PlanetSidebarController {
     })
     if (idx) {
       const planet = rt.following.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)
-      rt.following = rt.following.filter((p) => p.id !== this.planetCtxMenuTargetPlanet.id)
       if (planet.length > 0) {
         await planet[0].delete()
       }
-      rt.following = [...rt.following]
+      rt.set({
+        following: rt.following.filter((p) => p.id !== this.planetCtxMenuTargetPlanet.id),
+        middleSideBarArticles: rt.middleSideBarArticles.filter(
+          (a) => a.planet.id !== this.planetCtxMenuTargetPlanet.id
+        ),
+        middleSideBarFocusArticle:
+          rt.middleSideBarFocusArticle.planet.id === this.planetCtxMenuTargetPlanet.id
+            ? null
+            : rt.middleSideBarFocusArticle,
+      })
     }
   }
   showFollowPlanetDialog() {
