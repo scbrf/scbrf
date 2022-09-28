@@ -79,13 +79,15 @@ class Planet {
    */
   publicRender() {
     const pageAboutHTML = marked.parse(this.about)
+    log.info('during public render, about info is', { about: this.about, html: pageAboutHTML })
     const template = 'index.html'
     const html = require('../utils/render')
       .getEnv(this)
       .render(template, {
         assets_prefix: './',
         page_title: this.name,
-        page_description: this.about,
+        has_avatar: !!this.avatar,
+        page_description: pageAboutHTML,
         page_description_html: pageAboutHTML,
         articles: this.articles.map((a) => ({
           ...a.json(),
@@ -96,6 +98,7 @@ class Planet {
         build_timestamp: new Date().getTime(),
       })
     require('fs').writeFileSync(this.publicIndexPath, html)
+    log.info('public index updated', this.publicIndexPath)
   }
 
   static async load(id) {
@@ -104,6 +107,9 @@ class Planet {
       const json = JSON.parse(require('fs').readFileSync(planetPath).toString())
       log.info(`load planet from id ${id} got`, json)
       const planet = new Planet(json)
+      if (require('fs').existsSync(planet.avatarPath)) {
+        planet.avatar = 'avatar.png'
+      }
       await planet.loadDrafts()
       return planet
     } else {
@@ -195,6 +201,10 @@ class Planet {
         })),
       })
     )
+    if (require('fs').existsSync(this.avatarPath)) {
+      log.info('save avatar to public dir ...', this.avatarPath)
+      require('fs').cpSync(this.avatarPath, this.publicAvatarPath)
+    }
   }
   async publish() {
     if (this.publishing) {
