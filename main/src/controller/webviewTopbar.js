@@ -272,19 +272,19 @@ class WebviewTopbar {
     if (!this.view) return
     let article = rt.middleSideBarFocusArticle
     if (article) {
+      let attachments = article.attachments.map((a) => a.name || a)
+      if (article.audioFilename) {
+        attachments.push(require('path').basename(article.audioFilename))
+      }
+      if (article.videoFilename) {
+        attachments.push(require('path').basename(article.videoFilename))
+      }
+      attachments = Array.from(new Set(attachments))
       article = {
-        ...rt.middleSideBarFocusArticle.json(),
-        url: rt.middleSideBarFocusArticle.url,
-        planet: rt.middleSideBarFocusArticle.planet.json(),
-        attachments: [
-          ...rt.middleSideBarFocusArticle.attachments,
-          rt.middleSideBarFocusArticle.audioFilename
-            ? { name: require('path').basename(rt.middleSideBarFocusArticle.audioFilename), type: 'audio' }
-            : null,
-          rt.middleSideBarFocusArticle.videoFilename
-            ? { name: require('path').basename(rt.middleSideBarFocusArticle.videoFilename), type: 'video' }
-            : null,
-        ].filter((a) => a),
+        ...article.json(),
+        url: article.url,
+        planet: article.json(),
+        attachments,
       }
     } else {
       article = {}
