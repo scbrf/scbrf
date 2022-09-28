@@ -6,6 +6,7 @@
     "license": "MIT",
     "main": "main.js",
     "scripts": {
+        "predebug": "cd ../fe && yarn build",
         "debug": "electron-forge start",
         "start": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='..' electron-forge start",
         "start:watch": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='..' nodemon --watch main.js --watch ./src --exec 'yarn start'",

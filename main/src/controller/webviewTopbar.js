@@ -249,19 +249,45 @@ class WebviewTopbar {
     ArticleEditorDialog.addBrowserView(editorWebview.view)
     editorWebview.init()
 
+    //just for e2e test
+    ArticleEditorDialog.on('show', () => {
+      editorTopbar.view.webContents.executeJavaScript(`window.e2e_show = true`)
+      editorMain.view.webContents.executeJavaScript(`window.e2e_show = true`)
+      editorWebview.view.webContents.executeJavaScript(`window.e2e_show = true`)
+    })
+    //just for e2e test
+    ArticleEditorDialog.on('closed', () => {
+      editorTopbar.view.webContents.executeJavaScript(`window.e2e_show = false`)
+      editorMain.view.webContents.executeJavaScript(`window.e2e_show = false`)
+      editorWebview.view.webContents.executeJavaScript(`window.e2e_show = false`)
+    })
+
     ArticleEditorDialog.show()
   }
   updateUI() {
     if (!this.view) return
+    let article = rt.middleSideBarFocusArticle
+    if (article) {
+      article = {
+        ...rt.middleSideBarFocusArticle.json(),
+        url: rt.middleSideBarFocusArticle.url,
+        planet: rt.middleSideBarFocusArticle.planet.json(),
+        attachments: [
+          ...rt.middleSideBarFocusArticle.attachments,
+          rt.middleSideBarFocusArticle.audioFilename
+            ? { name: require('path').basename(rt.middleSideBarFocusArticle.audioFilename), type: 'audio' }
+            : null,
+          rt.middleSideBarFocusArticle.videoFilename
+            ? { name: require('path').basename(rt.middleSideBarFocusArticle.videoFilename), type: 'video' }
+            : null,
+        ].filter((a) => a),
+      }
+    } else {
+      article = {}
+    }
     this.view.webContents.send('topbar', {
       planet: rt.sidebarFocus && rt.sidebarFocus.json ? rt.sidebarFocus.json() : {},
-      article: rt.middleSideBarFocusArticle
-        ? {
-            ...rt.middleSideBarFocusArticle.json(),
-            url: rt.middleSideBarFocusArticle.url,
-            planet: rt.middleSideBarFocusArticle.planet.json(),
-          }
-        : {},
+      article,
     })
   }
 }

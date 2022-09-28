@@ -29,32 +29,36 @@ class EditorTopbar {
     this.updateUI()
   }
 
-  async addVideo() {
-    const path = dialog.showOpenDialogSync(BrowserWindow.fromBrowserView(this.view), {
-      message: 'attach a video',
-      filters: [
-        {
-          name: 'Movies',
-          extensions: ['mkv', 'avi', 'mp4'],
-        },
-      ],
-    })
+  async addVideo(event, path) {
+    if (!path) {
+      path = dialog.showOpenDialogSync(BrowserWindow.fromWebContents(event.sender), {
+        message: 'attach a video',
+        filters: [
+          {
+            name: 'Movies',
+            extensions: ['mkv', 'avi', 'mp4'],
+          },
+        ],
+      })
+    }
     if (path && path.length > 0) {
       this.view.webContents.send('updateVideo', 'file://' + path[0])
       await rt.draft.attachVideo(path[0])
     }
   }
 
-  async addAudio() {
-    const path = dialog.showOpenDialogSync(BrowserWindow.fromBrowserView(this.view), {
-      message: 'attach a audio',
-      filters: [
-        {
-          name: 'Music',
-          extensions: ['mp3', 'wav', 'm4a'],
-        },
-      ],
-    })
+  async addAudio(event, path) {
+    if (!path) {
+      path = dialog.showOpenDialogSync(BrowserWindow.fromWebContents(event.sender), {
+        message: 'attach a audio',
+        filters: [
+          {
+            name: 'Music',
+            extensions: ['mp3', 'wav', 'm4a'],
+          },
+        ],
+      })
+    }
     if (path && path.length > 0) {
       this.view.webContents.send('updateAudio', 'file://' + path[0])
       await rt.draft.attachAudio(path[0])

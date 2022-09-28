@@ -1,5 +1,5 @@
 const webdriver = require("selenium-webdriver");
-const { By, locateWith } = webdriver;
+const { By, locateWith, Key } = webdriver;
 const robot = require("robotjs");
 const driver = new webdriver.Builder()
   .usingServer("http://localhost:9515")
@@ -60,15 +60,11 @@ class Test {
     }
   }
 
-  async moveMouseAndClick(delta) {
-    const pos = robot.getMousePos();
-    robot.moveMouse(pos.x + delta.x, pos.y + delta.y);
-    await this.sleep(0.5);
-    robot.mouseClick();
-  }
-
-  async clickCtxMenu(delta) {
-    await this.moveMouseAndClick(delta);
+  async clickCtxMenu(idx) {
+    for (let i = 0; i < idx; i++) {
+      robot.keyTap("down");
+    }
+    robot.keyTap("enter");
   }
 
   async winExits(name) {
@@ -76,9 +72,40 @@ class Test {
     for (let s of s1) {
       await driver.switchTo().window(s);
       const url = await driver.getCurrentUrl();
-      if (url.endsWith(name)) return true;
+      if (url.endsWith(name)) {
+        return true;
+      }
     }
     return false;
+  }
+
+  async e2eClose(name, timeout) {
+    for (let i = 0; i < timeout; i++) {
+      try {
+        let found = false;
+        const s1 = await driver.getAllWindowHandles();
+        for (let s of s1) {
+          await driver.switchTo().window(s);
+          const url = await driver.getCurrentUrl();
+          if (url.endsWith(name)) {
+            found = true;
+            const closed = await driver.executeScript(
+              "return window.e2e_show === false"
+            );
+            if (closed) return true;
+            else break;
+          }
+        }
+        if (!found) {
+          throw new Error("target not found:" + name);
+        }
+        await this.sleep(1);
+      } catch (ex) {
+        console.log("winclose meet error, skip", ex);
+        await this.sleep(1);
+      }
+    }
+    throw new Error(`wait win ${name} timeout`);
   }
 
   async winClose(name, timeout) {
@@ -105,7 +132,7 @@ class Test {
     );
     await addIcon.click();
     await this.sleep(0.3);
-    await this.clickCtxMenu({ x: 50, y: 45 });
+    await this.clickCtxMenu(2);
     await this.sleep(0.3);
     await this.switchTo("/planet/follow");
     const textarea = await driver.findElement(By.css("textarea"));
@@ -135,7 +162,7 @@ class Test {
     );
     await addIcon.click();
     await this.sleep(0.3);
-    await this.clickCtxMenu({ x: 50, y: 15 });
+    await this.clickCtxMenu(1);
     await this.sleep(0.3);
     await this.switchTo("/planet/create");
     const title = await driver.findElement(By.css("input"));
@@ -150,15 +177,15 @@ class Test {
     await this.sleep(0.3);
     const newPlanet = await driver.findElement(By.css("span.ml-2"));
     await newPlanet.click();
+    await this.testArticleEditor();
+  }
+
+  async testEditorBasic() {
     await this.switchTo("/topbar");
     await this.sleep(0.3);
     const newArticle = await driver.findElement(By.css(".e2e-new"));
     await newArticle.click();
     await this.sleep(0.3);
-    await this.testArticleEditor();
-  }
-
-  async testArticleEditor() {
     const editorWebview = await this.switchTo("file://", true);
     await this.switchTo("/editor/main");
     const title = await driver.findElement(By.css("input"));
@@ -171,7 +198,9 @@ class Test {
       'return document.body.querySelector("strong")'
     );
     if (!strong) throw new Error("markdown error!");
+  }
 
+  async testEditorPhotoAttach() {
     await this.switchTo("/editor/topbar");
     await driver.findElement(By.css(".e2e-photo")); //just make sure the btn is there
     const photo = `/Users/wwq/Downloads/dwebservices-api-key.png`;
@@ -184,21 +213,132 @@ class Test {
       'return document.body.querySelector("img")'
     );
     if (!webimg) throw new Error("attach photo seems fail!");
+    await this.switchTo("file://", true);
+    await this.sleep(0.3);
+    const img = await driver.executeScript(
+      'return document.body.querySelector("img")'
+    );
+    if (!img) throw new Error("image render error!");
+  }
+
+  async testEditorAudioAttach() {
+    await this.switchTo("/editor/topbar");
+    await driver.findElement(By.css(".e2e-audio")); //just make sure the btn is there
+    const audio = `/Users/wwq/Downloads/第41期 我在传统纸媒当记者三十年.mp3`;
+    await driver.executeScript(`api.send('ipcDraftAddAudio', ['${audio}'])`);
+
+    await this.switchTo("/editor/main");
+    await driver.findElement(By.css("audio"));
+  }
+
+  async testEditorVideoAttach() {
+    await this.switchTo("/editor/topbar");
+    await driver.findElement(By.css(".e2e-video")); //just make sure the btn is there
+    const video = `/Users/wwq/Downloads/浪费.MP4`;
+    await driver.executeScript(`api.send('ipcDraftAddVideo', ['${video}'])`);
+
+    await this.switchTo("/editor/main");
+    await driver.findElement(By.css("video"));
+  }
+
+  async testPublish() {
+    await this.switchTo("/editor/topbar");
+    const pubbtn = await driver.findElement(By.css(".e2e-publish"));
+    await pubbtn.click();
+
+    await this.e2eClose("/editor/topbar", 10);
+
+    await this.switchTo("/root");
+    await this.sleep(0.3);
+    await driver.findElement(By.css(".animate-spin"));
+    await this.switchTo("index.html");
+    await this.sleep(0.3);
+    await driver.findElement(By.css("video"));
+  }
+
+  async testPlanetDraftKeep() {
+    await this.switchTo("/topbar");
+    await this.sleep(0.3);
+    const newArticle = await driver.findElement(By.css(".e2e-new"));
+    await newArticle.click();
+    await this.sleep(0.3);
+    await this.switchTo("/editor/main");
+    const title = await driver.findElement(By.css("input"));
+    const oldTitle = `new title ` + new Date() + " " + Math.random();
+    const oldContent = `new cnt ` + new Date() + " " + Math.random();
+    await title.sendKeys(oldTitle);
+    const cnt = await driver.findElement(By.css("textarea"));
+    await cnt.sendKeys(oldContent);
+    await this.sleep(0.3);
+    await driver.executeScript('api.send("ipcCloseWin")');
+    await this.e2eClose("/editor/topbar", 10);
+    await this.switchTo("/topbar");
+    await this.sleep(0.3);
+    const newArticle2 = await driver.findElement(By.css(".e2e-new"));
+    await newArticle2.click();
+    await this.sleep(0.3);
+    await this.switchTo("/editor/main");
+    await this.sleep(0.3);
+    const tv = await driver.executeScript(
+      'return document.querySelector("input").value'
+    );
+    const cv = await driver.executeScript(
+      'return document.querySelector("textarea").value'
+    );
+    if (tv !== oldTitle) {
+      console.log(`compare "${tv}","${oldTitle}"`);
+      throw new Error("title should load from draft");
+    }
+    if (cv !== oldContent) {
+      console.log(cv, oldContent);
+      throw new Error("content should load from draft");
+    }
+    await driver.executeScript('api.send("ipcCloseWin")');
+    await this.e2eClose("/editor/topbar", 10);
+  }
+
+  async testEditArticle() {
+    await this.switchTo("/articles");
+    await this.sleep(0.3);
+    const firstpost = await driver.findElement(By.css(".e2e-post-0"));
+    await driver.actions().contextClick(firstpost).perform();
+    await this.clickCtxMenu(1);
+    await this.sleep(0.3);
+    await this.switchTo("/editor/main");
+    await this.sleep(0.3);
+    const tv = await driver.executeScript(
+      'return document.querySelector("input").value'
+    );
+    const cv = await driver.executeScript(
+      'return document.querySelector("textarea").value'
+    );
+    if (tv !== "hello from scarborough") {
+      console.log(`compare "${tv}","hello from scarborough"`);
+      throw new Error("title should load from post");
+    }
+    if (!cv.startsWith("P1 \n\n**P2**")) {
+      console.log("cv now is", cv);
+      throw new Error("content should load from post");
+    }
+    await driver.executeScript('api.send("ipcCloseWin")');
+    await this.e2eClose("/editor/topbar", 10);
+  }
+
+  async testArticleEditor() {
+    await this.testEditorBasic();
+    await this.testEditorPhotoAttach();
+    await this.testEditorAudioAttach();
+    await this.testEditorVideoAttach();
+    await this.testPublish();
+    await this.testPlanetDraftKeep();
+    await this.testEditArticle();
   }
 
   async start() {
-    await this.cleanUp();
     await this.waitIpfs();
     // await this.followLivid();
     await this.createPlanet();
     await this.sleep();
-  }
-
-  async cleanUp() {
-    require("fs").rmSync("/Users/wwq/Library/Application Support/scarborough", {
-      force: true,
-      recursive: true,
-    });
   }
 }
 

@@ -52,7 +52,7 @@ class FollowingPlanet {
       updated: this.updated,
       lastRetrieved: this.lastRetrieved,
       githubUsername: this.githubUsername,
-      twitterUsername: this.twitterUsername
+      twitterUsername: this.twitterUsername,
     }
   }
 
@@ -113,7 +113,7 @@ class FollowingPlanet {
         resolve(files)
       })
     })
-    log.info('read planet dir get', planets)
+    log.info(`read planet dir ${FollowingPlanet.followingPlanetsPath} get`, planets)
     for (let id of planets || []) {
       const planet = await FollowingPlanet.load(id)
       if (!planet) {

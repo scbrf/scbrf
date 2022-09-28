@@ -91,16 +91,22 @@ class Article {
   publicRender() {
     const content_html = marked.parse(this.content)
     const template = 'blog.html'
-    const html = require('../utils/render').getEnv(this.planet).render(template, {
-      planet: this.planet,
-      planet_ipns: this.planet.ipns,
-      assets_prefix: '../',
-      article: this,
-      article_title: this.title,
-      page_title: this.title,
-      content_html: content_html,
-      build_timestamp: new Date().getTime(),
-    })
+    const html = require('../utils/render')
+      .getEnv(this.planet)
+      .render(template, {
+        planet: this.planet,
+        planet_ipns: this.planet.ipns,
+        assets_prefix: '../',
+        article: {
+          ...this.json(),
+          hasAudio: !!this.audioFilename,
+          hasVideo: !!this.videoFilename,
+        },
+        article_title: this.title,
+        page_title: this.title,
+        content_html: content_html,
+        build_timestamp: new Date().getTime(),
+      })
     require('fs').writeFileSync(this.publicIndexPath, html)
   }
 

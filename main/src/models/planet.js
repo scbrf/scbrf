@@ -222,7 +222,7 @@ class Planet {
         resolve(files)
       })
     })
-    log.info('read planet dir get', planets)
+    log.info(`read planet from ${Planet.myPlanetsPath} get`, planets)
     for (let id of planets || []) {
       const planet = await Planet.load(id)
       const articles = await new Promise((resolve) => {
