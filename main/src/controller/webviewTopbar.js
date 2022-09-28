@@ -74,7 +74,8 @@ class WebviewTopbar {
   async downloadAttachment(item) {
     let base = rt.middleSideBarFocusArticle.url
     if (base.endsWith('.html')) {
-      base = base.slice(0, -5)
+      const idx = base.lastIndexOf('/')
+      base = base.slice(0, idx)
     }
     if (!base.endsWith('/')) {
       base = base + '/'
