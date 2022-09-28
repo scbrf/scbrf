@@ -272,7 +272,7 @@ class WebviewTopbar {
     if (!this.view) return
     let article = rt.middleSideBarFocusArticle
     if (article) {
-      let attachments = article.attachments.map((a) => a.name || a)
+      let attachments = (article.attachments || []).map((a) => a.name || a)
       if (article.audioFilename) {
         attachments.push(require('path').basename(article.audioFilename))
       }

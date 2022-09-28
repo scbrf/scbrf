@@ -11,6 +11,7 @@ import ArticleEditorTopbarView from "../views/ArticleEditorTopbarView.vue";
 import ArticleEditorView from "../views/ArticleEditorView.vue";
 import ArticleEditorWaiting from "../views/ArticleEditorWaiting.vue";
 import PlanetInfoView from "../views/PlanetInfoView.vue";
+import EmptyView from "../views/EmptyView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,10 @@ const router = createRouter({
     {
       path: "/loading",
       component: LoadingView,
+    },
+    {
+      path: "/empty",
+      component: EmptyView,
     },
     {
       path: "/topbar",

@@ -35,9 +35,13 @@ class Webview {
   async loadWeb() {
     if (!this.view) return
     if (rt.middleSideBarFocusArticle) {
-      this.view.webContents.loadURL(rt.middleSideBarFocusArticle.url, { userAgent: 'Planet/JS' })
+      //give it a loading hint
+      this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/loading`)
+      this.view.webContents.once('dom-ready', () => {
+        this.view.webContents.loadURL(rt.middleSideBarFocusArticle.url, { userAgent: 'Planet/JS' })
+      })
     } else {
-      this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/loading`, { userAgent: 'Planet/JS' })
+      this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/empty`, { userAgent: 'Planet/JS' })
     }
   }
 }
