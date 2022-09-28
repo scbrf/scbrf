@@ -1,5 +1,5 @@
 {
-    "name": "scarborough",
+    "name": "Scarborough",
     "version": "0.0.2",
     "author": "yygqg.eth",
     "description": "Clone of Livid(olivida.eth)'s Planet project",
@@ -57,7 +57,7 @@
                 {
                     "name": "@electron-forge/maker-squirrel",
                     "config": {
-                        "name": "scarborough"
+                        "name": "Scarborough"
                     }
                 },
                 {
