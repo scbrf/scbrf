@@ -21,8 +21,7 @@ class UpManager {
     const now = new Date().getTime()
     for (let planet of rt.planets) {
       if (!(planet.id in this.upSchedule)) {
-        this.upSchedule[planet.id] =
-          (planet.lastPublished || now) + Math.random() * this.PUBLISH_DELTA + this.PUBLISH_DELTA
+        this.upSchedule[planet.id] = now + Math.random() * this.PUBLISH_DELTA + this.PUBLISH_DELTA
         log.debug('no up rec, set next up to', planet.id, this.upSchedule[planet.id])
       }
       if (now > this.upSchedule[planet.id]) {
@@ -35,8 +34,7 @@ class UpManager {
     }
     for (let planet of rt.following) {
       if (!(planet.id in this.upSchedule)) {
-        this.upSchedule[planet.id] =
-          (planet.lastRetrieved || now) + Math.random() * this.UPDATE_DELTA + this.UPDATE_DELTA
+        this.upSchedule[planet.id] = now + Math.random() * this.UPDATE_DELTA + this.UPDATE_DELTA
         log.debug('no up rec, set next up to', planet.id, this.upSchedule[planet.id])
       }
       if (now > this.upSchedule[planet.id]) {
