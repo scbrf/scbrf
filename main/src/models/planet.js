@@ -216,7 +216,7 @@ class Planet {
     rt.planets = [...rt.planets]
   }
   static async loadPlanets() {
-    Planet.planets = []
+    let ps = []
     const planets = await new Promise((resolve) => {
       require('fs').readdir(Planet.myPlanetsPath, (err, files) => {
         resolve(files)
@@ -237,8 +237,9 @@ class Planet {
         }
       }
       planet.articles.sort((a, b) => b.created - a.created)
-      rt.planets.push(planet)
+      ps.push(planet)
     }
+    rt.planets = ps
     log.info('load planet done!')
   }
 }

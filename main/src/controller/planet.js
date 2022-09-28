@@ -126,9 +126,9 @@ class PlanetSidebarController {
     const createPlanetDialog = new BrowserWindow({
       parent: win,
       x: win.getPosition()[0] + win.getSize()[0] / 2 - 300,
-      y: win.getPosition()[1] + win.getSize()[1] / 2 - 200,
+      y: win.getPosition()[1] + win.getSize()[1] / 2 - 150,
       width: 600,
-      height: 400,
+      height: 300,
       frame: false,
       resizable: false,
       vibrancy: 'content',
@@ -157,6 +157,12 @@ class PlanetSidebarController {
     })
     // createPlanetDialog.webContents.openDevTools({ mode: 'undocked' })
     createPlanetDialog.loadURL(`${require('../utils/websrv').WebRoot}/dialog/planet/create`)
+    createPlanetDialog.webContents.on('did-finish-load', () => {
+      if (rt.planetEditing) {
+        console.log(rt.planetEditing)
+        createPlanetDialog.webContents.send('create-edit-planet', rt.planetEditing.json())
+      }
+    })
     createPlanetDialog.show()
   }
   async followPlanet(param, progresscb) {
@@ -164,13 +170,39 @@ class PlanetSidebarController {
     this.cancelFollow = false
     const planet = await FollowingPlanet.follow(follow, progresscb)
     if (planet && !this.cancelFollow) {
-      rt.following = [planet, ...rt.following]
+      rt.set({
+        following: [...rt.following, planet],
+        sidebarFocus: planet,
+      })
     }
   }
   async createPlanet(param) {
-    const planet = await Planet.create(param)
-    planet.save()
-    rt.planets = [planet, ...rt.planets]
+    let planet
+    if (param.id) {
+      if (param.id === rt.planetEditing.id) {
+        planet = rt.planetEditing
+        rt.planetEditing.name = param.name
+        rt.planetEditing.about = param.about
+        if (rt.planetEditing.template !== param.template) {
+          rt.planetEditing.template = param.template
+        }
+        rt.planetEditing = null
+      } else {
+        log.error('fe and be not match!!', { fe: param.id, be: rt.planetEditing.id })
+        return
+      }
+    } else {
+      planet = await Planet.create(param)
+    }
+    await planet.save()
+    if (!param.id) {
+      rt.planets = [planet, ...rt.planets]
+    }
+    rt.sidebarFocus = planet
+    evt.emit(evt.evRuntimePlanetsChange)
+    if (planet.articles.length > 0) {
+      planet.publish()
+    }
   }
   updateSidebarFollowing() {
     if (!this.view) return
@@ -232,7 +264,10 @@ class PlanetSidebarController {
     this.createFollowMenu = Menu.buildFromTemplate([
       {
         label: 'Create Planet',
-        click: this.showCreatePlanetDialog.bind(this),
+        click: () => {
+          rt.planetEditing = null
+          this.showCreatePlanetDialog()
+        },
       },
       {
         type: 'separator',
@@ -287,6 +322,16 @@ class PlanetSidebarController {
       {
         label: 'Publish',
         click: this.publishPlanet.bind(this),
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Edit Planet',
+        click: () => {
+          rt.planetEditing = rt.planets.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)[0]
+          this.showCreatePlanetDialog()
+        },
       },
       {
         type: 'separator',

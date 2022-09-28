@@ -10,6 +10,7 @@ class Runtime {
   planets = [[], evt.evRuntimePlanetsChange, '自己创建的Planet列表']
   numbers = [{}, evt.evRuntimeNumbersChange, '左侧边栏里显示的数量']
 
+  planetEditing = [null, null, '增在编辑的Planet实例']
   draft = [null, evt.evRuntimeDraftChange, '当前编辑窗口正在编辑的草稿']
   middleSideBarFocusArticle = [null, evt.evRuntimeMiddleSidebarFocusChange, '正在浏览的文章']
 

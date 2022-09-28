@@ -3,6 +3,7 @@ import { useArticlesStore } from "./stores/articles";
 import { useTopbarStore } from "./stores/topbar";
 import { useEditorStore } from "./stores/editor";
 import { usePlanetInfoStore } from "./stores/planetinfo";
+import { useEditPlanetStore } from "./stores/editplanet";
 
 export default function () {
   const ipfs = useIPFSStore();
@@ -10,6 +11,7 @@ export default function () {
   const topbar = useTopbarStore();
   const editor = useEditorStore();
   const planetinfo = usePlanetInfoStore();
+  const planetEditor = useEditPlanetStore();
 
   api.recieve("ipfsOnlineState", (p) => {
     for (let key of Object.keys(p[0])) {
@@ -53,6 +55,11 @@ export default function () {
   api.recieve("planetInfo", (p) => {
     for (let key of Object.keys(p[0])) {
       planetinfo[key] = p[0][key];
+    }
+  });
+  api.recieve("create-edit-planet", (p) => {
+    for (let key of Object.keys(p[0])) {
+      planetEditor[key] = p[0][key];
     }
   });
 }

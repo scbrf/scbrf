@@ -37,7 +37,7 @@
       <div class="p-1">
         <div v-for="(planet,idx) in planets" :key="planet.id" @contextmenu="planetCtxMenu(planet)"
           @click="setFocus(`my:${planet.id}`)"
-          class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1 nodrag cursor-default"
+          class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1 nodrag cursor-default mb-1"
           :class="focus == `my:${planet.id}` ? ['bg-gray-300', `e2e-mp-${idx}`] : [`e2e-mp-${idx}`] ">
           <Avatar :image="planet.avatar" :placeholder="planet.name" extraClass="text-xs" /> <span class="ml-2">{{
           planet.name }}</span>
@@ -61,7 +61,7 @@
       <div class="p-1">
         <div v-for="(p, idx) in following" :key="p.id" @contextmenu="followingCtxMenu(p)"
           @click="setFocus(`following:${p.id}`)"
-          class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
+          class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1 mb-1"
           :class="focus == `following:${p.id}` ? ['bg-gray-300', `e2e-fp-${idx}`] : [`e2e-fp-${idx}`] ">
           <Avatar :image="p.avatar" :placeholder="p.name" extraClass="text-xs" /> <span class="ml-2">{{ p.name }}</span>
           <div class="flex-1"></div>
