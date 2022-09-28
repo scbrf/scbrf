@@ -1,6 +1,6 @@
 {
-    "name": "Scarborough",
-    "version": "0.0.2",
+    "name": "scarborough",
+    "version": "0.0.3",
     "author": "yygqg.eth",
     "description": "Clone of Livid(olivida.eth)'s Planet project",
     "license": "MIT",
@@ -64,7 +64,10 @@
                     "name": "@electron-forge/maker-zip",
                     "platforms": [
                         "darwin"
-                    ]
+                    ],
+                    "config": {
+                        "name": "Scarborough"
+                    }
                 },
                 {
                     "name": "@electron-forge/maker-deb",
