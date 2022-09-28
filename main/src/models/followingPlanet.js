@@ -126,7 +126,7 @@ class FollowingPlanet {
           resolve(files)
         })
       })
-      log.info('load articles return', { articles, id })
+      log.debug('load articles return', { articles, id })
       for (let name of articles) {
         const article = FollowingArticle.load(name, planet)
         if (article) {

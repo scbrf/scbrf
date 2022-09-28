@@ -80,14 +80,21 @@ class Planet {
   publicRender() {
     const pageAboutHTML = marked.parse(this.about)
     const template = 'index.html'
-    const html = require('../utils/render').getEnv(this).render(template, {
-      assets_prefix: './',
-      page_title: this.name,
-      page_description: this.about,
-      page_description_html: pageAboutHTML,
-      articles: this.articles,
-      build_timestamp: new Date().getTime(),
-    })
+    const html = require('../utils/render')
+      .getEnv(this)
+      .render(template, {
+        assets_prefix: './',
+        page_title: this.name,
+        page_description: this.about,
+        page_description_html: pageAboutHTML,
+        articles: this.articles.map((a) => ({
+          ...a.json(),
+          hasAudio: !!a.audioFilename,
+          hasVideo: !!a.videoFilename,
+          link: `/${a.id}/`,
+        })),
+        build_timestamp: new Date().getTime(),
+      })
     require('fs').writeFileSync(this.publicIndexPath, html)
   }
 
