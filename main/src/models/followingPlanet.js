@@ -269,6 +269,16 @@ class FollowingPlanet {
       )
     )
     planet.articles.sort((a, b) => b.created - a.created)
+    const rtPlanet = rt.following.filter((p) => p.id === planet.id)[0]
+    if (rtPlanet) {
+      planet.articles.forEach((a) => {
+        const rtArticle = rtPlanet.articles.filter((aa) => aa.id === a.id)[0]
+        if (rtArticle) {
+          a.read = rtArticle.read
+          a.starred = rtArticle.starred
+        }
+      })
+    }
 
     await planet.downloadAvatar(`${ipfs.gateway}/ipfs/${cid}/avatar.png`)
     cb(`done!`)
