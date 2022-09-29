@@ -122,7 +122,11 @@ class WebviewTopbar {
   }
 
   updatePlanetInfoWin(win) {
-    const planet = rt.middleSideBarFocusArticle.planet
+    let planet = rt.sidebarFocus
+    if (rt.middleSideBarFocusArticle) {
+      planet = rt.middleSideBarFocusArticle.planet
+    }
+    if (!planet) return
     win.webContents.send('planetInfo', {
       about: require('marked').parse(planet.about),
       updateat: planet.lastRetrieved || planet.lastPublished,
