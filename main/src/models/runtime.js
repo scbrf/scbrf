@@ -38,17 +38,17 @@ class Runtime {
     const ret = {}
     this.following.forEach((p) => {
       p.articles.forEach((a) => {
-        if (moment(a.created).isSame(moment(), 'day') && a.read === false) {
+        if (moment(a.created).isSame(moment(), 'day') && a.read !== true) {
           ret.today = (ret.today || 0) + 1
         }
-        if (a.read === false) {
+        if (a.read !== true) {
           ret.read = (ret.read || 0) + 1
         }
-        if (a.starred === true && a.read === false) {
+        if (a.starred === true && a.read !== true) {
           ret.starred = (ret.starred || 0) + 1
         }
       })
-      ret[`following:${p.id}`] = p.articles.filter((a) => a.read === false).length
+      ret[`following:${p.id}`] = p.articles.filter((a) => a.read !== true).length
     })
     this.numbers = ret
   }
@@ -73,7 +73,7 @@ class Runtime {
       })
     } else if (focus === 'unread') {
       const articles = this.following.reduce((r, p) => {
-        return [...r, ...p.articles.filter((a) => a.read === false)]
+        return [...r, ...p.articles.filter((a) => a.read !== true)]
       }, [])
       articles.sort((a, b) => b.created - a.created)
       this.set({

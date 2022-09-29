@@ -90,16 +90,16 @@ test('ipcSidebarFocus', () => {
       id: 'test1',
       name: 'test',
       articles: [
-        { created: new Date().getTime(), title: 'test1' },
-        { created: new Date().getTime() - 1000 * 3600 * 24 * 5, title: 'unread', read: false },
-        { created: new Date().getTime() - 1000 * 3600 * 24 * 5, title: 'starred', starred: true },
+        { id: 'a1', created: new Date().getTime(), title: 'test1' },
+        { id: 'a2', created: new Date().getTime() - 1000 * 3600 * 24 * 5, title: 'unread', read: true },
+        { id: 'a3', created: new Date().getTime() - 1000 * 3600 * 24 * 5, title: 'starred', starred: true },
       ],
     },
   ]
   expect(runtime.numbers.today).toBe(1)
-  expect(runtime.numbers.read).toBe(1)
+  expect(runtime.numbers.read).toBe(2)
   expect(runtime.numbers.starred).toBe(1)
-  expect(runtime.numbers[`following:test1`]).toBe(1)
+  expect(runtime.numbers[`following:test1`]).toBe(2)
 
   ipcCBs['ipcSetSidebarFocus'](null, 'today')
   expect(runtime.sidebarFocus).toBe('today')
@@ -110,10 +110,10 @@ test('ipcSidebarFocus', () => {
 
   ipcCBs['ipcSetSidebarFocus'](null, 'unread')
   expect(runtime.sidebarFocus).toBe('unread')
+  expect(runtime.middleSideBarArticles.length).toBe(2)
+  expect(runtime.middleSideBarArticles[0].title).toBe('test1')
   expect(runtime.middleSideBarTitle).toBe('Unread')
-  expect(runtime.middleSideBarArticles.length).toBe(1)
-  expect(runtime.middleSideBarArticles[0].title).toBe('unread')
-  expect(runtime.middleSideBarFocusArticle.title).toBe('unread')
+  expect(runtime.middleSideBarFocusArticle.title).toBe('test1')
 
   ipcCBs['ipcSetSidebarFocus'](null, 'starred')
   expect(runtime.sidebarFocus).toBe('starred')

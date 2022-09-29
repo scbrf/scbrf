@@ -115,9 +115,9 @@ class ArticleController {
     }
     const article = rt.following[pi].articles[ai]
     article.starred = !article.starred
-    article.read = true
     article.save()
     rt.following = [...rt.following]
+    rt.middleSideBarArticles = [...(rt.middleSideBarArticles || [])]
   }
   init() {
     this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/articles`)

@@ -174,20 +174,20 @@ class Test {
     await this.clickCtxMenu(2);
 
     await this.switchTo("/root");
-    let starred = await driver.findElement(By.css(".e2e-starred"));
-    const value = parseInt(await starred.getText());
-    if (value !== 1) {
-      throw new Error(`should be  remark as starred  ${value}`);
-    }
+    await this.expectElemNotExists(By.css("e2e-starred"));
 
     //reverse
     await this.switchTo("/articles");
     const post2 = await driver.findElement(By.css(".e2e-post-1"));
     await driver.actions().contextClick(post2).perform();
-    await this.clickCtxMenu(2);
+    await this.clickCtxMenu(1); //mark unread
 
     await this.switchTo("/root");
-    await this.expectElemNotExists(By.css("e2e-starred"));
+    let starred = await driver.findElement(By.css(".e2e-starred"));
+    const value = parseInt(await starred.getText());
+    if (value !== 1) {
+      throw new Error(`should be  remark as starred  ${value}`);
+    }
   }
 
   async markRead() {
