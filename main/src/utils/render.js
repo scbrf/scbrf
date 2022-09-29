@@ -8,7 +8,6 @@ class Render {
       planet.template.toLowerCase(),
       'templates'
     )
-    console.log('**************************** template path', templatePath)
     var env = new nunjucks.Environment(new nunjucks.FileSystemLoader(templatePath), { autoescape: false })
     env.addFilter('escapejs', function (str) {
       return str

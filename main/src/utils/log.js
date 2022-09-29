@@ -6,7 +6,7 @@ module.exports = (name, opt = {}) => {
     level: 'debug',
     streams: [
       {
-        level: 'debug',
+        level: process.env.NODE_ENV === 'test' ? 'error' : 'debug',
         stream: process.stdout,
       },
     ],

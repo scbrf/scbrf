@@ -81,20 +81,24 @@ class FollowingPlanet {
     try {
       // 更新 Following 的内容
       const newPlanet = await FollowingPlanet.follow(this.link)
-      for (let i in rt.following) {
-        if (rt.following[i] === this) {
-          newPlanet.articles.forEach((a) => {
-            const oldarticle = rt.following[i].articles.filter((b) => a.id === b.id)[0]
-            if (oldarticle) {
-              a.read = oldarticle.read
-              a.starred = oldarticle.starred
-            }
-          })
-          rt.following[i] = newPlanet
-          break
+      if (!newPlanet) {
+        log.info('update following get nothing', { link: this.link })
+      } else {
+        for (let i in rt.following) {
+          if (rt.following[i].id === this.id) {
+            ;(newPlanet.articles || []).forEach((a) => {
+              const oldarticle = rt.following[i].articles.filter((b) => a.id === b.id)[0]
+              if (oldarticle) {
+                a.read = oldarticle.read
+                a.starred = oldarticle.starred
+              }
+            })
+            rt.following[i] = newPlanet
+            break
+          }
         }
+        log.info('update site succ', { name: this.name })
       }
-      log.info('update site succ', { name: this.name })
     } catch (ex) {
       this.updating = false
       log.error('error when update', ex)
@@ -262,7 +266,7 @@ class FollowingPlanet {
 
     require('fs').mkdirSync(planet.basePath, { recursive: true })
     require('fs').mkdirSync(planet.articlesPath, { recursive: true })
-    planet.articles = publicPlanet.articles.map((a) =>
+    planet.articles = (publicPlanet.articles || []).map((a) =>
       FollowingArticle.create(
         {
           ...a,

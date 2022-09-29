@@ -65,4 +65,16 @@ test('refollow', async () => {
   expect(rt.following[0].lastRetrieved).toBeGreaterThan(lasttime)
   expect(rt.following[0].articles[0].read).toBe(true)
   expect(rt.following[0].articles[0].starred).toBe(true)
+
+  //test delete file
+  axios.get.mockReturnValue({
+    data: {
+      pipe: () => {},
+      name: 'planet1',
+      id: 'bbb',
+    },
+  })
+  await rt.following[0].update()
+  expect(rt.following.length).toBe(1)
+  expect(rt.following[0].articles.length).toBe(0)
 })
