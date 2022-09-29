@@ -54,6 +54,7 @@ class EventCenter {
   ipcDownloadMenu //显示下载菜单
 
   ipcAppQuit //app 安全退出
+  ipcOpenFocusInBrowser //在浏览器里打开本地网关预览模式
 
   constructor() {
     this.bus = EvtBus()

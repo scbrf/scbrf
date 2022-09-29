@@ -1,5 +1,6 @@
 const { BrowserView, Menu, clipboard, BrowserWindow, dialog } = require('electron')
 const { Planet, FollowingPlanet } = require('../models')
+const ipfs = require('../utils/ipfs')
 
 const log = require('../utils/log')('planetView')
 
@@ -25,6 +26,7 @@ class PlanetSidebarController {
       [evt.ipcPlanetCtxMenu, this.popupAndStoreP.bind(this, this.planetMenu)],
       [evt.ipcCreatePlanet, this.closeWinAndRun.bind(this, this.createPlanet.bind(this))],
       [evt.ipcFollowPlanet, this.closeWinAndRun.bind(this, this.followWithProgress.bind(this))],
+      [evt.ipcOpenFocusInBrowser, this.openFocusInBrowser],
     ])
   }
 
@@ -32,6 +34,11 @@ class PlanetSidebarController {
     const win = BrowserWindow.fromWebContents(e.sender)
     menu.popup(win)
     this.planetCtxMenuTargetPlanet = p
+  }
+
+  async openFocusInBrowser() {
+    const planet = rt.sidebarFocus
+    require('electron').shell.openExternal(`http://127.0.0.1:${ipfs.gatewayPort}/ipns/${planet.ipns || planet.link}/`)
   }
 
   async closeWinAndRun(func, e, p) {

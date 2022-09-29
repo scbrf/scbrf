@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col p-4 h-screen">
         <div class="flex items-center">
-            <div class="text-xs text-gray-500">{{updatePrefix }} {{pubdata}} </div>
+            <div @click="openInBrowser" class="text-xs text-gray-500">{{updatePrefix }} {{pubdata}} </div>
             <div class="flex-1"> </div>
             <XCircleIcon @click="close" class="w-5 h-5"> </XCircleIcon>
         </div>
@@ -44,6 +44,9 @@ export default {
         fixPath(path) {
             if (path && path.startsWith('/')) return `file://${path}`
             return path
+        },
+        openInBrowser() {
+            api.send('ipcOpenFocusInBrowser',)
         },
         close() {
             api.send('ipcCloseWin')
