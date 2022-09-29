@@ -6,8 +6,8 @@ const log = require('../utils/log')('upmanager')
  * 处理Planets和Following的定期更新
  */
 class UpManager {
-  PUBLISH_DELTA = 5 * 60 * 1000
-  UPDATE_DELTA = 15 * 60 * 1000
+  PUBLISH_DELTA = 30 * 60 * 1000
+  UPDATE_DELTA = 30 * 60 * 1000
   constructor() {
     evt.bindBusTable(this, [[evt.evAppInit, this.start]])
     this.upSchedule = {}
@@ -27,7 +27,7 @@ class UpManager {
       if (now > this.upSchedule[planet.id]) {
         this.upSchedule[planet.id] = now + Math.random() * this.PUBLISH_DELTA + this.PUBLISH_DELTA
         planet.publish()
-      } else if (this.upSchedule[planet.id] < planet.lastPublished + this.PUBLISH_DELTA) {
+      } else if (this.upSchedule[planet.id] < planet.lastPublished + 2 * this.PUBLISH_DELTA) {
         this.upSchedule[planet.id] = planet.lastPublished + this.PUBLISH_DELTA + Math.random() * this.PUBLISH_DELTA
         log.debug('maybe manual update, set next up to', planet.id, this.upSchedule[planet.id])
       }
@@ -40,7 +40,7 @@ class UpManager {
       if (now > this.upSchedule[planet.id]) {
         this.upSchedule[planet.id] = now + Math.random() * this.UPDATE_DELTA + this.UPDATE_DELTA
         planet.update()
-      } else if (this.upSchedule[planet.id] < planet.lastRetrieved + this.UPDATE_DELTA) {
+      } else if (this.upSchedule[planet.id] < planet.lastRetrieved + 2 * this.UPDATE_DELTA) {
         this.upSchedule[planet.id] = planet.lastRetrieved + this.UPDATE_DELTA + Math.random() * this.UPDATE_DELTA
         log.debug('maybe manual update, set next up to', planet.id, this.upSchedule[planet.id])
       }
