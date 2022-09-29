@@ -81,16 +81,16 @@ class FollowingPlanet {
     try {
       // 更新 Following 的内容
       const newPlanet = await FollowingPlanet.follow(this.link)
-      for (let i in FollowingPlanet.following) {
-        if (FollowingPlanet.following[i] === this) {
+      for (let i in rt.following) {
+        if (rt.following[i] === this) {
           newPlanet.articles.forEach((a) => {
-            const oldarticle = FollowingPlanet.following[i].articles.filter((b) => a.id === b.id)[0]
+            const oldarticle = rt.following[i].articles.filter((b) => a.id === b.id)[0]
             if (oldarticle) {
               a.read = oldarticle.read
               a.starred = oldarticle.starred
             }
           })
-          FollowingPlanet.following[i] = newPlanet
+          rt.following[i] = newPlanet
           break
         }
       }
