@@ -1,5 +1,5 @@
 const { default: axios } = require('axios')
-const log = require('../utils/log')('models/followingPlanet')
+const log = require('../utils/log')('modelsFollowingPlanet')
 
 const uuid = require('uuid').v4
 const ipfs = require('../utils/ipfs')

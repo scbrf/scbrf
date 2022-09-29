@@ -42,12 +42,9 @@ class ScarboroughApp {
   }
 
   async initDirBase() {
-    const BASE_ROOT = process.env.SCARBOROUGH_ROOT
-      ? require('path').resolve(process.env.SCARBOROUGH_ROOT)
-      : app.getPath('userData')
-    FollowingPlanet.followingPlanetsPath = require('path').join(BASE_ROOT, 'Following')
-    Planet.myPlanetsPath = require('path').join(BASE_ROOT, 'My')
-    ipfs.constructor.REPO_PATH = require('path').join(BASE_ROOT, 'ipfs')
+    FollowingPlanet.followingPlanetsPath = require('path').join(app.__root__, 'Following')
+    Planet.myPlanetsPath = require('path').join(app.__root__, 'My')
+    ipfs.constructor.REPO_PATH = require('path').join(app.__root__, 'ipfs')
   }
 }
 

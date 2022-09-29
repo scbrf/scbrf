@@ -1,7 +1,7 @@
 const marked = require('marked')
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
-const log = require('../utils/log')('models/followingArticle')
+const log = require('../utils/log')('modelsFollowingArticle')
 
 const uuid = require('uuid').v4
 const ipfs = require('../utils/ipfs')

@@ -1,7 +1,7 @@
 const marked = require('marked')
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
-const log = require('../utils/log')('models/drafr')
+const log = require('../utils/log')('modelsDraft')
 const rt = require('./runtime')
 
 const uuid = require('uuid').v4
@@ -56,7 +56,6 @@ class Draft {
     draft.attachments.forEach((a) => {
       a.url = 'file://' + require('path').join(draft.attachmentsPath, a.name)
     })
-
 
     //对于大文件，直接引用，提高效率
     if (draft.audioFilename) {
@@ -240,7 +239,7 @@ class Draft {
   }
 
   async publishAttachmentsWin32(article) {
-    if (!require('fs').existsSync(article.publicBase)){
+    if (!require('fs').existsSync(article.publicBase)) {
       require('fs').mkdirSync(article.publicBase, { recursive: true })
     }
 
@@ -251,12 +250,14 @@ class Draft {
       )
     }
     if (this.audioFilename && !this.audioFilename.startsWith(article.publicBase)) {
-      require('fs').cpSync(this.audioFilename,
+      require('fs').cpSync(
+        this.audioFilename,
         require('path').join(article.publicBase, require('path').basename(this.audioFilename))
       )
     }
     if (this.videoFilename && !this.videoFilename.startsWith(article.publicBase)) {
-      require('fs').cpSync(this.videoFilename,
+      require('fs').cpSync(
+        this.videoFilename,
         require('path').join(article.publicBase, require('path').basename(this.videoFilename))
       )
     }

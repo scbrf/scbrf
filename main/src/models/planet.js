@@ -1,5 +1,5 @@
 const marked = require('marked')
-const log = require('../utils/log')('models/planet')
+const log = require('../utils/log')('modelsPlanet')
 
 const uuid = require('uuid').v4
 const ipfs = require('../utils/ipfs')

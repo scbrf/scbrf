@@ -1,6 +1,6 @@
 const { ipcMain } = require('electron')
 const EvtBus = require('js-event-bus')
-const log = require('../utils/log')('event center')
+const log = require('../utils/log')('eventCenter')
 
 class EventCenter {
   //直接在这里定义一个事件名，注意时间名必须用 ev + 任意一个大写字母开头

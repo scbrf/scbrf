@@ -1,4 +1,4 @@
-const log = require('../utils/log')('models/runtime')
+const log = require('../utils/log')('modelsRuntime')
 
 const evt = require('../utils/events')
 const moment = require('moment')

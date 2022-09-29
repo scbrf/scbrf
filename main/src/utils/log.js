@@ -1,5 +1,34 @@
 const bunyan = require('bunyan')
 
 module.exports = (name, opt = {}) => {
-  return bunyan.createLogger({ name, level: process.env.NODE_ENV === 'dev' ? 'debug' : 'info', ...opt })
+  const opts = {
+    name,
+    level: 'debug',
+    streams: [
+      {
+        level: 'debug',
+        stream: process.stdout,
+      },
+    ],
+    ...opt,
+  }
+  if (process.env.NODE_ENV !== 'test') {
+    const { app } = require('electron')
+    const logBase = require('path').join(app.__root__ || '/tmp', 'logs')
+    if (!require('fs').existsSync(logBase)) {
+      require('fs').mkdirSync(logBase, { recursive: true })
+    }
+    opts.streams = [
+      ...opts.streams,
+      {
+        level: 'info',
+        path: require('path').join(logBase, `${name}.log`),
+      },
+      {
+        level: 'error',
+        path: require('path').join(logBase, `__error.log`),
+      },
+    ]
+  }
+  return bunyan.createLogger(opts)
 }

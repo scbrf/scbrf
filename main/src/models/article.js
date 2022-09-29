@@ -1,5 +1,5 @@
 const marked = require('marked')
-const log = require('../utils/log')('models/article')
+const log = require('../utils/log')('modelsArticle')
 
 const uuid = require('uuid').v4
 
