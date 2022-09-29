@@ -244,7 +244,7 @@ class FollowingPlanet {
       await require('../utils/download')(url, this.avatarPath)
       this.avatar = require('path').basename(this.avatarPath)
     } catch (ex) {
-      log.error(`download avatar from ${url} fail`, ex)
+      log.error(`download avatar from ${url} fail`, ex.toString())
     }
   }
 
