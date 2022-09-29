@@ -224,10 +224,11 @@ class Planet {
 
     try {
       const cid = await ipfs.addDirectory(this.publicBasePath)
-      log.info('publish dir return:', cid)
+      log.debug('publish dir return:', cid)
       await ipfs.publish(this.id, cid)
+      log.info(`publish site succ`, { key: this.id, cid })
     } catch (ex) {
-      log.error('publish error', ex)
+      log.error('publish site error', { key: this.id, cid, ex })
     }
     this.publishing = false
     this.lastPublished = new Date().getTime()

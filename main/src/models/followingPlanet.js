@@ -94,6 +94,7 @@ class FollowingPlanet {
           break
         }
       }
+      log.info('update site succ', { name: this.name })
     } catch (ex) {
       this.updating = false
       log.error('error when update', ex)
@@ -157,7 +158,10 @@ class FollowingPlanet {
       cb(`error: not support http[s] or rss yet and maybe never!`)
       // return FollowingPlanet.followHTTP(link)
     }
-    return FollowingPlanet.followIPNSorDNSLink(link, cb)
+    const planet = FollowingPlanet.followIPNSorDNSLink(link, cb)
+    await planet.save()
+    await Promise.all(planet.articles.map((a) => a.save()))
+    return planet
   }
 
   static async getCID(ipns) {
@@ -279,7 +283,7 @@ class FollowingPlanet {
         }
       })
     }
-
+    cb(`try to update planet avatar ...`)
     await planet.downloadAvatar(`${ipfs.gateway}/ipfs/${cid}/avatar.png`)
     cb(`done!`)
     return planet
