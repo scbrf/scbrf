@@ -37,7 +37,7 @@ class PlanetSidebarController {
   }
 
   async openFocusInBrowser() {
-    const planet = rt.sidebarFocus
+    let planet = rt.middleSideBarFocusArticle.planet
     require('electron').shell.openExternal(`http://127.0.0.1:${ipfs.gatewayPort}/ipns/${planet.ipns || planet.link}/`)
   }
 
