@@ -10,8 +10,8 @@
             <label class="input-group input-group-sm w-100 flex mt-2">
                 <span class="w-24">Template:</span>
                 <select class="select select-bordered select-sm flex-1" v-model="template">
-                    <option>8-bit</option>
-                    <option selected>Plain</option>
+                    <option value="gamedb">8-bit</option>
+                    <option value="plain" selected>Plain</option>
                 </select>
             </label>
 
@@ -22,7 +22,8 @@
         <div class="flex flex-row p-2">
             <button class="btn btn-sm btn-ghost" @click="doclose">Close</button>
             <div class="flex-1"></div>
-            <button class="btn btn-sm btn-ghost" @click="doCreate" :disabled="!validate">{{ id?'Update' :'Create'}}</button>
+            <button class="btn btn-sm btn-ghost" @click="doCreate" :disabled="!validate">{{ id?'Update'
+            :'Create'}}</button>
         </div>
     </div>
 </template>

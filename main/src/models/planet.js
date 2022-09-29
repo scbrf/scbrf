@@ -14,7 +14,7 @@ class Planet {
   constructor(params) {
     this.name = params.name
     this.about = params.about || ''
-    this.template = params.template || 'Plain'
+    this.template = params.template || 'plain'
     this.id = params.id || uuid()
     const now = new Date().getTime()
     this.created = params.created || now
@@ -214,6 +214,7 @@ class Planet {
     rt.planets = [...rt.planets]
     await this.savePublic()
     await this.publicRender()
+    await this.copyTemplateAssets()
     await Promise.all(
       this.articles.map((a) => async () => {
         await a.savePublic()

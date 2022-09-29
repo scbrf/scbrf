@@ -195,6 +195,7 @@ class PlanetSidebarController {
           rt.planetEditing.template = param.template
         }
         rt.planetEditing = null
+        log.info('change planet properties to', param)
       } else {
         log.error('fe and be not match!!', { fe: param.id, be: rt.planetEditing.id })
         return
