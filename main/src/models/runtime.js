@@ -38,13 +38,13 @@ class Runtime {
     const ret = {}
     this.following.forEach((p) => {
       p.articles.forEach((a) => {
-        if (moment(a.created).isSame(moment(), 'day')) {
+        if (moment(a.created).isSame(moment(), 'day') && a.read === false) {
           ret.today = (ret.today || 0) + 1
         }
         if (a.read === false) {
           ret.read = (ret.read || 0) + 1
         }
-        if (a.starred === true) {
+        if (a.starred === true && a.read === false) {
           ret.starred = (ret.starred || 0) + 1
         }
       })

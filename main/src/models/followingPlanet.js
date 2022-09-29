@@ -221,9 +221,13 @@ class FollowingPlanet {
       planet.planetType = '.ens'
       planet.link = link
       if (!planet.avatar) {
-        let avatarUrl = await wallet.resolveAvatar(link)
-        if (avatarUrl) {
-          await planet.downloadAvatar(avatarUrl)
+        try {
+          let avatarUrl = await wallet.resolveAvatar(link)
+          if (avatarUrl) {
+            await planet.downloadAvatar(avatarUrl)
+          }
+        } catch (ex) {
+          log.error('try resolve avatar got exception', ex)
         }
       }
       await planet.save()
