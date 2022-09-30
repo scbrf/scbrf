@@ -82,7 +82,7 @@ class PlanetSidebarController {
   }
   async publishPlanet() {
     const planet = rt.planets.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)[0]
-    await planet.publish()
+    await planet.republish()
   }
   async DeletePlanet() {
     const idx = dialog.showMessageBoxSync({
