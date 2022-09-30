@@ -26,7 +26,7 @@ class UpManager {
       }
       if (now > this.upSchedule[planet.id]) {
         this.upSchedule[planet.id] = now + Math.random() * this.PUBLISH_DELTA + this.PUBLISH_DELTA
-        planet.publish()
+        planet.republish()
       } else if (this.upSchedule[planet.id] < planet.lastPublished + this.PUBLISH_DELTA) {
         this.upSchedule[planet.id] = planet.lastPublished + this.PUBLISH_DELTA + Math.random() * this.PUBLISH_DELTA
         log.debug('maybe manual update, set next up to', planet.id, this.upSchedule[planet.id])

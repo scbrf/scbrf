@@ -9,7 +9,7 @@ test('first round', () => {
   const func2 = jest.fn()
   rt.planets = []
   rt.following = []
-  rt.planets.push({ id: 'p1', publish: func1 })
+  rt.planets.push({ id: 'p1', republish: func1 })
   rt.following.push({ id: 'f1', update: func2 })
   upm.doCheck()
   expect(upm.upSchedule.p1).toBeTruthy()

@@ -23,6 +23,7 @@ class Planet {
     this.githubUsername = params.githubUsername || null
     this.twitterUsername = params.twitterUsername || null
     this.lastPublished = params.lastPublished || now
+    this.cid = params.cid || null
     this.articles = []
     this.drafts = []
 
@@ -146,6 +147,7 @@ class Planet {
     return {
       id: this.id,
       ipns: this.ipns,
+      cid: this.cid,
       name: this.name,
       about: this.about,
       template: this.template,
@@ -174,6 +176,9 @@ class Planet {
    */
   savePublic() {
     log.info('when save public, article create date is', this.articles.length && this.articles[0].created)
+    if (!require('fs').existsSync(this.publicBasePath)) {
+      require('fs').mkdirSync(this.publicBasePath, { recursive: true })
+    }
     require('fs').writeFileSync(
       this.publicInfoPath,
       JSON.stringify({
@@ -217,6 +222,7 @@ class Planet {
     await this.copyTemplateAssets()
     await Promise.all(
       this.articles.map((a) => async () => {
+        log.info('during public,save to public dir', a.id)
         await a.savePublic()
         await a.publicRender()
       })
@@ -227,13 +233,37 @@ class Planet {
       log.debug('publish dir return:', cid)
       await ipfs.publish(this.id, cid)
       log.info(`publish site succ`, { key: this.id, cid })
+      this.cid = cid
     } catch (ex) {
-      log.error('publish site error', { key: this.id, cid, ex })
+      log.error('publish site error', { key: this.id, ex })
     }
     this.publishing = false
     this.lastPublished = new Date().getTime()
+    this.save()
     rt.planets = [...rt.planets]
   }
+
+  async republish() {
+    if (!this.cid) {
+      log.error('no cid when republish, this should not happen')
+      return
+    }
+    if (this.publishing) {
+      return
+    }
+    this.publishing = true
+    rt.planets = [...rt.planets]
+    try {
+      await ipfs.publish(this.id, this.cid)
+    } catch (ex) {
+      log.error('error when republish', ex.toString())
+    }
+    this.publishing = false
+    this.lastPublished = new Date().getTime()
+    this.save()
+    rt.planets = [...rt.planets]
+  }
+
   static async loadPlanets() {
     let ps = []
     const planets = await new Promise((resolve) => {
