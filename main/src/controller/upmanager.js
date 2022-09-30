@@ -6,8 +6,8 @@ const log = require('../utils/log')('upmanager')
  * 处理Planets和Following的定期更新
  */
 class UpManager {
-  PUBLISH_DELTA = 30 * 60 * 1000
-  UPDATE_DELTA = 30 * 60 * 1000
+  PUBLISH_DELTA = 15 * 60 * 1000
+  UPDATE_DELTA = 5 * 60 * 1000
   constructor() {
     evt.bindBusTable(this, [[evt.evAppInit, this.start]])
     this.upSchedule = {}
