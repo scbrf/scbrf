@@ -100,10 +100,10 @@ class FollowingPlanet {
         log.info('update site succ', { name: this.name })
       }
     } catch (ex) {
-      this.updating = false
       log.error('error when update', ex)
     }
 
+    this.updating = false
     rt.following = [...rt.following]
   }
 
