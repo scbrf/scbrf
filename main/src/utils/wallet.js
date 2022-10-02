@@ -1,16 +1,21 @@
-const { ipcMain } = require('electron')
+const { app, ipcMain, BrowserWindow } = require('electron')
 const { ethers } = require('ethers')
+const evt = require('../utils/events')
 const log = require('../utils/log')('wallet')
 
 class Wallet {
-  init(rootDir) {
-    this.walletPath = require('path').join(rootDir, 'wallet.json')
-    // if (require('fs').existsSync(this.walletPath)) {
-    //   this.wallet = ethers.Wallet.fromEncryptedJsonSync(
-    //     JSON.parse(require('fs').readFileSync(this.walletPath).toString()),
-    //     ''
-    //   )
-    // }
+  init() {
+    evt.bindIpcMainTable(this, [
+      [evt.ipcCreateWallet, this.createWallet],
+      [evt.ipcUnlockWallet, this.unlockWallet],
+    ])
+    this.walletDir = require('path').join(app.__root__, 'wallet')
+    this.walletPath = require('path').join(this.walletDir, 'wallet.json')
+    if (require('fs').existsSync(this.walletPath)) {
+      this.needUnlock = true
+    } else {
+      this.needCreate = true
+    }
     ipcMain.handle('wallet/address', () => {
       return this.wallet.address
     })
@@ -21,7 +26,23 @@ class Wallet {
       const msg = param[0]
       return await this.wallet.signMessage(msg)
     })
+    // this.wallet = ethers.Wallet.createRandom()
+  }
+  async unlockWallet(event, passwd) {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    this.wallet = ethers.Wallet.fromEncryptedJsonSync(require('fs').readFileSync(this.walletPath).toString(), passwd)
+    win.closable = true
+    win.close()
+  }
+  async createWallet(event, passwd) {
+    const win = BrowserWindow.fromWebContents(event.sender)
     this.wallet = ethers.Wallet.createRandom()
+    if (!require('fs').existsSync(this.walletDir)) {
+      require('fs').mkdirSync(this.walletDir, { recursive: true })
+    }
+    require('fs').writeFileSync(this.walletPath, await this.wallet.encrypt(passwd))
+    win.closable = true
+    win.close()
   }
   get provider() {
     const network = 'homestead'

@@ -56,6 +56,9 @@ class EventCenter {
   ipcAppQuit //app 安全退出
   ipcOpenFocusInBrowser //在浏览器里打开本地网关预览模式
 
+  ipcCreateWallet //创建密码
+  ipcUnlockWallet //解锁钱包
+
   constructor() {
     this.bus = EvtBus()
     this.eventNameInit()

@@ -12,6 +12,8 @@ import ArticleEditorView from "../views/ArticleEditorView.vue";
 import ArticleEditorWaiting from "../views/ArticleEditorWaiting.vue";
 import PlanetInfoView from "../views/PlanetInfoView.vue";
 import EmptyView from "../views/EmptyView.vue";
+import CreateWalletView from "../views/CreateWalletView.vue";
+import UnlockWalletView from "../views/UnlockWalletView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,6 +64,14 @@ const router = createRouter({
       path: "/about",
       name: "about",
       component: () => import("../views/AboutView.vue"),
+    },
+    {
+      path: "/wallet/create",
+      component: CreateWalletView,
+    },
+    {
+      path: "/wallet/unlock",
+      component: UnlockWalletView,
     },
     {
       path: "/dialog/planet/create",

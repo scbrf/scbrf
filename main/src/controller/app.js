@@ -19,6 +19,14 @@ class ScarboroughApp {
     //程序退出的时候通知各模块清理自己
     app.on('quit', () => evt.emit(evt.evAppQuit))
   }
+  async createWallet() {
+    await require('./createWalletWin').show()
+  }
+
+  async unlockWallet() {
+    await require('./unlockWalletWin').show()
+  }
+
   async start() {
     //首先设置所有内容保存的根目录
     await this.initDirBase()
@@ -26,6 +34,14 @@ class ScarboroughApp {
     await this.loadAll()
     //启动前端页面服务器
     await require('../utils/websrv').init()
+
+    await wallet.init()
+    if (wallet.needCreate) {
+      await this.createWallet()
+    } else {
+      await this.unlockWallet()
+    }
+
     //各个模块这个时候可以按需做自己的初始化工作
     evt.emit(evt.evAppInit)
     //创建并且显示主窗口
@@ -46,7 +62,6 @@ class ScarboroughApp {
     FollowingPlanet.followingPlanetsPath = require('path').join(app.__root__, 'Following')
     Planet.myPlanetsPath = require('path').join(app.__root__, 'My')
     ipfs.constructor.REPO_PATH = require('path').join(app.__root__, 'ipfs')
-    wallet.init(require('path').join(app.__root__, 'wallet'))
   }
 }
 
