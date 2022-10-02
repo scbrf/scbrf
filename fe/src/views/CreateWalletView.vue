@@ -9,7 +9,7 @@
             在下面的文本框中输入一个密码，我们不会记录这个密码，忘记密码代表着您无法再修改之前发表的评论。
         </div>
         <div class="flex-1"></div>
-        <label class="input-group input-group-sm w-100 flex mt-2">
+        <label class="input-group input-group-sm w-100 flex mt-2 nodrag">
             <input type="password" placeholder="请输入密码!" v-model="passwd1"
                 class="input flex-1 input-sm input-bordered font-bold text-center" />
             <input type="password" placeholder="请重复输入!" v-model="passwd2"
@@ -17,7 +17,7 @@
         </label>
         <div class="flex-1"></div>
         <div class="flex justify-center m-2">
-            <button class="btn btn-sm btn-outline" :disabled="!validate" @click="createWallet">创建钱包</button>
+            <button class="btn btn-sm btn-outline nodrag" :disabled="!validate" @click="createWallet">创建钱包</button>
         </div>
     </div>
 </template>

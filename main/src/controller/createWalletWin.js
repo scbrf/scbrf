@@ -10,7 +10,7 @@ class CreateWalletWin {
         x: 18,
         y: 18,
       },
-      frame: true,
+      frame: false,
       closable: false,
       maximizable: false,
       minimizable: false,
@@ -26,6 +26,7 @@ class CreateWalletWin {
     await new Promise((resolve) => {
       win.on('close', resolve)
       win.show()
+      win.webContents.openDevTools()
     })
   }
 }
