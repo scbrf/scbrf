@@ -18,10 +18,12 @@
 
 .oprations .likes {
     margin-right: 1em;
+    cursor: pointer;
 }
 
 .oprations .dislikes {
     margin-right: 1em;
+    cursor: pointer;
 }
 
 .oprations .reply {
@@ -50,6 +52,7 @@
     display: flex;
     align-items: center;
     padding: 3pt;
+    cursor: pointer;
 }
 
 .likebtn {
@@ -91,6 +94,9 @@
 
 .scbrf-comments-post .deletebtn {
     margin-right: 1em;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
 }
 
 .scbrf-comments-post {
