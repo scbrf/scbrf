@@ -26,7 +26,7 @@ class Webview {
       log.info('need open url', url)
       // return { action: 'deny' };
     })
-    // this.view.webContents.openDevTools({mode: 'undocked'})
+    this.view.webContents.openDevTools({ mode: 'undocked' })
   }
   init() {
     this.view.setAutoResize({ height: true, width: true })

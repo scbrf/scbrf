@@ -1,7 +1,28 @@
+const { ipcMain } = require('electron')
 const { ethers } = require('ethers')
 const log = require('../utils/log')('wallet')
 
 class Wallet {
+  init(rootDir) {
+    this.walletPath = require('path').join(rootDir, 'wallet.json')
+    // if (require('fs').existsSync(this.walletPath)) {
+    //   this.wallet = ethers.Wallet.fromEncryptedJsonSync(
+    //     JSON.parse(require('fs').readFileSync(this.walletPath).toString()),
+    //     ''
+    //   )
+    // }
+    ipcMain.handle('wallet/address', () => {
+      return this.wallet.address
+    })
+    ipcMain.handle('ipc/eth_requestAccounts', () => {
+      return [this.wallet.address]
+    })
+    ipcMain.handle('ipc/personal_sign', async (_, param) => {
+      const msg = param[0]
+      return await this.wallet.signMessage(msg)
+    })
+    this.wallet = ethers.Wallet.createRandom()
+  }
   get provider() {
     const network = 'homestead'
     return ethers.getDefaultProvider(network, {

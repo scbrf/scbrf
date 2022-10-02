@@ -3,6 +3,7 @@ const evt = require('../utils/events')
 const { FollowingPlanet, Planet } = require('../models')
 const ipfs = require('../utils/ipfs')
 const rt = require('../models/runtime')
+const wallet = require('../utils/wallet')
 require('./upmanager')
 require('./mainwindow')
 require('./trayIcon')
@@ -45,6 +46,7 @@ class ScarboroughApp {
     FollowingPlanet.followingPlanetsPath = require('path').join(app.__root__, 'Following')
     Planet.myPlanetsPath = require('path').join(app.__root__, 'My')
     ipfs.constructor.REPO_PATH = require('path').join(app.__root__, 'ipfs')
+    wallet.init(require('path').join(app.__root__, 'wallet'))
   }
 }
 

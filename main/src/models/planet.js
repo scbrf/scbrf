@@ -164,6 +164,10 @@ class Planet {
       recursive: true,
       force: true,
     })
+    log.info('copt assets dir done', {
+      from: src,
+      to: this.publicAssetsPath,
+    })
   }
   save() {
     require('fs').writeFileSync(this.infoPath, JSON.stringify(this.json()))
