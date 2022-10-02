@@ -207,11 +207,11 @@ class PlanetSidebarController {
     if (!param.id) {
       rt.planets = [planet, ...rt.planets]
     }
-    rt.sidebarFocus = planet
-    evt.emit(evt.evRuntimePlanetsChange)
     if (planet.articles.length > 0) {
       planet.publish()
     }
+    rt.sidebarFocus = planet
+    evt.emit(evt.evRuntimePlanetsChange)
   }
   updateSidebarFollowing() {
     if (!this.view) return

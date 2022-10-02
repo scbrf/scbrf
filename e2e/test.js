@@ -532,7 +532,21 @@ class Test {
     await this.expectElemNotExists(By.css(".e2e-mp-0"));
   }
 
+  async createWallet() {
+    await this.switchTo("/wallet/create");
+    const passwd = await driver.findElement(By.css("input"));
+    await passwd.sendKeys("123");
+    const passwd2 = await driver.findElement(
+      locateWith(By.css("input")).near(By.css("input"))
+    );
+    await passwd2.sendKeys("123");
+    const button = await driver.findElement(By.css("button"));
+    await button.click();
+    await this.winClose("/wallet/create", 10);
+  }
+
   async start() {
+    await this.createWallet();
     await this.waitIpfs();
     await this.createPlanet();
     await this.editPlanet();
