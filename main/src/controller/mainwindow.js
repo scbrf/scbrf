@@ -6,6 +6,7 @@ const articles = require('./articles')
 const webview = require('./webview')
 const webviewTopbar = require('./webviewTopbar')
 const audioPlayer = require('./audioplayer')
+const wallet = require('../utils/wallet')
 
 class MainWindowController {
   constructor() {
@@ -116,6 +117,9 @@ class MainWindowController {
     })
   }
   activeOrCreateWindow() {
+    // 如果没有解锁钱包，就什么也不做
+    if (!wallet.wallet) return
+
     if (this.win) {
       if (this.win.isMinimized()) {
         this.win.restore()
