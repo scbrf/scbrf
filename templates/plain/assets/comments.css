@@ -149,3 +149,19 @@
     opacity: 0.5;
     color: var(--foreground-secondary-color);
 }
+
+.trusted {
+    padding: 0;
+    margin: 0;
+}
+
+.trusted a {
+    display: flex;
+    align-items: center;
+}
+
+.trusted img {
+    margin-left: 1em;
+    width: 1.5em;
+    height: 1.5em;
+}

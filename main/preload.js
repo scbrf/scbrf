@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('api', {
 })
 let ethereum = {}
 contextBridge.exposeInMainWorld('ethereum', {
+  isScarborough: true,
   async on(msg, cb) {
     ethereum[msg] = cb
     if (msg === 'accountsChanged') {

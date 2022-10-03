@@ -23,7 +23,6 @@ class Planet {
     this.githubUsername = params.githubUsername || null
     this.twitterUsername = params.twitterUsername || null
     this.lastPublished = params.lastPublished || now
-    this.cid = params.cid || null
     this.articles = []
     this.drafts = []
 
@@ -147,7 +146,6 @@ class Planet {
     return {
       id: this.id,
       ipns: this.ipns,
-      cid: this.cid,
       name: this.name,
       about: this.about,
       template: this.template,
@@ -237,7 +235,6 @@ class Planet {
       log.debug('publish dir return:', cid)
       await ipfs.publish(this.id, cid)
       log.info(`publish site succ`, { key: this.id, cid })
-      this.cid = cid
     } catch (ex) {
       log.error('publish site error', { key: this.id, ex })
     }
@@ -248,17 +245,15 @@ class Planet {
   }
 
   async republish() {
-    if (!this.cid) {
-      log.error('no cid when republish, this should not happen')
-      return
-    }
     if (this.publishing) {
       return
     }
     this.publishing = true
     rt.planets = [...rt.planets]
     try {
-      await ipfs.publish(this.id, this.cid)
+      const cid = await ipfs.addDirectory(this.publicBasePath)
+      log.debug('publish dir return:', cid)
+      await ipfs.publish(this.id, cid)
     } catch (ex) {
       log.error('error when republish', ex.toString())
     }
