@@ -142,3 +142,10 @@
     border-bottom: 1px solid #f0f0f0;
     margin-top: 1em;
 }
+
+.scbrf-comments-helper {
+    margin-left: 1em;
+    font-size: x-small;
+    opacity: 0.5;
+    color: var(--foreground-secondary-color);
+}
