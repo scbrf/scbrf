@@ -26,7 +26,7 @@ class CreateWalletWin {
     await new Promise((resolve) => {
       win.on('close', resolve)
       win.show()
-      win.webContents.openDevTools()
+      // win.webContents.openDevTools()
     })
   }
 }
