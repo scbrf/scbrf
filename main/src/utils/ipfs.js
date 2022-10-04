@@ -210,7 +210,7 @@ class IPFSDaemon {
     return this.runIPFSCmd('config', 'Peering.Peers', JSON.stringify(peers), '--json')
   }
   async updateGatewayPort(port) {
-    return this.runIPFSCmd('config', 'Addresses.Gateway', `/ip4/127.0.0.1/tcp/${port}`)
+    return this.runIPFSCmd('config', 'Addresses.Gateway', `/ip4/0.0.0.0/tcp/${port}`)
   }
 
   async updateAPIPort(port) {

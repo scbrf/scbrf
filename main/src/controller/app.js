@@ -42,6 +42,8 @@ class ScarboroughApp {
       await this.unlockWallet()
     }
 
+    await require('../utils/apisrv').init()
+
     //各个模块这个时候可以按需做自己的初始化工作
     evt.emit(evt.evAppInit)
     //创建并且显示主窗口
