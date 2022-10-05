@@ -16,6 +16,9 @@ jest.mock('../utils/render')
 jest.mock('../utils/ipfs')
 jest.mock('../utils/wallet')
 jest.mock('axios')
+wallet.wallet = {
+  address: 'test',
+}
 render.getEnv.mockReturnValue({
   render() {},
 })

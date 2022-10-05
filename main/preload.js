@@ -6,20 +6,3 @@ contextBridge.exposeInMainWorld('api', {
     return ipcRenderer.invoke(...arguments)
   },
 })
-let ethereum = {}
-contextBridge.exposeInMainWorld('ethereum', {
-  isScarborough: true,
-  async on(msg, cb) {
-    ethereum[msg] = cb
-    if (msg === 'accountsChanged') {
-      const address = await ipcRenderer.invoke('wallet/address')
-      cb([address])
-    }
-  },
-  async request(obj) {
-    const { method, params } = obj
-    const result = await ipcRenderer.invoke(`ipc/${method}`, params)
-    console.log('request method', obj, 'got', result)
-    return result
-  },
-})

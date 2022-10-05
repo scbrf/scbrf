@@ -15,6 +15,7 @@ class Article {
     this.created = param.created || now
     this.updated = param.updated || now
     this.summary = param.summary || null
+    this.author = param.author || require('../utils/wallet').wallet.address
     this.planet = planet
     this.drafts = []
 
@@ -47,6 +48,7 @@ class Article {
       summary: this.summary,
       title: this.title,
       created: this.created,
+      author: this.author,
       id: this.id,
       link: this.link,
       audioFilename: this.audioFilename,

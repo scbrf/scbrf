@@ -15,7 +15,7 @@ class Webview {
     this.view = new BrowserView({
       webPreferences: {
         webSecurity: false,
-        preload: require('path').join(__dirname, '..', '..', 'preload.js'),
+        preload: require('path').join(__dirname, '..', '..', 'preload_ethereum.js'),
       },
     })
     this.view.webContents.on('will-navigate', (e, url) => {

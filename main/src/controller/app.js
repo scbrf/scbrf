@@ -30,11 +30,10 @@ class ScarboroughApp {
   async start() {
     //首先设置所有内容保存的根目录
     await this.initDirBase()
-    //加载已经保存的内容
-    await this.loadAll()
     //启动前端页面服务器
     await require('../utils/websrv').init()
 
+    //解锁钱包
     await wallet.init()
     if (wallet.needCreate) {
       await this.createWallet()
@@ -42,6 +41,10 @@ class ScarboroughApp {
       await this.unlockWallet()
     }
 
+    //加载已经保存的内容
+    await this.loadAll()
+
+    //启动api网关，用于服务移动端
     await require('../utils/apisrv').init()
 
     //各个模块这个时候可以按需做自己的初始化工作

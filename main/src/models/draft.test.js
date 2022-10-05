@@ -1,4 +1,5 @@
 const fs = require('fs')
+const wallet = require('../utils/wallet')
 require('nunjucks')
 const ipfs = require('../utils/ipfs')
 require('image-size')
@@ -8,6 +9,11 @@ jest.mock('fs')
 jest.mock('nunjucks')
 jest.mock('image-size')
 jest.mock('../utils/ipfs')
+jest.mock('../utils/wallet')
+wallet.wallet = {
+  addres: 'test',
+}
+
 Planet.myPlanetsPath = '/tmp'
 let cpcb
 fs.copyFile.mockImplementation((_, __, cb) => {
@@ -116,7 +122,7 @@ test('remove juke files', async () => {
   if (process.platform === 'win32') {
     expect(targets.length).toBe(0)
     expect(fs.rmSync).toHaveBeenCalledTimes(1) //rm draft
-  } else{
+  } else {
     expect(targets.length).toBe(1)
     expect(fs.rmSync).toHaveBeenCalledTimes(2) //rm public and rm draft
   }
