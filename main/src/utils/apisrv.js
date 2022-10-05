@@ -95,7 +95,6 @@ class ApiServer {
           articles: p.articles.map((a) => {
             const obj = a.json()
             obj.summary = FollowingArticle.extractSummary(a)
-            obj.created = require('./datetime').timeFromReferenceDate(obj.created)
             delete obj.content
             obj.url = `${ipfsGateway}/ipfs/${p.cid}/${a.id}/`
             return obj
