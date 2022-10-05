@@ -130,6 +130,27 @@ class PlanetSidebarController {
       })
     }
   }
+  showSiteQRDialog() {
+    const win = BrowserWindow.fromWebContents(this.view.webContents)
+    const qrDialog = new BrowserWindow({
+      parent: win,
+      x: win.getPosition()[0] + win.getSize()[0] / 2 - 300,
+      y: win.getPosition()[1] + win.getSize()[1] / 2 - 150,
+      width: 400,
+      height: 400,
+      frame: false,
+      resizable: false,
+      webPreferences: {
+        preload: require('path').join(__dirname, '..', '..', 'preload.js'),
+      },
+    })
+    // qrDialog.webContents.openDevTools({ mode: 'undocked' })
+    qrDialog.loadURL(`${require('../utils/websrv').WebRoot}/dialog/planet/qrcode`)
+    qrDialog.webContents.on('did-finish-load', () => {
+      qrDialog.webContents.send('updatePlanetUrl', require('../utils/apisrv').getPlanetUrl())
+    })
+    qrDialog.show()
+  }
   showFollowPlanetDialog() {
     const win = BrowserWindow.fromWebContents(this.view.webContents)
     const createPlanetDialog = new BrowserWindow({
@@ -279,11 +300,15 @@ class PlanetSidebarController {
         },
       },
       {
+        label: 'Follow Planet',
+        click: this.showFollowPlanetDialog.bind(this),
+      },
+      {
         type: 'separator',
       },
       {
-        label: 'Follow Planet',
-        click: this.showFollowPlanetDialog.bind(this),
+        label: 'Site QrCode',
+        click: this.showSiteQRDialog.bind(this),
       },
     ])
 

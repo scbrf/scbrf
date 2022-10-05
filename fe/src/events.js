@@ -4,6 +4,7 @@ import { useTopbarStore } from "./stores/topbar";
 import { useEditorStore } from "./stores/editor";
 import { usePlanetInfoStore } from "./stores/planetinfo";
 import { useEditPlanetStore } from "./stores/editplanet";
+import { useSiteStore } from "./stores/site";
 
 export default function () {
   const ipfs = useIPFSStore();
@@ -12,12 +13,16 @@ export default function () {
   const editor = useEditorStore();
   const planetinfo = usePlanetInfoStore();
   const planetEditor = useEditPlanetStore();
+  const site = useSiteStore();
 
   api.recieve("ipfsOnlineState", (p) => {
     for (let key of Object.keys(p[0])) {
       ipfs[key] = p[0][key];
     }
     // ipfs.$patch(p[0]); //seems has bug do not want to deep into
+  });
+  api.recieve("updatePlanetUrl", (p) => {
+    site.api = p[0];
   });
   api.recieve("myplanets", (p) => {
     ipfs.planets = p[0];
@@ -43,6 +48,9 @@ export default function () {
   });
   api.recieve("updateAudio", (p) => {
     editor.audioFilename = p[0];
+  });
+  api.recieve("updateAttachments", (p) => {
+    editor.attachments = p[0];
   });
   api.recieve("updateAttachments", (p) => {
     editor.attachments = p[0];

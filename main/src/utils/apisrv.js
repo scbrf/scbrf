@@ -14,8 +14,14 @@ class ApiServer {
       host: '0.0.0.0',
     })
     log.debug('api server init called, and got port', port)
-    await this.startListen(port)
-    this.mdnsStart(port)
+    this.apiPort = port
+    this.ipAddr = this.getIpAddress()
+    await this.startListen()
+    this.mdnsStart()
+  }
+
+  getPlanetUrl() {
+    return `scbrf://${this.getIpAddress()}:${this.apiPort}`
   }
 
   getIpAddress() {
@@ -31,17 +37,18 @@ class ApiServer {
     }
   }
 
-  mdnsStart(port) {
+  mdnsStart() {
     var mdns = require('multicast-dns')()
     mdns.on('query', (query) => {
-      if (query.questions[0] && query.questions[0].name === '_api._scarborough._tcp.local') {
+      if (query.questions[0] && query.questions[0].name.startsWith('_scarborough-api._tcp')) {
+        log.debug(`querying ${query.questions[0].name} ...`)
         mdns.respond({
           answers: [
             {
               name: query.questions[0].name,
               type: 'SRV',
               data: {
-                port,
+                port: this.apiPort,
                 target: this.getIpAddress(),
               },
             },
@@ -86,8 +93,8 @@ class ApiServer {
       }
     })
     app.use(router.routes()).use(router.allowedMethods())
-    log.debug('api server started at port:', port)
-    app.listen(port, '0.0.0.0')
+    log.debug('api server started at port:', this.apiPort)
+    app.listen(this.apiPort, '0.0.0.0')
   }
 }
 

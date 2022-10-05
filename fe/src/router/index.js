@@ -14,6 +14,7 @@ import PlanetInfoView from "../views/PlanetInfoView.vue";
 import EmptyView from "../views/EmptyView.vue";
 import CreateWalletView from "../views/CreateWalletView.vue";
 import UnlockWalletView from "../views/UnlockWalletView.vue";
+import QrcodeView from "../views/QrcodeView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -80,6 +81,10 @@ const router = createRouter({
     {
       path: "/dialog/planet/follow",
       component: FollowPlanetView,
+    },
+    {
+      path: "/dialog/planet/qrcode",
+      component: QrcodeView,
     },
     {
       path: "/dialog/planet/info",
