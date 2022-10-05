@@ -58,13 +58,22 @@ class ApiServer {
     })
   }
 
-  startListen(port) {
+  startListen() {
     const app = new Koa()
     const bodyParser = require('koa-bodyparser')
     const Router = require('koa-router')
     const router = new Router()
     app.use(bodyParser())
     app.use(logger)
+    router.post('/ipc', async (ctx) => {
+      const { method, params, requestid } = ctx.request.body
+      if (method === 'personal_sign') {
+        ctx.body = {
+          requestid,
+          data: await wallet.wallet.signMessage(params[0]),
+        }
+      }
+    })
     router.post('/site', (ctx) => {
       const ipfsGateway = `http://${this.getIpAddress()}:${ipfs.gatewayPort}`
       ctx.body = {
