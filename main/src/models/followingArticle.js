@@ -26,18 +26,11 @@ class FollowingArticle {
 
   static extractSummary(article, planet) {
     if (article.content.length > 0) {
-      if (
-        planet.planetType === '.planet' ||
-        planet.planetType === '.ens' ||
-        planet.planetType === '.dotbit' ||
-        planet.planetType === '.ipns'
-      ) {
-        const html = marked.parse(article.content)
-        const dom = new JSDOM(html)
-        return dom.window.document.body.textContent.substring(0, 300)
-      } else if (planet.planetType === '.dnslink' || planet.planetType == '.dns') {
-        return 'dummy summary'
-      }
+      const html = marked.parse(article.content)
+      const dom = new JSDOM(html)
+      return dom.window.document.body.textContent.substring(0, 300)
+    } else {
+      return 'Empty Content'
     }
   }
 

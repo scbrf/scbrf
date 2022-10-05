@@ -4,6 +4,7 @@ const log = require('../utils/log')('api')
 const rt = require('../models/runtime')
 const wallet = require('./wallet')
 const ipfs = require('./ipfs')
+const FollowingArticle = require('../models/followingArticle')
 
 //API for mobile
 class ApiServer {
@@ -83,6 +84,7 @@ class ApiServer {
           ...p.json(),
           articles: p.articles.map((a) => {
             const obj = a.json()
+            obj.summary = FollowingArticle.extractSummary(a)
             delete obj.content
             obj.url = `${ipfsGateway}/ipns/${p.ipns}/${a.id}/`
             return obj
@@ -92,6 +94,7 @@ class ApiServer {
           ...p.json(),
           articles: p.articles.map((a) => {
             const obj = a.json()
+            obj.summary = FollowingArticle.extractSummary(a)
             obj.created = require('./datetime').timeFromReferenceDate(obj.created)
             delete obj.content
             obj.url = `${ipfsGateway}/ipfs/${p.cid}/${a.id}/`
