@@ -5,6 +5,7 @@ const rt = require('../models/runtime')
 const wallet = require('./wallet')
 const ipfs = require('./ipfs')
 const FollowingArticle = require('../models/followingArticle')
+const evt = require('../utils/events')
 
 //API for mobile
 class ApiServer {
@@ -75,6 +76,24 @@ class ApiServer {
         }
       }
     })
+    router.post('/article/markreaded', async (ctx) => {
+      const { planetid, articleid } = ctx.request.body
+      const planet = rt.following.filter((p) => p.id === planetid)[0]
+      if (planet) {
+        const article = planet.articles.filter((a) => a.id === articleid)[0]
+        if (article) {
+          article.read = true
+          article.save()
+          rt.following = [...rt.following]
+          evt.emit(evt.evRuntimeMiddleSidebarContentChange)
+          ctx.body = { result: '' }
+        } else {
+          ctx.body = { result: 'article not found' }
+        }
+      } else {
+        ctx.body = { result: 'planet not found' }
+      }
+    })
     router.post('/site', (ctx) => {
       const ipfsGateway = `http://${this.getIpAddress()}:${ipfs.gatewayPort}`
       ctx.body = {
@@ -85,6 +104,7 @@ class ApiServer {
           articles: p.articles.map((a) => {
             const obj = a.json()
             obj.summary = FollowingArticle.extractSummary(a)
+            obj.editable = true
             delete obj.content
             obj.url = `${ipfsGateway}/ipns/${p.ipns}/${a.id}/`
             return obj
