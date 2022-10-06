@@ -101,6 +101,7 @@ class ApiServer {
         ipfsGateway,
         planets: rt.planets.map((p) => ({
           ...p.json(),
+          avatar: p.avatar,
           articles: p.articles.map((a) => {
             const obj = a.json()
             obj.summary = FollowingArticle.extractSummary(a)
@@ -112,6 +113,7 @@ class ApiServer {
         })),
         following: rt.following.map((p) => ({
           ...p.json(),
+          avatar: p.avatar,
           articles: p.articles.map((a) => {
             const obj = a.json()
             obj.summary = FollowingArticle.extractSummary(a)
