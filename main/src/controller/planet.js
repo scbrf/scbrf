@@ -47,12 +47,13 @@ class PlanetSidebarController {
       await func(p, win)
       win.close()
     } catch (ex) {
-      log.error('error', ex)
+      log.error('error, dialog may keep opened', ex)
     }
   }
 
   async followWithProgress(p, win) {
     const progressFunc = (msg) => {
+      log.debug(`progress message: ${msg}`)
       win.webContents.executeJavaScript(`(()=>{
                     document.querySelector('.msg').innerText = '${msg}';
                 })()`)
@@ -60,6 +61,7 @@ class PlanetSidebarController {
     try {
       await this.followPlanet(p, progressFunc)
     } catch (ex) {
+      log.error('error when follow planet', ex)
       progressFunc(ex.toString())
       throw ex
     }

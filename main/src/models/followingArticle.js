@@ -35,9 +35,7 @@ class FollowingArticle {
   }
 
   get url() {
-    if (this.planet.planetType === '.ens') {
-      return `${ipfs.gateway}/ipfs/${this.planet.cid}/${this.id}/`
-    }
+    return `${ipfs.gateway}/ipfs/${this.planet.cid}/${this.id}/`
   }
 
   save() {

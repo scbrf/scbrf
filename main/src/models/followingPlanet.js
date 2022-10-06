@@ -162,10 +162,12 @@ class FollowingPlanet {
       cb(`error: not support http[s] or rss yet and maybe never!`)
       // return FollowingPlanet.followHTTP(link)
     }
-    const planet = FollowingPlanet.followIPNSorDNSLink(link, cb)
-    await planet.save()
-    await Promise.all(planet.articles.map((a) => a.save()))
-    return planet
+    const planet = await FollowingPlanet.followIPNSorDNSLink(link, cb)
+    if (planet) {
+      await planet.save()
+      await Promise.all(planet.articles.map((a) => a.save()))
+      return planet
+    }
   }
 
   static async getCID(ipns) {
@@ -292,8 +294,12 @@ class FollowingPlanet {
       })
     }
     cb(`try to update planet avatar ...`)
-    await planet.downloadAvatar(`${ipfs.gateway}/ipfs/${cid}/avatar.png`)
-    cb(`done!`)
+    try {
+      await planet.downloadAvatar(`${ipfs.gateway}/ipfs/${cid}/avatar.png`)
+      cb(`done!`)
+    } catch (ex) {
+      cb(`avatar may not ready!`)
+    }
     return planet
   }
 }
