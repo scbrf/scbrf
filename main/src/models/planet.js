@@ -269,7 +269,7 @@ class Planet {
     try {
       log.debug('refresh comments done!')
       const cid = await ipfs.addDirectory(this.publicBasePath)
-      log.debug('publish dir return:', cid)
+      log.info('publish dir return:', { planetid: this.id, cid })
       await ipfs.publish(this.id, cid)
     } catch (ex) {
       log.error('error when republish', ex.toString())
