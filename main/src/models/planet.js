@@ -224,13 +224,6 @@ class Planet {
     await this.savePublic()
     await this.publicRender()
     await this.copyTemplateAssets()
-    await Promise.all(
-      this.articles.map((a) => async () => {
-        log.info('during public,save to public dir', a.id)
-        await a.savePublic()
-        await a.publicRender()
-      })
-    )
 
     try {
       await Promise.all(this.articles.map((a) => a.publishComments()))
@@ -238,6 +231,14 @@ class Planet {
     } catch (ex) {
       log.error('刷新评论异常，继续', ex)
     }
+
+    await Promise.all(
+      this.articles.map((a) => async () => {
+        log.info('during public,save to public dir', a.id)
+        await a.savePublic()
+        await a.publicRender()
+      })
+    )
 
     try {
       const cid = await ipfs.addDirectory(this.publicBasePath)
