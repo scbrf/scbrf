@@ -180,7 +180,7 @@ class PlanetSidebarController {
       x: win.getPosition()[0] + win.getSize()[0] / 2 - 300,
       y: win.getPosition()[1] + win.getSize()[1] / 2 - 200,
       width: 600,
-      height: 400,
+      height: 350,
       frame: false,
       resizable: false,
       webPreferences: {
@@ -214,6 +214,7 @@ class PlanetSidebarController {
         planet = rt.planetEditing
         rt.planetEditing.name = param.name
         rt.planetEditing.about = param.about
+        rt.planetEditing.commentsBridge = param.commentsBridge
         if (rt.planetEditing.template !== param.template) {
           rt.planetEditing.template = param.template
         }

@@ -20,6 +20,7 @@ class MainWindowController {
       [evt.ipcMinimalWin, (e) => BrowserWindow.fromWebContents(e.sender).minimize()],
       [evt.ipcTriggleRootPanel, this.triggerRootPabel],
       [evt.ipcAppQuit, () => app.quit()],
+      [evt.ipcOpenUrlExternal, this.openExternal],
     ])
   }
   createWindow() {
@@ -59,6 +60,9 @@ class MainWindowController {
       this.win = null
     })
     this.rebounds()
+  }
+  openExternal(_, url) {
+    require('electron').shell.openExternal(url)
   }
   triggerRootPabel() {
     let root

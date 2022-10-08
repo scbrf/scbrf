@@ -23,6 +23,7 @@ class Article {
     this.draftsPath = require('path').join(planet.articlesPath, `Drafts`)
     this.publicBase = require('path').join(planet.publicBasePath, this.id)
     this.publicArticlePath = require('path').join(this.publicBase, 'article.json')
+    this.publicCommentsPath = require('path').join(this.publicBase, 'comments.js')
     this.publicIndexPath = require('path').join(this.publicBase, 'index.html')
   }
 
@@ -58,6 +59,25 @@ class Article {
 
   save() {
     require('fs').writeFileSync(this.articlePath, JSON.stringify(this.json()))
+  }
+
+  //从评论中心获取评论然后保存在本地的Public目录
+  //不应该抛出异常。
+  async publishComments() {
+    log.debug('need publish comments for article:', { articleid: this.id, commentsipns: this.planet.commentsIpns })
+    if (!this.planet.commentsBridge) return
+    const url = `${require('../utils/ipfs').gateway}/ipns/${this.planet.commentsBridge}/${this.id.toUpperCase()}.json`
+    log.debug('fetch  article comments from ', url)
+    try {
+      const comments = await require('axios').get(`${url}?seed=${new Date().getTime()}`)
+      require('fs').writeFileSync(
+        this.publicCommentsPath,
+        `window.__INIT_COMMENTS__ = ${JSON.stringify(comments.data)}`
+      )
+      log.debug('fetch article comments done!')
+    } catch (ex) {
+      log.error('error when fetch comments', ex.message)
+    }
   }
 
   delete() {

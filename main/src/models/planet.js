@@ -20,6 +20,7 @@ class Planet {
     this.created = params.created || now
     this.updated = params.updated || now
     this.ipns = params.ipns || null
+    this.commentsBridge = params.commentsBridge || ''
     this.githubUsername = params.githubUsername || null
     this.twitterUsername = params.twitterUsername || null
     this.lastPublished = params.lastPublished || now
@@ -148,6 +149,7 @@ class Planet {
       ipns: this.ipns,
       name: this.name,
       about: this.about,
+      commentsBridge: this.commentsBridge,
       template: this.template,
       created: this.created,
       updated: this.updated,
@@ -231,6 +233,13 @@ class Planet {
     )
 
     try {
+      await Promise.all(this.articles.map((a) => a.publishComments()))
+      log.info('save comments finish!')
+    } catch (ex) {
+      log.error('刷新评论异常，继续', ex)
+    }
+
+    try {
       const cid = await ipfs.addDirectory(this.publicBasePath)
       log.debug('publish dir return:', cid)
       await ipfs.publish(this.id, cid)
@@ -250,7 +259,15 @@ class Planet {
     }
     this.publishing = true
     rt.planets = [...rt.planets]
+
     try {
+      await Promise.all(this.articles.map((a) => a.publishComments()))
+    } catch (ex) {
+      log.error('刷新评论异常，继续', ex)
+    }
+
+    try {
+      log.debug('refresh comments done!')
       const cid = await ipfs.addDirectory(this.publicBasePath)
       log.debug('publish dir return:', cid)
       await ipfs.publish(this.id, cid)
@@ -273,6 +290,7 @@ class Planet {
     log.info(`read planet from ${Planet.myPlanetsPath} get`, planets)
     for (let id of planets || []) {
       const planet = await Planet.load(id)
+      if (!planet) continue
       const articles = await new Promise((resolve) => {
         require('fs').readdir(planet.articlesPath, (err, files) => {
           resolve(files)

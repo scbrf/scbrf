@@ -4,7 +4,7 @@
         <div class="flex-1"></div>
         <label class="input-group input-group-sm w-100 flex justify-center mt-2 nodrag">
             <input @keyup.enter="unlockWallet" type="password" placeholder="请输入密码!" v-model="passwd"
-                class="input input-sm input-bordered font-bold text-center" />
+                class="input input-sm input-bordered font-bold text-center" autofocus />
         </label>
         <div :class="error ? ['error'] : []" class="flex text-xs opacity-50 mt-4 text-center leading-6 justify-center">
             {{ error || '* 如果忘记密码，您可以退出程序、删除密码文件，然后重新启动程序以创建新密码'}}</div>

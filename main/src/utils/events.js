@@ -59,6 +59,8 @@ class EventCenter {
   ipcCreateWallet //创建密码
   ipcUnlockWallet //解锁钱包
 
+  ipcOpenUrlExternal //在外部浏览器打开
+
   constructor() {
     this.bus = EvtBus()
     this.eventNameInit()

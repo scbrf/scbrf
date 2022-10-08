@@ -6,5 +6,6 @@ export const useEditPlanetStore = defineStore("editplanet", {
     name: "",
     about: "",
     template: "Plain",
+    commentsBridge: "",
   }),
 });

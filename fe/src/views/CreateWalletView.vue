@@ -11,7 +11,7 @@
         <div class="flex-1"></div>
         <label class="input-group input-group-sm w-100 flex mt-2 nodrag">
             <input type="password" placeholder="请输入密码!" v-model="passwd1"
-                class="input flex-1 input-sm input-bordered font-bold text-center" />
+                class="input flex-1 input-sm input-bordered font-bold text-center" autofocus />
             <input type="password" placeholder="请重复输入!" v-model="passwd2"
                 class="input flex-1 input-sm input-bordered font-bold text-center" />
         </label>
