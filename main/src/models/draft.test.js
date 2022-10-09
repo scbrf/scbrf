@@ -25,26 +25,26 @@ test('create planet draft', async () => {
   await draft.addPhotos(['/tmp/a.png', '/tmp/b.jpg'])
   expect(draft.attachments.length).toBe(2)
   expect(draft.attachments[0].name).toBe('a.png')
-  expect(draft.attachments[0].url).toBe('file://' + require('path').normalize('/tmp/p1/Drafts/d1/Attachments/a.png'))
+  expect(draft.attachments[0].url).toBe('file://' + require('path').normalize('/tmp/P1/Drafts/D1/Attachments/a.png'))
   await draft.attachAudio('/tmp/b.mp3')
   expect(draft.audioFilename).toBe('/tmp/b.mp3')
   await expect(draft.attachAudio('/tmp/c.mp3')).rejects.toThrowError('Conflict')
   cpcb()
-  expect(draft.audioFilename).toBe(require('path').normalize('/tmp/p1/Drafts/d1/Attachments/b.mp3'))
+  expect(draft.audioFilename).toBe(require('path').normalize('/tmp/P1/Drafts/D1/Attachments/b.mp3'))
   draft.attachAudio('/tmp/c.mp3')
   expect(draft.audioFilename).toBe('/tmp/c.mp3')
   cpcb()
-  expect(draft.audioFilename).toBe(require('path').normalize('/tmp/p1/Drafts/d1/Attachments/c.mp3'))
+  expect(draft.audioFilename).toBe(require('path').normalize('/tmp/P1/Drafts/D1/Attachments/c.mp3'))
 
   await draft.attachVideo('/tmp/b.mp4')
   expect(draft.videoFilename).toBe('/tmp/b.mp4')
   await expect(draft.attachVideo('/tmp/c.mp4')).rejects.toThrowError('Conflict')
   cpcb()
-  expect(draft.videoFilename).toBe(require('path').normalize('/tmp/p1/Drafts/d1/Attachments/b.mp4'))
+  expect(draft.videoFilename).toBe(require('path').normalize('/tmp/P1/Drafts/D1/Attachments/b.mp4'))
   draft.attachVideo('/tmp/c.mp4')
   expect(draft.videoFilename).toBe('/tmp/c.mp4')
   cpcb()
-  expect(draft.videoFilename).toBe(require('path').normalize('/tmp/p1/Drafts/d1/Attachments/c.mp4'))
+  expect(draft.videoFilename).toBe(require('path').normalize('/tmp/P1/Drafts/D1/Attachments/c.mp4'))
 })
 
 test('draft from article', async () => {
@@ -58,8 +58,8 @@ test('draft from article', async () => {
   })
   const draft = Draft.fromArticle(article)
   expect(draft.id).toBe(article.id)
-  expect(draft.audioFilename).toBe(require('path').normalize('/tmp/p1/Public/a1/a.mp3'))
-  expect(draft.videoFilename).toBe(require('path').normalize('/tmp/p1/Public/a1/b.mp4'))
+  expect(draft.audioFilename).toBe(require('path').normalize('/tmp/P1/Public/A1/a.mp3'))
+  expect(draft.videoFilename).toBe(require('path').normalize('/tmp/P1/Public/A1/b.mp4'))
   expect(draft.attachments[0].name).toBe('c.jpg')
 
   const a2 = Article.fromDraft(draft)
@@ -70,7 +70,7 @@ test('draft from article', async () => {
 
 test('publish pending on wait copy audio', async () => {
   const draft = new Draft(new Planet({ id: 'p1' }), null, {
-    id: 'a1',
+    id: 'A1',
     title: 'test',
     content: 'this is a test',
   })
@@ -106,7 +106,7 @@ test('publish pending on wait copy video', async () => {
 
 test('remove juke files', async () => {
   const draft = new Draft(new Planet({ id: 'p1' }), null, {
-    id: 'a1',
+    id: 'A1',
     title: 'test',
     content: 'this is a test',
     attachments: [{ name: 'a.png' }, { name: 'b.png' }],

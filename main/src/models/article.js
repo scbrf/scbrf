@@ -8,7 +8,7 @@ const uuid = require('uuid').v4
 
 class Article {
   constructor(planet, param) {
-    this.id = param.id || uuid()
+    this.id = (param.id || uuid()).toUpperCase()
     this.title = param.title || ''
     this.content = param.content || ''
     this.audioFilename = param.audioFilename || null

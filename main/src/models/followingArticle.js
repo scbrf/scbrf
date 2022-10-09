@@ -8,7 +8,7 @@ const ipfs = require('../utils/ipfs')
 
 class FollowingArticle {
   constructor(a) {
-    this.id = a.id || uuid()
+    this.id = (a.id || uuid()).toUpperCase()
     this.link = a.link
     this.title = a.title
     this.content = a.content

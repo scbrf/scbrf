@@ -15,7 +15,7 @@ class Planet {
     this.name = params.name
     this.about = params.about || ''
     this.template = params.template || 'plain'
-    this.id = params.id || uuid()
+    this.id = (params.id || uuid()).toUpperCase()
     const now = new Date().getTime()
     this.created = params.created || now
     this.updated = params.updated || now

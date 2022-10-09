@@ -11,7 +11,7 @@ const rt = require('./runtime')
 class FollowingPlanet {
   static followingPlanetsPath
   constructor(params) {
-    this.id = params.id || uuid()
+    this.id = (params.id || uuid()).toUpperCase()
     this.planetType = params.planetType || '.ens'
     this.name = params.name
     this.about = params.about || ''

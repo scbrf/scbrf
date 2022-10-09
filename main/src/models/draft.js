@@ -86,7 +86,7 @@ class Draft {
   }
 
   set(param) {
-    this.id = param.id || uuid()
+    this.id = (param.id || uuid()).toUpperCase()
     this.title = param.title || ''
     this.content = param.content || ''
     this.attachments = param.attachments || []
