@@ -1,4 +1,7 @@
 const marked = require('marked')
+const jsdom = require('jsdom')
+const { JSDOM } = jsdom
+
 const log = require('../utils/log')('modelsArticle')
 
 const uuid = require('uuid').v4
@@ -14,10 +17,10 @@ class Article {
     const now = new Date().getTime()
     this.created = param.created || now
     this.updated = param.updated || now
-    this.summary = param.summary || null
     this.author = param.author || require('../utils/wallet').wallet.address
     this.planet = planet
     this.drafts = []
+    this.summary = param.summary || Article.extractSummary(this)
 
     this.articlePath = require('path').join(planet.articlesPath, `${this.id}.json`)
     this.draftsPath = require('path').join(planet.articlesPath, `Drafts`)
@@ -42,6 +45,16 @@ class Article {
     return 'file://' + this.publicIndexPath
   }
 
+  static extractSummary(article) {
+    if (article.content.length > 0) {
+      const html = marked.parse(article.content)
+      const dom = new JSDOM(html)
+      return dom.window.document.body.textContent.substring(0, 300)
+    } else {
+      return 'Empty Content'
+    }
+  }
+
   json() {
     return {
       attachments: this.attachments,
@@ -64,7 +77,7 @@ class Article {
   //从评论中心获取评论然后保存在本地的Public目录
   //不应该抛出异常。
   async publishComments() {
-    log.debug('need publish comments for article:', { articleid: this.id, commentsipns: this.planet.commentsIpns })
+    log.debug('need publish comments for article:', { articleid: this.id, commentsipns: this.planet.commentsBridge })
     if (!this.planet.commentsBridge) return
     const url = `${require('../utils/ipfs').gateway}/ipns/${this.planet.commentsBridge}/${this.id.toUpperCase()}.json`
     log.debug('fetch  article comments from ', url)

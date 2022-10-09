@@ -42,6 +42,11 @@ class IPFSDaemon {
     log.info('shutdown daemon called!')
     return this.runIPFSCmd('shutdown')
   }
+  async importKey(name, path) {
+    log.info(`import IPFS keypair from ${path}`)
+    const rsp = await this.runIPFSCmd('key', 'import', name, path)
+    return rsp.trim()
+  }
   async generateKey(id) {
     log.info(`Generating IPFS keypair for ${id}`)
     const rsp = await this.runIPFSCmd('key', 'gen', id)

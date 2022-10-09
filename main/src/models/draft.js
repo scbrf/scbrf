@@ -48,6 +48,7 @@ class Draft {
 
     //对于图片附件，认为是小附件，直接复制以避免冲突
     for (let attachment of draft.attachments) {
+      log.debug('copy attachment', [draft.attachmentsPath, attachment.name])
       const attachmentPath = require('path').join(draft.attachmentsPath, attachment.name)
       if (!require('fs').existsSync(attachmentPath)) {
         require('fs').cpSync(require('path').join(article.publicBase, attachment.name), attachmentPath)

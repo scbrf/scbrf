@@ -50,7 +50,7 @@ class Planet {
         resolve(files)
       })
     })
-    for (let id of drafts) {
+    for (let id of drafts || []) {
       const draftPath = require('path').join(this.draftsPath, id, 'Draft.json')
       if (require('fs').existsSync(draftPath)) {
         const params = JSON.parse(require('fs').readFileSync(draftPath))
@@ -170,6 +170,9 @@ class Planet {
     })
   }
   save() {
+    if (!require('fs').existsSync(this.basePath)) {
+      require('fs').mkdirSync(this.basePath, { recursive: true })
+    }
     require('fs').writeFileSync(this.infoPath, JSON.stringify(this.json()))
   }
   removeDraft(draft) {

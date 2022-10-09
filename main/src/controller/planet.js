@@ -1,5 +1,5 @@
 const { BrowserView, Menu, clipboard, BrowserWindow, dialog } = require('electron')
-const { Planet, FollowingPlanet } = require('../models')
+const { Planet, FollowingPlanet, Article } = require('../models')
 const ipfs = require('../utils/ipfs')
 
 const log = require('../utils/log')('planetView')
@@ -286,6 +286,91 @@ class PlanetSidebarController {
     )
   }
 
+  async doImportPlanet() {
+    const win = BrowserWindow.fromBrowserView(this.view)
+    const pathes = dialog.showOpenDialogSync(win, {
+      message: 'Import Planet',
+      filters: [
+        {
+          name: 'Planet',
+          extensions: ['planet'],
+        },
+      ],
+    })
+    const base = pathes[0]
+    const planetPath = require('path').join(base, 'planet.json')
+    const planetJson = JSON.parse(require('fs').readFileSync(planetPath).toString())
+    const planet = new Planet({
+      ...planetJson,
+      created: require('../utils/datetime').timeFromReferenceDate(planetJson.created),
+      updated: require('../utils/datetime').timeFromReferenceDate(planetJson.updated),
+    })
+    if (require('fs').existsSync(planet.basePath)) {
+      dialog.showMessageBoxSync(win, {
+        message: '目录已存在',
+        type: 'error',
+      })
+      return
+    }
+    if (rt.planets.filter((p) => p.id === planet.id)[0]) {
+      dialog.showMessageBoxSync(win, {
+        message: 'ID 已存在',
+        type: 'error',
+      })
+      return
+    }
+    require('fs').mkdirSync(planet.basePath)
+    require('fs').mkdirSync(planet.publicBasePath)
+    require('fs').mkdirSync(planet.articlesPath)
+    require('fs').mkdirSync(planet.articleDraftsPath)
+
+    const keyPath = require('path').join(base, 'planet.key')
+    const avatarPath = require('path').join(base, 'avatar.png')
+    const articlesPath = require('fs')
+      .readdirSync(base)
+      .map((a) => require('path').join(base, a))
+      .filter((a) => require('fs').existsSync(require('path').join(a, 'article.json')))
+    planet.articles = articlesPath.map((a) => {
+      const aJson = JSON.parse(require('fs').readFileSync(require('path').join(a, 'article.json')).toString())
+      return new Article(planet, {
+        ...aJson,
+        attachments: (aJson.attachments || [])
+          .filter((a) => a != aJson.audioFilename)
+          .filter((a) => a != aJson.videoFilename)
+          .map((a) => ({ name: a })),
+        created: require('../utils/datetime').timeFromReferenceDate(aJson.created),
+        updated: require('../utils/datetime').timeFromReferenceDate(aJson.updated),
+      })
+    })
+    if (require('fs').existsSync(avatarPath)) {
+      require('fs').copyFileSync(avatarPath, planet.avatarPath)
+      planet.avatar = 'avatar.png'
+    }
+    await planet.save()
+    await Promise.all(planet.articles.map((a) => a.save()))
+    await Promise.all(
+      planet.articles.map((a) =>
+        require('fs').cpSync(require('path').join(base, a.id), a.publicBase, { recursive: true })
+      )
+    )
+    await planet.copyTemplateAssets()
+    await planet.publicRender()
+    await Promise.all(planet.articles.map((a) => a.publicRender()))
+    try {
+      await require('../utils/ipfs').importKey(planet.id, keyPath)
+    } catch (ex) {
+      if (ex.message.indexOf('already exists') < 0) {
+        require('fs').rmSync(planet.basePath, { recursive: true, force: true })
+        dialog.showMessageBoxSync(win, {
+          message: ex.message,
+          type: 'error',
+        })
+        return
+      }
+    }
+    rt.planets = [planet, ...rt.planets]
+  }
+
   async init() {
     // Planets SideBar 通讯代理和数据管理
     this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/root`)
@@ -312,6 +397,13 @@ class PlanetSidebarController {
       {
         label: 'Site QrCode',
         click: this.showSiteQRDialog.bind(this),
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Import Planet',
+        click: this.doImportPlanet.bind(this),
       },
     ])
 

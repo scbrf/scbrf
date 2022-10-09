@@ -24,7 +24,7 @@ class FollowingArticle {
     return require('path').join(this.planet.articlesPath, `${this.id}.json`)
   }
 
-  static extractSummary(article, planet) {
+  static extractSummary(article) {
     if (article.content.length > 0) {
       const html = marked.parse(article.content)
       const dom = new JSDOM(html)
