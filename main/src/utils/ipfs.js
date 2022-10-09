@@ -4,7 +4,7 @@ const axios = require('axios').default
 const log = require('../utils/log')('ipfs')
 
 const OS = require('os').platform()
-const EXE_FILE = OS === 'darwin' ? 'ipfs-amd64' : OS == 'win32' ? 'ipfs.exe' : 'ipfs'
+const EXE_FILE = OS === 'win32' ? 'ipfs.exe' : 'ipfs'
 
 class IPFSDaemon {
   // 启动并监视IPFS Daemon
