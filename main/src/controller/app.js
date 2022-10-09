@@ -40,6 +40,10 @@ class ScarboroughApp {
     } else {
       await this.unlockWallet()
     }
+    if (!wallet.wallet) {
+      app.quit()
+      return
+    }
 
     //加载已经保存的内容
     await this.loadAll()
