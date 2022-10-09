@@ -27,7 +27,7 @@ Planet.myPlanetsPath = '/tmp'
 test('republish', async () => {
   const planet = new Planet({ id: 'aaa' })
   planet.articles.push(new Article(planet, { id: 'bbb', title: 'aaa', content: 'aaa' }))
-  expect(planet.id).toBe('AAA')
+  expect(planet.id).toBe('aaa')
   expect(planet.articles.length).toBe(1)
   const lastpub = planet.lastPublished
   await planet.publish()

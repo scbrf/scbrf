@@ -15,7 +15,8 @@ class Planet {
     this.name = params.name
     this.about = params.about || ''
     this.template = params.template || 'plain'
-    this.id = (params.id || uuid()).toUpperCase()
+    //let's just keep old uuid on planetid since it is bind to ipfs key name
+    this.id = params.id || uuid().toUpperCase()
     const now = new Date().getTime()
     this.created = params.created || now
     this.updated = params.updated || now
