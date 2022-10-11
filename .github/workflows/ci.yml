@@ -1,0 +1,58 @@
+name: Electron CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: npm install
+        run: |
+          cd fe && npm install
+          cd ../main && npm install
+      - name: fetch ipfsbin win
+        if: matrix.os == 'windows-latest'
+        uses: wei/wget@v1
+        with:
+          args: -O ipfs.zip https://github.com/ipfs/kubo/releases/download/v0.15.0/kubo_v0.15.0_windows-amd64.zip
+      - name: unzip ipfsbin win
+        if: matrix.os == 'windows-latest'
+        uses: montudor/action-zip@v1
+        with:
+          args: unzip -qq ipfs.zip -d ipfs
+      - name: move to ipnfsbin win
+        run: mov ipfs/ipfs.exe ipfsbin/
+      - name: build package
+        run: |
+          cd main && npm run make      
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ github.ref }}
+      #     release_name: ${{ github.ref }}
+      #     body_path: CHANGELOG.md
+      #     draft: false
+      #     prerelease: true
+      # - name: upload apk
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./build/app/outputs/flutter-apk/app-release.apk
+      #     asset_name: scbrf-release.apk
+      #     asset_content_type: application/vnd.android.package-archive
