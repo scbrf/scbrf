@@ -179,21 +179,41 @@ class ApiServer {
     const files = (attachments || []).filter(
       (a) => !require('fs').existsSync(require('path').join(draft.attachmentsPath, a))
     )
-    if (audioFilename && !require('fs').existsSync(require('path').join(draft.attachmentsPath, audioFilename))) {
+    var audioFileTarget = null
+    if (audioFilename) {
+      var article = planet.articles.filter((a) => a.id === id)[0]
+      if (require('fs').existsSync(require('path').join(draft.attachmentsPath, audioFilename))) {
+        audioFileTarget = require('path').join(draft.attachmentsPath, audioFilename)
+      } else if (article && require('fs').existsSync(require('path').join(article.publicBase, audioFilename))) {
+        audioFileTarget = require('path').join(article.publicBase, audioFilename)
+      }
+    }
+    if (audioFilename && !audioFileTarget) {
       files.push(audioFilename)
     }
-    if (videoFilename && !require('fs').existsSync(require('path').join(draft.attachmentsPath, videoFilename))) {
-      files.push(videoFilename)
+
+    var videoFileTarget = null
+    if (videoFilename) {
+      var article = planet.articles.filter((a) => a.id === id)[0]
+      if (require('fs').existsSync(require('path').join(draft.attachmentsPath, videoFilename))) {
+        videoFileTarget = require('path').join(draft.attachmentsPath, videoFilename)
+      } else if (article && require('fs').existsSync(require('path').join(article.publicBase, videoFilename))) {
+        videoFileTarget = require('path').join(article.publicBase, videoFilename)
+      }
     }
+    if (videoFilename && !videoFileTarget) {
+      files.push(audioFilename)
+    }
+
     log.debug('files debug', { attachments, files, length: files.length })
     if (files.length > 0) {
       ctx.body = { files }
     } else {
       if (audioFilename) {
-        draft.audioFilename = require('path').join(draft.attachmentsPath, audioFilename)
+        draft.audioFilename = audioFileTarget
       }
       if (videoFilename) {
-        draft.videoFilename = require('path').join(draft.attachmentsPath, videoFilename)
+        draft.videoFilename = videoFileTarget
       }
       await draft.publish()
       ctx.body = { error: '' }
