@@ -9,6 +9,7 @@ const Article = require('./article')
 
 class Planet {
   static myPlanetsPath
+  static PublicRoot
   static templateBase = require('path').join(__dirname, '..', '..', '..', 'templates')
 
   constructor(params) {
@@ -35,7 +36,7 @@ class Planet {
     this.faviconPath = require('path').join(this.basePath, 'favicon.ico')
     this.draftsPath = require('path').join(this.basePath, 'Drafts')
     this.articleDraftsPath = require('path').join(this.articlesPath, 'Drafts')
-    this.publicBasePath = require('path').join(this.basePath, 'Public')
+    this.publicBasePath = require('path').join(Planet.PublicRoot, this.id)
     this.publicInfoPath = require('path').join(this.publicBasePath, 'planet.json')
     this.publicAvatarPath = require('path').join(this.publicBasePath, 'avatar.png')
     this.publicFaviconPath = require('path').join(this.publicBasePath, 'favicon.ico')
@@ -283,6 +284,18 @@ class Planet {
     this.lastPublished = new Date().getTime()
     this.save()
     rt.planets = [...rt.planets]
+  }
+
+  static async migrate() {
+    if (!require('fs').existsSync(Planet.PublicRoot)) {
+      require('fs').mkdirSync(Planet.PublicRoot, { recursive: true })
+    }
+    for (let planet of rt.planets) {
+      const oldPublic = require('path').join(planet.basePath, 'Public')
+      if (require('fs').existsSync(oldPublic) && !require('fs').existsSync(planet.publicBasePath)) {
+        require('fs').renameSync(oldPublic, planet.publicBasePath)
+      }
+    }
   }
 
   static async loadPlanets() {

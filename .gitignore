@@ -2,6 +2,7 @@ ipfsbin/ipfs*
 ipfs/
 My/
 Following/
+Public/
 dist/
 .DS_Store
 attachments/

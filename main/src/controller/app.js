@@ -60,6 +60,7 @@ class ScarboroughApp {
   async loadAll() {
     await FollowingPlanet.loadFollowing()
     await Planet.loadPlanets()
+    await Planet.migrate()
     if (rt.planets.length > 0) {
       rt.sidebarFocus = rt.planets[0]
     } else {
@@ -70,6 +71,7 @@ class ScarboroughApp {
   async initDirBase() {
     FollowingPlanet.followingPlanetsPath = require('path').join(app.__root__, 'Following')
     Planet.myPlanetsPath = require('path').join(app.__root__, 'My')
+    Planet.PublicRoot = require('path').join(app.__root__, 'Public')
     ipfs.constructor.REPO_PATH = require('path').join(app.__root__, 'ipfs')
   }
 }

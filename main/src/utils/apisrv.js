@@ -4,8 +4,8 @@ const log = require('../utils/log')('api')
 const rt = require('../models/runtime')
 const wallet = require('./wallet')
 const ipfs = require('./ipfs')
-const FollowingArticle = require('../models/followingArticle')
 const evt = require('../utils/events')
+const { Draft, Planet, FollowingArticle } = require('../models')
 
 //API for mobile
 class ApiServer {
@@ -60,12 +60,137 @@ class ApiServer {
     })
   }
 
+  apiMarkReaded(ctx) {
+    const { planetid, articleid } = ctx.request.body
+    const planet = rt.following.filter((p) => p.id === planetid)[0]
+    if (planet) {
+      const article = planet.articles.filter((a) => a.id === articleid)[0]
+      if (article) {
+        article.read = true
+        article.save()
+        rt.following = [...rt.following]
+        evt.emit(evt.evRuntimeMiddleSidebarContentChange)
+        ctx.body = { error: '' }
+      } else {
+        ctx.body = { error: 'article not found' }
+      }
+    } else {
+      ctx.body = { error: 'planet not found' }
+    }
+  }
+
+  apiListSite(ctx) {
+    const ipfsGateway = `http://${this.getIpAddress()}:${ipfs.gatewayPort}`
+    ctx.body = {
+      ipfspeers: rt.ipfsPeers,
+      ipfsGateway,
+      planets: rt.planets.map((p) => ({
+        ...p.json(),
+        avatar: p.avatar,
+        articles: p.articles.map((a) => {
+          const obj = a.json()
+          obj.summary = FollowingArticle.extractSummary(a)
+          obj.editable = true
+          delete obj.content
+          obj.url = `http://${this.ipAddr}:${this.apiPort}/${p.id}/${a.id}/`
+          obj.attachments = obj.attachments.map((a) => a.name)
+          return obj
+        }),
+      })),
+      following: rt.following.map((p) => ({
+        ...p.json(),
+        avatar: p.avatar,
+        articles: p.articles.map((a) => {
+          const obj = a.json()
+          obj.summary = FollowingArticle.extractSummary(a)
+          delete obj.content
+          obj.url = `${ipfsGateway}/ipfs/${p.cid}/${a.id}/`
+          return obj
+        }),
+      })),
+      address: wallet.wallet.address,
+    }
+  }
+
+  async apiPlanetCreate(ctx) {
+    await require('../controller/planet').createPlanet(ctx.request.body)
+    ctx.body = { error: '' }
+  }
+
+  async apiPlanetFollow(ctx) {
+    await require('../controller/planet').followPlanet(ctx.request.body)
+    ctx.body = { error: '' }
+  }
+
+  async upload(ctx) {
+    // log.info(ctx.request.files)
+    const { file } = ctx.request.files
+    if (file && rt.draft && rt.draft.attachments) {
+      if (
+        rt.draft.attachments.filter((a) => a.name === file.originalFilename)[0] ||
+        rt.draft.videoFilename == file.originalFilename ||
+        rt.draft.audioFilename == file.originalFilename
+      ) {
+        require('fs').renameSync(file.filepath, require('path').join(rt.draft.attachmentsPath, file.originalFilename))
+        ctx.body = { error: '' }
+        return
+      }
+    }
+    ctx.body = { error: 'not allowed' }
+  }
+
+  async apiPublishDraft(ctx) {
+    const { planetid, id, title, content, attachments, audioFilename, videoFilename } = ctx.request.body
+    const planet = rt.planets.filter((p) => p.id === planetid)[0]
+    if (!planet) {
+      ctx.body = { error: `invalid planet id ${planetid}` }
+      return
+    }
+    const draft = new Draft(planet, null, {
+      id,
+      title,
+      content,
+      audioFilename,
+      videoFilename,
+      attachments: attachments.map((a) => ({ name: a })),
+    })
+    rt.draft = draft
+    const files = (attachments || []).filter(
+      (a) => !require('fs').existsSync(require('path').join(draft.attachmentsPath, a))
+    )
+    if (audioFilename && !require('fs').existsSync(require('path').join(draft.attachmentsPath, audioFilename))) {
+      files.push(audioFilename)
+    }
+    if (videoFilename && !require('fs').existsSync(require('path').join(draft.attachmentsPath, videoFilename))) {
+      files.push(videoFilename)
+    }
+    log.debug('files debug', { attachments, files, length: files.length })
+    if (files.length > 0) {
+      ctx.body = { files }
+    } else {
+      if (audioFilename) {
+        draft.audioFilename = require('path').join(draft.attachmentsPath, audioFilename)
+      }
+      if (videoFilename) {
+        draft.videoFilename = require('path').join(draft.attachmentsPath, videoFilename)
+      }
+      await draft.publish()
+      ctx.body = { error: '' }
+    }
+  }
+
   startListen() {
     const app = new Koa()
-    const bodyParser = require('koa-bodyparser')
+    const bodyParser = require('koa-body')
     const Router = require('koa-router')
+    const serve = require('koa-static')
+    app.use(serve(Planet.PublicRoot))
     const router = new Router()
-    app.use(bodyParser())
+    app.use(
+      bodyParser({
+        multipart: true,
+      })
+    )
     app.use(logger)
     router.post('/ipc', async (ctx) => {
       const { method, params, requestid } = ctx.request.body
@@ -76,55 +201,13 @@ class ApiServer {
         }
       }
     })
-    router.post('/article/markreaded', async (ctx) => {
-      const { planetid, articleid } = ctx.request.body
-      const planet = rt.following.filter((p) => p.id === planetid)[0]
-      if (planet) {
-        const article = planet.articles.filter((a) => a.id === articleid)[0]
-        if (article) {
-          article.read = true
-          article.save()
-          rt.following = [...rt.following]
-          evt.emit(evt.evRuntimeMiddleSidebarContentChange)
-          ctx.body = { result: '' }
-        } else {
-          ctx.body = { result: 'article not found' }
-        }
-      } else {
-        ctx.body = { result: 'planet not found' }
-      }
-    })
-    router.post('/site', (ctx) => {
-      const ipfsGateway = `http://${this.getIpAddress()}:${ipfs.gatewayPort}`
-      ctx.body = {
-        ipfspeers: rt.ipfsPeers,
-        ipfsGateway,
-        planets: rt.planets.map((p) => ({
-          ...p.json(),
-          avatar: p.avatar,
-          articles: p.articles.map((a) => {
-            const obj = a.json()
-            obj.summary = FollowingArticle.extractSummary(a)
-            obj.editable = true
-            delete obj.content
-            obj.url = `${ipfsGateway}/ipns/${p.ipns}/${a.id}/`
-            return obj
-          }),
-        })),
-        following: rt.following.map((p) => ({
-          ...p.json(),
-          avatar: p.avatar,
-          articles: p.articles.map((a) => {
-            const obj = a.json()
-            obj.summary = FollowingArticle.extractSummary(a)
-            delete obj.content
-            obj.url = `${ipfsGateway}/ipfs/${p.cid}/${a.id}/`
-            return obj
-          }),
-        })),
-        address: wallet.wallet.address,
-      }
-    })
+    router.post('/planet/create', this.apiPlanetCreate.bind(this))
+    router.post('/planet/follow', this.apiPlanetFollow.bind(this))
+    router.post('/article/markreaded', this.apiMarkReaded.bind(this))
+    router.post('/draft/publish', this.apiPublishDraft.bind(this))
+    router.post('/site', this.apiListSite.bind(this))
+    router.post('/upload', this.upload.bind(this))
+
     app.use(router.routes()).use(router.allowedMethods())
     log.debug('api server started at port:', this.apiPort)
     app.listen(this.apiPort, '0.0.0.0')
@@ -135,13 +218,13 @@ async function logger(ctx, next) {
   const start = new Date().getTime()
   try {
     await next()
-    log.debug(
+    log.info(
       `${((new Date().getTime() - start) / 1000).toFixed(3)} ${ctx.request.url}, ${JSON.stringify(ctx.request.body)},${
         ctx.status
       }, ${JSON.stringify(ctx.body)}`
     )
   } catch (ex) {
-    log.debug(
+    log.info(
       `${((new Date().getTime() - start) / 1000).toFixed(3)} ${ctx.request.url}, ${JSON.stringify(
         ctx.request.body
       )}, ${ex}`

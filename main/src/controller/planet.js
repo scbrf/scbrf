@@ -126,7 +126,7 @@ class PlanetSidebarController {
           (a) => a.planet.id !== this.planetCtxMenuTargetPlanet.id
         ),
         middleSideBarFocusArticle:
-          rt.middleSideBarFocusArticle.planet.id === this.planetCtxMenuTargetPlanet.id
+          rt.middleSideBarFocusArticle && rt.middleSideBarFocusArticle.planet.id === this.planetCtxMenuTargetPlanet.id
             ? null
             : rt.middleSideBarFocusArticle,
       })
@@ -196,7 +196,7 @@ class PlanetSidebarController {
     })
     createPlanetDialog.show()
   }
-  async followPlanet(param, progresscb) {
+  async followPlanet(param, progresscb = () => {}) {
     const { follow } = param
     this.cancelFollow = false
     const planet = await FollowingPlanet.follow(follow, progresscb)

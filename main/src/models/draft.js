@@ -135,7 +135,11 @@ class Draft {
     if (!this.article) {
       this.article = article
     }
-    await this.confirmBigFileCopy()
+    if (!(await this.confirmBigFileCopy())) {
+      log.error('on publish copy file error, give up')
+      return
+    }
+
     log.info('when publish, created time is', {
       draft: this.created,
       article: article.created,
@@ -170,6 +174,7 @@ class Draft {
       if (new Date().getTime() - startat > 5000) {
         startat = new Date().getTime()
         log.error('confirm big copy takes too long!', this.audioFilename)
+        return false
       }
     }
     while (!this.copyOK(this.videoFilename)) {
@@ -177,8 +182,10 @@ class Draft {
       if (new Date().getTime() - startat > 5000) {
         startat = new Date().getTime()
         log.error('confirm big copy takes too long!', this.audioFilename)
+        return false
       }
     }
+    return true
   }
 
   //在编辑的时候移除附件
