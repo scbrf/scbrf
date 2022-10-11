@@ -183,6 +183,33 @@ class WebviewTopbar {
     await rt.draft.save()
     this.showCreateArticleDialog()
   }
+
+  async doDeleteArticle(planetid, articleid) {
+    let planet = rt.planets.filter((p) => p.id === planetid)[0]
+    const article = planet.articles.filter((a) => a.id === articleid)[0]
+    planet.articles = planet.articles.filter((a) => a.id !== articleid)
+    await article.delete()
+    //删除操作一般只会影响当前列表
+    const articles = rt.middleSideBarArticles.filter((a) => a.id !== article.id)
+    //如果需要，将焦点移动到前一个或者下一个
+    let focusArticle
+    if (rt.middleSideBarFocusArticle && article.id === rt.middleSideBarFocusArticle.id) {
+      for (let i = 0; i < rt.middleSideBarArticles.length; i++) {
+        if (rt.middleSideBarArticles[i].id === article.id) {
+          if (i > 0) {
+            focusArticle = rt.middleSideBarArticles[i - 1]
+          } else if (rt.middleSideBarArticles.length > 0) {
+            focusArticle = rt.middleSideBarArticles[1]
+          }
+        }
+      }
+    }
+    rt.set({
+      middleSideBarArticles: articles,
+      middleSideBarFocusArticle: focusArticle,
+    })
+  }
+
   async deleteArticle() {
     const idx = dialog.showMessageBoxSync({
       message: `Are you sure you want to delete ${this.ctxArticle.title}, this could not be undone ?`,
@@ -191,28 +218,7 @@ class WebviewTopbar {
       cancelId: 0,
     })
     if (idx) {
-      let planet = rt.planets.filter((p) => p.id === this.ctxArticle.planet.id)[0]
-      const article = planet.articles.filter((a) => a.id === this.ctxArticle.id)[0]
-      planet.articles = planet.articles.filter((a) => a.id !== this.ctxArticle.id)
-      await article.delete()
-      //删除操作一般只会影响当前列表
-      const articles = rt.middleSideBarArticles.filter((a) => a.id !== article.id)
-      let focusArticle
-      if (rt.middleSideBarFocusArticle && article.id === rt.middleSideBarFocusArticle.id) {
-        for (let i = 0; i < rt.middleSideBarArticles.length; i++) {
-          if (rt.middleSideBarArticles[i].id === article.id) {
-            if (i > 0) {
-              focusArticle = rt.middleSideBarArticles[i - 1]
-            } else if (rt.middleSideBarArticles.length > 0) {
-              focusArticle = rt.middleSideBarArticles[1]
-            }
-          }
-        }
-      }
-      rt.set({
-        middleSideBarArticles: articles,
-        middleSideBarFocusArticle: focusArticle,
-      })
+      await this.doDeleteArticle(this.ctxArticle.planet.id, this.ctxArticle.id)
     }
   }
   async editArticle() {

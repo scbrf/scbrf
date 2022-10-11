@@ -178,6 +178,21 @@ class ApiServer {
       ctx.body = { error: '' }
     }
   }
+  async apiDeleteArticle(ctx) {
+    const { id, planetid } = ctx.request.body
+    const planet = rt.planets.filter((p) => p.id === planetid)[0]
+    if (!planet) {
+      ctx.body = { error: `invalid planetid ${planetid}` }
+      return
+    }
+    const article = planet.articles.filter((a) => a.id === id)[0]
+    if (!article) {
+      ctx.body = { error: `invalid articleid ${id}` }
+      return
+    }
+    await require('../controller/webviewTopbar').doDeleteArticle(planetid, id)
+    ctx.body = { error: '' }
+  }
 
   startListen() {
     const app = new Koa()
@@ -204,6 +219,7 @@ class ApiServer {
     router.post('/planet/create', this.apiPlanetCreate.bind(this))
     router.post('/planet/follow', this.apiPlanetFollow.bind(this))
     router.post('/article/markreaded', this.apiMarkReaded.bind(this))
+    router.post('/article/delete', this.apiDeleteArticle.bind(this))
     router.post('/draft/publish', this.apiPublishDraft.bind(this))
     router.post('/site', this.apiListSite.bind(this))
     router.post('/upload', this.upload.bind(this))
