@@ -79,6 +79,27 @@ class ApiServer {
     }
   }
 
+  apiArticleGet(ctx) {
+    const { planetid, articleid } = ctx.request.body
+    const planet = rt.planets.filter((p) => p.id === planetid)[0]
+    if (!planet) {
+      ctx.body = { error: `invalid planetid ${planetid}` }
+      return
+    }
+    const article = planet.articles.filter((a) => a.id === articleid)[0]
+    if (!article) {
+      ctx.body = { error: `invalid articleid ${id}` }
+      return
+    }
+
+    ctx.body = {
+      ...article.json(),
+      attachments: article.attachments.map((a) => a.name),
+      summary: FollowingArticle.extractSummary(article),
+      url: `http://${this.ipAddr}:${this.apiPort}/${planetid}/${articleid}/`,
+    }
+  }
+
   apiListSite(ctx) {
     const ipfsGateway = `http://${this.getIpAddress()}:${ipfs.gatewayPort}`
     ctx.body = {
@@ -220,6 +241,7 @@ class ApiServer {
     router.post('/planet/follow', this.apiPlanetFollow.bind(this))
     router.post('/article/markreaded', this.apiMarkReaded.bind(this))
     router.post('/article/delete', this.apiDeleteArticle.bind(this))
+    router.post('/article/get', this.apiArticleGet.bind(this))
     router.post('/draft/publish', this.apiPublishDraft.bind(this))
     router.post('/site', this.apiListSite.bind(this))
     router.post('/upload', this.upload.bind(this))
