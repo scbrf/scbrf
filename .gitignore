@@ -8,3 +8,5 @@ dist/
 attachments/
 logs/
 wallet/
+*.zip
+tools/node_modules/*

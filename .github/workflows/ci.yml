@@ -17,22 +17,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: npm install
+      - name: fe npm install
         run: |
           cd fe && npm install
-          cd ../main && npm install
-      - name: fetch ipfsbin win
-        if: matrix.os == 'windows-latest'
-        uses: wei/wget@v1
-        with:
-          args: -O ipfs.zip https://github.com/ipfs/kubo/releases/download/v0.15.0/kubo_v0.15.0_windows-amd64.zip
-      - name: unzip ipfsbin win
-        if: matrix.os == 'windows-latest'
-        uses: montudor/action-zip@v1
-        with:
-          args: unzip -qq ipfs.zip -d ipfs
-      - name: move to ipnfsbin win
-        run: mov ipfs/ipfs.exe ipfsbin/
+      - name: main npm install
+        run: |
+          cd main && npm install
+      - name: fetch ipfsbin
+        run: |
+          cd main && node tools/fetchbin.js
       - name: build package
         run: |
           cd main && npm run make      
