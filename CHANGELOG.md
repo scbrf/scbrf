@@ -1,1 +1,1 @@
-1. 采用github action自动Release，下一步会加入自动的test以加强质量
+1. 打开浏览窗口的 webSecurity 以提高安全性
