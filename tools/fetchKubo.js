@@ -30,23 +30,25 @@ async function run() {
     targetDir,
     require("path").basename(entryPath)
   );
-  if (localPath.endsWith(".zip")) {
-    const AdmZip = require("adm-zip");
-    const zip = new AdmZip(localPath);
-    console.log("need extract", entryPath);
-    zip.extractEntryTo(entryPath, targetDir, false, true);
-  } else if (localPath.endsWith(".tar.gz")) {
-    const tar = require("tar");
-    await tar.x({
-      file: localPath,
-      filter: (path) => path === entryPath,
-      cwd: __dirname,
-    });
-    if (!require("fs").existsSync(targetPath)) {
-      require("fs").renameSync(
-        require("path").join(__dirname, entryPath),
-        targetPath
-      );
+  if (!require("fs").existsSync(targetPath)) {
+    if (localPath.endsWith(".zip")) {
+      const AdmZip = require("adm-zip");
+      const zip = new AdmZip(localPath);
+      console.log("need extract", entryPath);
+      zip.extractEntryTo(entryPath, targetDir, false, true);
+    } else if (localPath.endsWith(".tar.gz")) {
+      const tar = require("tar");
+      await tar.x({
+        file: localPath,
+        filter: (path) => path === entryPath,
+        cwd: __dirname,
+      });
+      if (!require("fs").existsSync(targetPath)) {
+        require("fs").renameSync(
+          require("path").join(__dirname, entryPath),
+          targetPath
+        );
+      }
     }
   }
   console.log("done!");

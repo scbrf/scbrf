@@ -17,6 +17,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - name: Cache ipfs bin
+        id: cache-ipfs-bin
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-ipfs-bin
+        with:
+          path: main/ipfsbin
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-15
       - name: tools npm install
         run: |
           cd tools && npm install
@@ -31,7 +39,7 @@ jobs:
           cd main && npm install
       - name: build package
         run: |
-          cd main && npm run make
+          cd main && npm run make && ls -R out/make
       - name: release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
