@@ -10,11 +10,11 @@ class Webview {
       [evt.evAppInit, this.createView],
       [evt.evRuntimeMiddleSidebarFocusChange, this.loadWeb],
     ])
+    evt.bindIpcMainTable(this, [[evt.ipcShareOpen, this.shareOpen]])
   }
   createView() {
     this.view = new BrowserView({
       webPreferences: {
-        webSecurity: false,
         preload: require('path').join(__dirname, '..', '..', 'preload_ethereum.js'),
       },
     })
@@ -32,16 +32,26 @@ class Webview {
     this.view.setAutoResize({ height: true, width: true })
     this.loadWeb()
   }
+  shareOpen() {
+    require('electron').shell.openExternal(this.view.webContents.getURL())
+  }
   async loadWeb() {
     if (!this.view) return
     if (rt.middleSideBarFocusArticle) {
       //give it a loading hint
       this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/loading`)
       this.view.webContents.once('dom-ready', () => {
-        this.view.webContents.loadURL(rt.middleSideBarFocusArticle.url, { userAgent: 'Planet/JS' })
+        const url = `http://${require('../utils/apisrv').ipAddr}:${require('../utils/apisrv').apiPort}/${
+          rt.middleSideBarFocusArticle.planet.id
+        }/${rt.middleSideBarFocusArticle.id}/index.html`
+        this.view.webContents.loadURL(
+          rt.middleSideBarFocusArticle.url.startsWith('file://') ? url : rt.middleSideBarFocusArticle.url,
+          { userAgent: 'Planet/JS' }
+        )
       })
     } else {
-      this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/empty`, { userAgent: 'Planet/JS' })
+      const url = `${require('../utils/websrv').WebRoot}/empty`
+      this.view.webContents.loadURL(url, { userAgent: 'Planet/JS' })
     }
   }
 }

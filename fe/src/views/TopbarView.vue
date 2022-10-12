@@ -16,7 +16,7 @@
             <span class="ml-2"> {{ article.attachments.length }}</span>
         </button>
         <div class="flex-1"></div>
-        <ShareIcon class="w-6 h-6 mr-4 text-slate-300"></ShareIcon>
+        <ShareIcon @click="ipcShareOpen" class="w-6 h-6 mr-4 hover:text-gray-900 nodrag"></ShareIcon>
     </div>
 </template>
 <script>
@@ -52,6 +52,9 @@ export default {
         },
         showDownloadMenu() {
             api.send('ipcDownloadMenu')
+        },
+        ipcShareOpen() {
+            api.send('ipcShareOpen')
         }
     }
 }
