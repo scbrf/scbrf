@@ -32,7 +32,7 @@ async function run() {
   );
   if (localPath.endsWith(".zip")) {
     const AdmZip = require("adm-zip");
-    const zip = new AdmZip("./a.zip");
+    const zip = new AdmZip(localPath);
     console.log("need extract", entryPath);
     zip.extractEntryTo(entryPath, targetDir, false, true);
   } else if (localPath.endsWith(".tar.gz")) {
