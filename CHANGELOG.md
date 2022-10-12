@@ -1,0 +1,1 @@
+1. 采用github action自动Release，下一步会加入自动的test以加强质量
