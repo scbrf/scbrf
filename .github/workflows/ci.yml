@@ -2,15 +2,15 @@ name: Electron CI
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
       - name: Install Node.js
@@ -31,24 +31,13 @@ jobs:
           cd main && npm install
       - name: build package
         run: |
-          cd main && npm run make      
-      # - name: Create Release
-      #   id: create_release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: ${{ github.ref }}
-      #     release_name: ${{ github.ref }}
-      #     body_path: CHANGELOG.md
-      #     draft: false
-      #     prerelease: true
-      # - name: upload apk
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./build/app/outputs/flutter-apk/app-release.apk
-      #     asset_name: scbrf-release.apk
-      #     asset_content_type: application/vnd.android.package-archive
+          cd main && npm run make
+      - name: release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            "main/out/make/**/*.zip"
+            "main/out/make/**/*.exe"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
