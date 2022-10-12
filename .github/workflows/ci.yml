@@ -23,7 +23,7 @@ jobs:
         env:
           cache-name: cache-ipfs-bin
         with:
-          path: main/ipfsbin
+          path: ipfsbin
           key: ${{ runner.os }}-build-${{ env.cache-name }}-15
       - name: tools npm install
         run: |
