@@ -17,18 +17,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: fe npm install
-        run: |
-          cd fe && npm install
-      - name: main npm install
-        run: |
-          cd main && npm install
       - name: tools npm install
         run: |
           cd tools && npm install
       - name: fetch ipfsbin
         run: |
           cd tools && node fetchKubo.js
+      - name: fe npm install
+        run: |
+          cd fe && npm install
+      - name: main npm install
+        run: |
+          cd main && npm install
       - name: build package
         run: |
           cd main && npm run make      

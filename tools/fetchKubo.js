@@ -37,7 +37,7 @@ async function run() {
     zip.extractEntryTo(entryPath, targetDir, false, true);
   } else if (localPath.endsWith(".tar.gz")) {
     const tar = require("tar");
-    tar.x({
+    await tar.x({
       file: localPath,
       filter: (path) => path === entryPath,
       cwd: __dirname,
