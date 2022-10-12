@@ -9,4 +9,5 @@ attachments/
 logs/
 wallet/
 *.zip
+*.tar.gz
 tools/node_modules/*
