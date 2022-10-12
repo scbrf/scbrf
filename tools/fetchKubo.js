@@ -40,9 +40,13 @@ async function run() {
     tar.x({
       file: localPath,
       filter: (path) => path === entryPath,
+      cwd: __dirname,
     });
     if (!require("fs").existsSync(targetPath)) {
-      require("fs").renameSync(entryPath, targetPath);
+      require("fs").renameSync(
+        require("path").join(__dirname, entryPath),
+        targetPath
+      );
     }
   }
   console.log("done!");
