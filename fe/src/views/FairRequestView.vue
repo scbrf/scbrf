@@ -1,6 +1,8 @@
 <template>
-    <div v-if="!title" class="h-screen w-screen flex items-center justify-center">
-        Loading...
+    <div v-if="!title || isLoading" class="h-screen w-screen flex items-center justify-center">
+        <XCircleIcon @click="closeWin" class="absolute right-4 top-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+        </XCircleIcon>
+        Loading, may take a few minutes depend on your network...
     </div>
     <div v-else class="h-screen w-screen flex flex-col p-4">
         <div class="text-lg text-center font-bold my-2">投放到集市</div>
@@ -41,8 +43,12 @@
 <script>
 import { mapState, } from 'pinia';
 import { useFairStore } from '../stores/fair';
+import { XCircleIcon } from '@heroicons/vue/24/outline'
 
 export default {
+    components: {
+        XCircleIcon
+    },
     data() {
         return {
             value: 0.01,
