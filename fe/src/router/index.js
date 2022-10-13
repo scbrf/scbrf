@@ -15,6 +15,7 @@ import EmptyView from "../views/EmptyView.vue";
 import CreateWalletView from "../views/CreateWalletView.vue";
 import UnlockWalletView from "../views/UnlockWalletView.vue";
 import QrcodeView from "../views/QrcodeView.vue";
+import FairRequestView from "../views/FairRequestView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -73,6 +74,10 @@ const router = createRouter({
     {
       path: "/wallet/unlock",
       component: UnlockWalletView,
+    },
+    {
+      path: "/dialog/article/fair",
+      component: FairRequestView,
     },
     {
       path: "/dialog/planet/create",

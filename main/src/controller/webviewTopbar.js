@@ -23,6 +23,7 @@ class WebviewTopbar {
       [evt.ipcMyArticleCtxMenu, this.showMyArticleCtxMenu],
       [evt.ipcSetAvatar, this.setPlanetAvatar],
       [evt.ipcDownloadMenu, this.showDownloadMenu],
+      [evt.ipcFairRequest, this.doFairRequest],
     ])
   }
   createView() {
@@ -46,6 +47,13 @@ class WebviewTopbar {
       {
         label: 'Delete Article',
         click: this.deleteArticle.bind(this),
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Fair Request',
+        click: this.fairRequest.bind(this),
       },
     ])
   }
@@ -208,6 +216,71 @@ class WebviewTopbar {
       middleSideBarArticles: articles,
       middleSideBarFocusArticle: focusArticle,
     })
+  }
+
+  async doFairRequest(event, p) {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const { passwd, value, duration } = p
+    if (!(await require('../utils/wallet').validatePasswd(passwd))) {
+      win.webContents.send('article-fair-request', {
+        error: '密码错误!',
+      })
+      return
+    }
+    log.debug('try do donate with', { value, duration })
+    try {
+      const tx = await require('../utils/wallet').donate(
+        this.ctxArticle.planet.ipns,
+        this.ctxArticle.id,
+        duration,
+        value
+      )
+      log.debug('got tx from donate', tx)
+      const rsp = await tx.wait()
+      log.debug('got tx after wait', rsp)
+      win.close()
+    } catch (ex) {
+      log.debug('donate error', ex)
+      win.webContents.send('article-fair-request', {
+        error: ex.message,
+      })
+    }
+  }
+
+  async fairRequest() {
+    const win = BrowserWindow.fromWebContents(this.view.webContents)
+    const fairRequestDialog = new BrowserWindow({
+      parent: win,
+      x: win.getPosition()[0] + win.getSize()[0] / 2 - 300,
+      y: win.getPosition()[1] + win.getSize()[1] / 2 - 200,
+      width: 600,
+      height: 400,
+      frame: false,
+      resizable: false,
+      webPreferences: {
+        preload: require('path').join(__dirname, '..', '..', 'preload.js'),
+      },
+    })
+    fairRequestDialog.loadURL(`${require('../utils/websrv').WebRoot}/dialog/article/fair`)
+    fairRequestDialog.webContents.on('did-finish-load', async () => {
+      const balance = await require('../utils/wallet').balance()
+      const gas = await require('../utils/wallet').estimateGasForFair(
+        this.ctxArticle.planet.ipns,
+        this.ctxArticle.id,
+        24 * 3600,
+        0.01
+      )
+      const info = {
+        address: require('../utils/wallet').wallet.address,
+        balance,
+        gas,
+        title: this.ctxArticle.title,
+        planet: this.ctxArticle.planet.name,
+      }
+      log.debug('fair request info', info)
+      fairRequestDialog.webContents.send('article-fair-request', info)
+    })
+    fairRequestDialog.show()
   }
 
   async deleteArticle() {

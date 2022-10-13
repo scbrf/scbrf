@@ -60,7 +60,9 @@ class EventCenter {
   ipcUnlockWallet //解锁钱包
 
   ipcOpenUrlExternal //在外部浏览器打开
-  ipcShareOpen
+  ipcShareOpen //webview的右上角按钮
+
+  ipcFairRequest //投放到集市
 
   constructor() {
     this.bus = EvtBus()

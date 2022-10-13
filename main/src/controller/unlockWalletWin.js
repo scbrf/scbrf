@@ -22,6 +22,7 @@ class CreateWalletWin {
   }
   async show() {
     const win = this.createWin()
+    // win.webContents.openDevTools()
     win.loadURL(`${require('../utils/websrv').WebRoot}/wallet/unlock`)
     await new Promise((resolve) => {
       win.on('close', resolve)

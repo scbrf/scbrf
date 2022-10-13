@@ -1,7 +1,12 @@
 const { app, ipcMain, BrowserWindow } = require('electron')
 const { ethers } = require('ethers')
+const md5 = require('md5')
 const evt = require('../utils/events')
 const log = require('../utils/log')('wallet')
+
+const ENS_NETWORK = 'homestead'
+const CONTRACT_NETWORK = 'goerli'
+const FairContractAddr = '0x8969573027575a1478DAcc5694876B6DF349c832'
 
 class Wallet {
   init() {
@@ -29,14 +34,15 @@ class Wallet {
           require('fs').readFileSync(this.walletPath).toString(),
           passwd
         )
+        this.passwdSign = md5(passwd)
         const win = BrowserWindow.fromWebContents(event.sender)
         win.closable = true
         win.close()
+        this.initContract()
       } catch (ex) {
         return ex.message
       }
     })
-    // this.wallet = ethers.Wallet.createRandom()
   }
   async createWallet(event, passwd) {
     const win = BrowserWindow.fromWebContents(event.sender)
@@ -44,12 +50,35 @@ class Wallet {
     if (!require('fs').existsSync(this.walletDir)) {
       require('fs').mkdirSync(this.walletDir, { recursive: true })
     }
+    this.passwdSign = md5(passwd)
+    this.initContract()
     require('fs').writeFileSync(this.walletPath, await this.wallet.encrypt(passwd))
     win.closable = true
     win.close()
   }
-  get provider() {
-    const network = 'homestead'
+
+  initContract() {
+    this.donateContract = new ethers.Contract(
+      FairContractAddr,
+      [
+        'event ContentAdded(string ipns, string uuid, uint256 duration, uint256 pos)',
+        'event ContentRemoved(string ipns, string uuid)',
+        'event ContentTimePaused(string ipns, string uuid, uint256 duration)',
+        'event ContentTimeRecovery(string ipns, string uuid, uint256 duration, uint256 pos)',
+        'event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)',
+        'function DurationLimit() view returns (uint256)',
+        'function owner() view returns (address)',
+        'function renounceOwnership()',
+        'function transferOwnership(address newOwner)',
+        'function hot50() view returns (tuple(string ipns, string uuid, uint256 value, uint256 when, uint256 duration)[50], uint256)',
+        'function setLimit(uint256 v)',
+        'function donate(string ipns, string uuid, uint256 duration) payable',
+      ],
+      new ethers.Wallet(this.wallet.privateKey, this.provider(CONTRACT_NETWORK))
+    )
+  }
+
+  provider(network) {
     return ethers.getDefaultProvider(network, {
       etherscan: 'EJBW93QCI6F38PIYI8ME2SDGCRD7QZR3JU',
       infura: 'a05d6642580e4e0eb70c4328c9eb5da7',
@@ -62,7 +91,7 @@ class Wallet {
   }
   async resolveENS(ens) {
     log.info(`need resolve ${ens}`)
-    const resolve = await this.provider.getResolver(ens)
+    const resolve = await this.provider(ENS_NETWORK).getResolver(ens)
     if (resolve) {
       const ipns = await resolve.getContentHash()
       log.info(`resolve content hash return ${ipns}`)
@@ -74,10 +103,36 @@ class Wallet {
 
   async resolveAvatar(ens) {
     log.info(`need resolve avatar for ${ens}`)
-    const resolve = await this.provider.getResolver(ens)
+    const resolve = await this.provider(ENS_NETWORK).getResolver(ens)
     const avatar = await resolve.getAvatar()
     log.info(`resolve avatar return ${avatar}`)
     return avatar && avatar.url
+  }
+
+  async balance() {
+    const bn = await this.provider(CONTRACT_NETWORK).getBalance(this.wallet.address)
+    return ethers.utils.formatEther(bn)
+  }
+
+  async validatePasswd(passwd) {
+    return md5(passwd) === this.passwdSign
+  }
+
+  async estimateGasForFair(ipns, uuid, duration, value) {
+    const bn = await this.donateContract.estimateGas.donate(ipns, uuid, duration, {
+      value: ethers.utils.parseEther(`${value}`),
+    })
+    return ethers.utils.formatEther(bn)
+  }
+
+  async donate(ipns, uuid, duration, value) {
+    return await this.donateContract.donate(ipns, uuid, parseFloat(duration) * 3600, {
+      value: ethers.utils.parseEther(`${value}`),
+    })
+  }
+
+  async fairHot50() {
+    return await this.donateContract.hot50()
   }
 }
 

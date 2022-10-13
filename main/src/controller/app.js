@@ -7,6 +7,7 @@ const wallet = require('../utils/wallet')
 require('./upmanager')
 require('./mainwindow')
 require('./trayIcon')
+require('./fair')
 
 class ScarboroughApp {
   constructor() {
