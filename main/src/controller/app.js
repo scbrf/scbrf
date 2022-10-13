@@ -1,6 +1,6 @@
 const { app } = require('electron')
 const evt = require('../utils/events')
-const { FollowingPlanet, Planet } = require('../models')
+const { FollowingPlanet, Planet, FairArticle } = require('../models')
 const ipfs = require('../utils/ipfs')
 const rt = require('../models/runtime')
 const wallet = require('../utils/wallet')
@@ -73,6 +73,7 @@ class ScarboroughApp {
     FollowingPlanet.followingPlanetsPath = require('path').join(app.__root__, 'Following')
     Planet.myPlanetsPath = require('path').join(app.__root__, 'My')
     Planet.PublicRoot = require('path').join(app.__root__, 'Public')
+    FairArticle.FairArticlesPath = require('path').join(app.__root__, 'Fair')
     ipfs.constructor.REPO_PATH = require('path').join(app.__root__, 'ipfs')
   }
 }

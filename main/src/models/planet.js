@@ -238,7 +238,7 @@ class Planet {
     }
 
     await Promise.all(
-      this.articles.map((a) => async () => {
+      this.articles.map(async (a) => {
         log.info('during public,save to public dir', a.id)
         await a.savePublic()
         await a.publicRender()

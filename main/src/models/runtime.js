@@ -9,6 +9,7 @@ class Runtime {
   following = [[], evt.evRuntimeFollowingChange, '正在关注的Planet列表']
   planets = [[], evt.evRuntimePlanetsChange, '自己创建的Planet列表']
   numbers = [{}, evt.evRuntimeNumbersChange, '左侧边栏里显示的数量']
+  fair = [[], evt.evRuntimeFairChange, '集市里的内容']
 
   planetEditing = [null, null, '增在编辑的Planet实例']
   draft = [null, evt.evRuntimeDraftChange, '当前编辑窗口正在编辑的草稿']
@@ -60,6 +61,14 @@ class Runtime {
         middleSideBarTitle: focus.name,
         middleSideBarArticles: focus.articles,
         middleSideBarFocusArticle: focus.articles[0],
+      })
+    } else if (focus === 'fair') {
+      const articles = [...this.fair]
+      articles.sort((a, b) => b.created - a.created)
+      this.set({
+        middleSideBarTitle: 'Fair',
+        middleSideBarArticles: articles,
+        middleSideBarFocusArticle: articles[0],
       })
     } else if (focus === 'today') {
       const articles = this.following.reduce((r, p) => {

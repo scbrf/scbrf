@@ -1,7 +1,7 @@
-const { BrowserView, Menu, ipcMain, BrowserWindow } = require('electron')
+const { BrowserView, Menu, ipcMain, BrowserWindow, clipboard } = require('electron')
 const evt = require('../utils/events')
 const rt = require('../models/runtime')
-
+const log = require('../utils/log')('articlesControl')
 class ArticleController {
   constructor() {
     evt.bindBusTable(this, [
@@ -23,6 +23,15 @@ class ArticleController {
     this.view.webContents.on('did-finish-load', () => {
       this.updateMiddleSidebarUI()
     })
+    this.fairArticleCtxMenu = Menu.buildFromTemplate([
+      {
+        label: 'Copy IPNS',
+        click: () => {
+          log.debug('ctx article is', this.ctxArticle)
+          clipboard.writeText(this.ctxArticle.planet.ipns)
+        },
+      },
+    ])
     this.followingArticleCtxMenu = Menu.buildFromTemplate([
       {
         label: 'Trigger Read',
@@ -37,9 +46,13 @@ class ArticleController {
   showArticlesCtxMenu(event, a) {
     const win = BrowserWindow.fromWebContents(event.sender)
     this.ctxArticle = a
-    let planet = rt.following.filter((p) => p.id === a.planet.id)[0]
-    if (planet) {
-      this.followingArticleCtxMenu.popup(win)
+    if (rt.sidebarFocus == 'fair') {
+      this.fairArticleCtxMenu.popup(win)
+    } else {
+      let planet = rt.following.filter((p) => p.id === a.planet.id)[0]
+      if (planet) {
+        this.followingArticleCtxMenu.popup(win)
+      }
     }
   }
   updateMiddleSidebarUI() {

@@ -4,4 +4,5 @@ module.exports = {
   Planet: require('./planet'),
   Article: require('./article'),
   Draft: require('./draft'),
+  FairArticle: require('./fairArticle'),
 }

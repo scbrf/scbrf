@@ -1,8 +1,10 @@
 <template>
-    <div v-if="!title || isLoading" class="h-screen w-screen flex items-center justify-center">
+    <div v-if="!title || isLoading" class="h-screen w-screen flex flex-col items-center justify-center">
         <XCircleIcon @click="closeWin" class="absolute right-4 top-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
         </XCircleIcon>
-        Loading, may take a few minutes depend on your network...
+        <progress class="progress w-56 mb-4"></progress>
+        <div>Loading, may take a few minutes depend on your network...</div>
+        <div v-if="error" class="flex-1 flex items-center justify-center text-red-600 font-bold mt-4">{{ error }}</div>
     </div>
     <div v-else class="h-screen w-screen flex flex-col p-4">
         <div class="text-lg text-center font-bold my-2">投放到集市</div>
@@ -10,7 +12,11 @@
             站点 {{ planet }} 的文章 {{ title }} 将会被投放到集市，所有人都有机会看到您的文章，也可以看到您的整个站点。
         </div>
         <div class="leading-6 mb-2">
-            您需要为此支付 Gas 费(预计: {{gas}})和社区捐赠(金额由您决定但不能为空，将全数用于支援社区运作)，您当前的余额是: {{balance}} ETH.
+            您需要为此支付 Gas 费(预计: {{gas}})和社区捐赠(金额由您决定但不能为空，将全数用于支援社区运作)
+        </div>
+        <div class="leading-6 mb-2">
+            您的钱包地址是：<span class="font-bold"> {{address}} </span>,当前的余额是: {{balance}} ETH <span
+                class="font-bold">(测试网络:Goerli)</span>.
         </div>
         <div class="form-control flex flex-col items-stretch justify-center w-100 px-24 py-4">
             <label class="input-group input-group-sm flex  w-auto">

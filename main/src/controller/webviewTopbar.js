@@ -252,9 +252,9 @@ class WebviewTopbar {
     const fairRequestDialog = new BrowserWindow({
       parent: win,
       x: win.getPosition()[0] + win.getSize()[0] / 2 - 300,
-      y: win.getPosition()[1] + win.getSize()[1] / 2 - 200,
+      y: win.getPosition()[1] + win.getSize()[1] / 2 - 225,
       width: 600,
-      height: 400,
+      height: 450,
       frame: false,
       resizable: false,
       webPreferences: {

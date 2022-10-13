@@ -14,6 +14,11 @@
     <div>
       <div class="text-xs text-gray-400 font-sans font-bold">Smart Feeds</div>
       <div class="p-1">
+        <div @click="setFocus('fair')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
+          :class="focus == 'fair' ? ['bg-gray-300'] : [] ">
+          <NewspaperIcon class="h-6 w-6 text-green-500 mr-1" /> <span class="flex-1">Fair</span>
+          <span v-if="numbers.fair" class="e2e-today"> {{ numbers.fair }} </span>
+        </div>
         <div @click="setFocus('today')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'today' ? ['bg-gray-300'] : [] ">
           <SunIcon class="h-6 w-6 text-orange-500 mr-1" /> <span class="flex-1">Today</span>
@@ -92,7 +97,7 @@
 </template>
 <script>
 import Avatar from '../components/Avatar.vue'
-import { ViewColumnsIcon, SunIcon, CheckBadgeIcon, StarIcon, PlusIcon, XCircleIcon, MinusCircleIcon } from '@heroicons/vue/24/outline'
+import { ViewColumnsIcon, NewspaperIcon, SunIcon, CheckBadgeIcon, StarIcon, PlusIcon, XCircleIcon, MinusCircleIcon } from '@heroicons/vue/24/outline'
 import { mapState, mapWritableState } from 'pinia';
 import { useIPFSStore } from '../stores/ipfs';
 
@@ -103,7 +108,7 @@ export default {
     }
   },
   components: {
-    ViewColumnsIcon, SunIcon, CheckBadgeIcon, StarIcon, Avatar, PlusIcon, XCircleIcon, MinusCircleIcon
+    ViewColumnsIcon, SunIcon, NewspaperIcon, CheckBadgeIcon, StarIcon, Avatar, PlusIcon, XCircleIcon, MinusCircleIcon
   },
   computed: {
     ...mapState(useIPFSStore, ['online', 'peers', 'planets', 'following', 'numbers']),
