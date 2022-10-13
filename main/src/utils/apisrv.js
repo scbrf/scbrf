@@ -105,6 +105,11 @@ class ApiServer {
     ctx.body = {
       ipfspeers: rt.ipfsPeers,
       ipfsGateway,
+      fair: rt.fair.map((a) => ({
+        ...a.json(),
+        read: true,
+        url: `${ipfsGateway}/ipns/${a.planet.ipns}/${a.id}/`,
+      })),
       planets: rt.planets.map((p) => ({
         ...p.json(),
         avatar: p.avatar,
