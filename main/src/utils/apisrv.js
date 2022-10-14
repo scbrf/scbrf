@@ -250,6 +250,7 @@ class ApiServer {
       }
     }
     if (audioFilename && !audioFileTarget) {
+      log.debug('put audio file', { audioFilename, audioFileTarget })
       files.push(audioFilename)
     }
 
@@ -263,7 +264,10 @@ class ApiServer {
       }
     }
     if (videoFilename && !videoFileTarget) {
-      files.push(audioFilename)
+      log.debug('put video file', { videoFilename, videoFileTarget })
+      files.push(videoFilename)
+    } else {
+      log.debug('got videofile at', videoFileTarget)
     }
 
     log.debug('files debug', { attachments, files, length: files.length })
