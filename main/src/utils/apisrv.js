@@ -281,6 +281,27 @@ class ApiServer {
       ctx.body = { error: '' }
     }
   }
+
+  async apiDeletePlanet(ctx) {
+    const { id } = ctx.request.body
+    const planet = rt.planets.filter((p) => p.id === id)[0]
+    rt.planets = rt.planets.filter((p) => p.id !== id)
+    if (planet) {
+      await planet.delete()
+    }
+    ctx.body = { error: '' }
+  }
+
+  async apiUnfollowPlanet(ctx) {
+    const { id } = ctx.request.body
+    const planet = rt.following.filter((p) => p.id === id)[0]
+    rt.following = rt.following.filter((p) => p.id !== id)
+    if (planet) {
+      await planet.delete()
+    }
+    ctx.body = { error: '' }
+  }
+
   async apiDeleteArticle(ctx) {
     const { id, planetid } = ctx.request.body
     const planet = rt.planets.filter((p) => p.id === planetid)[0]
@@ -328,6 +349,8 @@ class ApiServer {
     router.post('/fair/prepare', this.apiFairPrepare.bind(this))
     router.post('/fair/request', this.apiFairRequest.bind(this))
     router.post('/draft/publish', this.apiPublishDraft.bind(this))
+    router.post('/planet/delete', this.apiDeletePlanet.bind(this))
+    router.post('/planet/unfollow', this.apiUnfollowPlanet.bind(this))
     router.post('/site', this.apiListSite.bind(this))
     router.post('/upload', this.upload.bind(this))
 
