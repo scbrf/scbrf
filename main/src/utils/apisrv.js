@@ -303,6 +303,7 @@ class ApiServer {
 
   async apiFairMarkReaded(ctx) {
     await Promise.all(rt.fair.map((a) => a.confirmRead()))
+    rt.fair = [...rt.fair]
     ctx.body = { error: '' }
   }
 
