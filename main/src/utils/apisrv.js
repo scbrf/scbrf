@@ -264,7 +264,6 @@ class ApiServer {
       }
     }
     if (videoFilename && !videoFileTarget) {
-      log.debug('put video file', { videoFilename, videoFileTarget })
       files.push(videoFilename)
     } else {
       log.debug('got videofile at', videoFileTarget)
