@@ -30,6 +30,7 @@ class Runtime {
       [evt.evRuntimeSidebarFocusChange, this.updateMiddleSidebarOnChange],
       [evt.evRuntimeFollowingChange, this.updateNumber],
       [evt.evRuntimePlanetsChange, this.updateNumber],
+      [evt.evRuntimeFairChange, this.updateNumber],
     ])
 
     this.initDataModel()
@@ -51,10 +52,12 @@ class Runtime {
       })
       ret[`following:${p.id}`] = p.articles.filter((a) => a.read !== true).length
     })
+    ret.fair = this.fair.filter((a) => a.read !== true).length
     this.numbers = ret
+    log.debug('update numbers to', this.numbers)
   }
 
-  updateMiddleSidebarOnChange() {
+  async updateMiddleSidebarOnChange() {
     const focus = this.sidebarFocus || ''
     if (focus.articles) {
       this.set({
@@ -64,7 +67,8 @@ class Runtime {
       })
     } else if (focus === 'fair') {
       const articles = [...this.fair]
-      articles.sort((a, b) => b.created - a.created)
+      await Promise.all(articles.map((a) => a.confirmRead()))
+      this.fair = [...articles]
       this.set({
         middleSideBarTitle: 'Fair',
         middleSideBarArticles: articles,

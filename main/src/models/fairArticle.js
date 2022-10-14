@@ -46,12 +46,25 @@ class FairArticle {
     }
   }
 
+  async confirmRead() {
+    if (this.read !== true) {
+      this.read = true
+      await this.save()
+    }
+  }
+
+  save() {
+    const articlePath = require('path').join(FairArticle.FairArticlesPath, `${this.id}.json`)
+    require('fs').writeFileSync(articlePath, JSON.stringify(this.json()))
+  }
+
   json() {
     return {
       attachments: this.attachments,
       content: this.content,
       summary: this.summary,
       title: this.title,
+      read: this.read,
       created: this.created,
       author: this.author,
       id: this.id,
@@ -68,11 +81,16 @@ class FairArticle {
     try {
       const rsp = await require('axios').get(url)
       const articlePath = require('path').join(FairArticle.FairArticlesPath, `${meta.uuid}.json`)
+      let oldvalue = {}
+      if (require('fs').existsSync(articlePath)) {
+        oldvalue = JSON.parse(require('fs').readFileSync(articlePath).toString())
+      }
       require('fs').writeFileSync(
         articlePath,
         JSON.stringify({
           ...rsp.data,
           ...meta,
+          read: oldvalue.read || false,
         })
       )
     } catch (ex) {

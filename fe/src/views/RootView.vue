@@ -17,7 +17,11 @@
         <div @click="setFocus('fair')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'fair' ? ['bg-gray-300'] : [] ">
           <NewspaperIcon class="h-6 w-6 text-green-500 mr-1" /> <span class="flex-1">Fair</span>
-          <span v-if="numbers.fair" class="e2e-today"> {{ numbers.fair }} </span>
+          <span v-if="numbers.fair"
+            class="e2e-today bg-orange-500 rounded-full font-bold w-6 aspect-square flex items-center justify-center text-white">
+            {{
+            numbers.fair }}
+          </span>
         </div>
         <div @click="setFocus('today')" class="hover:bg-blue-500 nodrag flex text-sm items-center rounded px-4 py-1"
           :class="focus == 'today' ? ['bg-gray-300'] : [] ">

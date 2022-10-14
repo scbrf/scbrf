@@ -20,6 +20,7 @@ class EventCenter {
   evRuntimeMiddleSidebarContentChange // '中间栏的标题或者内容发生了变化'
   evRuntimeMiddleSidebarFocusChange // '中间栏的关注文章发生了变化'
   evRuntimeSidebarFocusChange //'左侧栏的关注点发生了变化'
+  evRuntimeFairChange //集市内容变更
 
   evRebounds // 重新排列窗口，比如当用户切换左边栏或者切换声音播放器的时候
 

@@ -163,7 +163,6 @@ class ApiServer {
       ipfsGateway,
       fair: rt.fair.map((a) => ({
         ...a.json(),
-        read: true,
         url: `${ipfsGateway}/ipns/${a.planet.ipns}/${a.id}/`,
       })),
       planets: rt.planets.map((p) => ({
@@ -302,6 +301,11 @@ class ApiServer {
     ctx.body = { error: '' }
   }
 
+  async apiFairMarkReaded(ctx) {
+    await Promise.all(rt.fair.map((a) => a.confirmRead()))
+    ctx.body = { error: '' }
+  }
+
   async apiDeleteArticle(ctx) {
     const { id, planetid } = ctx.request.body
     const planet = rt.planets.filter((p) => p.id === planetid)[0]
@@ -350,6 +354,7 @@ class ApiServer {
     router.post('/fair/request', this.apiFairRequest.bind(this))
     router.post('/draft/publish', this.apiPublishDraft.bind(this))
     router.post('/planet/delete', this.apiDeletePlanet.bind(this))
+    router.post('/fair/markreaded', this.apiFairMarkReaded.bind(this))
     router.post('/planet/unfollow', this.apiUnfollowPlanet.bind(this))
     router.post('/site', this.apiListSite.bind(this))
     router.post('/upload', this.upload.bind(this))
