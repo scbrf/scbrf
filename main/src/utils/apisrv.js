@@ -60,6 +60,25 @@ class ApiServer {
     })
   }
 
+  apiMarkStarred(ctx) {
+    const { planetid, articleid, starred } = ctx.request.body
+    const planet = rt.following.filter((p) => p.id === planetid)[0]
+    if (planet) {
+      const article = planet.articles.filter((a) => a.id === articleid)[0]
+      if (article) {
+        article.starred = starred
+        article.save()
+        rt.following = [...rt.following]
+        evt.emit(evt.evRuntimeMiddleSidebarContentChange)
+        ctx.body = { error: '' }
+      } else {
+        ctx.body = { error: 'article not found' }
+      }
+    } else {
+      ctx.body = { error: 'planet not found' }
+    }
+  }
+
   apiMarkReaded(ctx) {
     const { planetid, articleid } = ctx.request.body
     const planet = rt.following.filter((p) => p.id === planetid)[0]
@@ -266,6 +285,7 @@ class ApiServer {
     router.post('/planet/create', this.apiPlanetCreate.bind(this))
     router.post('/planet/follow', this.apiPlanetFollow.bind(this))
     router.post('/article/markreaded', this.apiMarkReaded.bind(this))
+    router.post('/article/markstarred', this.apiMarkStarred.bind(this))
     router.post('/article/delete', this.apiDeleteArticle.bind(this))
     router.post('/article/get', this.apiArticleGet.bind(this))
     router.post('/draft/publish', this.apiPublishDraft.bind(this))
