@@ -98,6 +98,43 @@ class ApiServer {
     }
   }
 
+  async apiFairRequest(ctx) {
+    const { planetid, articleid, duration, value, passwd } = ctx.request.body
+    const planet = rt.planets.filter((p) => p.id === planetid)[0]
+    if (!planet) {
+      ctx.body = { error: `invalid planetid ${planetid}` }
+      return
+    }
+    const article = planet.articles.filter((a) => a.id === articleid)[0]
+    if (!article) {
+      ctx.body = { error: `invalid articleid ${id}` }
+      return
+    }
+    const error = await require('../controller/webviewTopbar').fairAction(
+      article.planet.ipns,
+      article.id,
+      duration,
+      value,
+      passwd
+    )
+    ctx.body = { error: error || '' }
+  }
+
+  async apiFairPrepare(ctx) {
+    const { planetid, articleid } = ctx.request.body
+    const planet = rt.planets.filter((p) => p.id === planetid)[0]
+    if (!planet) {
+      ctx.body = { error: `invalid planetid ${planetid}` }
+      return
+    }
+    const article = planet.articles.filter((a) => a.id === articleid)[0]
+    if (!article) {
+      ctx.body = { error: `invalid articleid ${id}` }
+      return
+    }
+    ctx.body = await require('../controller/webviewTopbar').fairPrepare(article)
+  }
+
   apiArticleGet(ctx) {
     const { planetid, articleid } = ctx.request.body
     const planet = rt.planets.filter((p) => p.id === planetid)[0]
@@ -288,6 +325,8 @@ class ApiServer {
     router.post('/article/markstarred', this.apiMarkStarred.bind(this))
     router.post('/article/delete', this.apiDeleteArticle.bind(this))
     router.post('/article/get', this.apiArticleGet.bind(this))
+    router.post('/fair/prepare', this.apiFairPrepare.bind(this))
+    router.post('/fair/request', this.apiFairRequest.bind(this))
     router.post('/draft/publish', this.apiPublishDraft.bind(this))
     router.post('/site', this.apiListSite.bind(this))
     router.post('/upload', this.upload.bind(this))

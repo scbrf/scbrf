@@ -218,33 +218,46 @@ class WebviewTopbar {
     })
   }
 
-  async doFairRequest(event, p) {
-    const win = BrowserWindow.fromWebContents(event.sender)
-    const { passwd, value, duration } = p
+  async fairAction(ipns, uuid, duration, value, passwd) {
     if (!(await require('../utils/wallet').validatePasswd(passwd))) {
-      win.webContents.send('article-fair-request', {
-        error: '密码错误!',
-      })
-      return
+      return '密码错误'
     }
     log.debug('try do donate with', { value, duration })
     try {
-      const tx = await require('../utils/wallet').donate(
-        this.ctxArticle.planet.ipns,
-        this.ctxArticle.id,
-        duration,
-        value
-      )
+      const tx = await require('../utils/wallet').donate(ipns, uuid, duration, value)
       log.debug('got tx from donate', tx)
       const rsp = await tx.wait()
       log.debug('got tx after wait', rsp)
-      win.close()
     } catch (ex) {
       log.debug('donate error', ex)
-      win.webContents.send('article-fair-request', {
-        error: ex.message,
-      })
+      return ex.message
     }
+  }
+
+  async doFairRequest(event, p) {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const { passwd, value, duration } = p
+    const error = await this.fairAction(this.ctxArticle.planet.ipns, this.ctxArticle.id, duration, value, passwd)
+    if (error) {
+      win.webContents.send('article-fair-request', {
+        error,
+      })
+    } else {
+      win.close()
+    }
+  }
+
+  async fairPrepare(artilce) {
+    const balance = await require('../utils/wallet').balance()
+    const gas = await require('../utils/wallet').estimateGasForFair(artilce.planet.ipns, artilce.id, 24 * 3600, 0.01)
+    const info = {
+      address: require('../utils/wallet').wallet.address,
+      balance,
+      gas,
+      title: artilce.title,
+      planet: artilce.planet.name,
+    }
+    return info
   }
 
   async fairRequest() {
@@ -263,20 +276,7 @@ class WebviewTopbar {
     })
     fairRequestDialog.loadURL(`${require('../utils/websrv').WebRoot}/dialog/article/fair`)
     fairRequestDialog.webContents.on('did-finish-load', async () => {
-      const balance = await require('../utils/wallet').balance()
-      const gas = await require('../utils/wallet').estimateGasForFair(
-        this.ctxArticle.planet.ipns,
-        this.ctxArticle.id,
-        24 * 3600,
-        0.01
-      )
-      const info = {
-        address: require('../utils/wallet').wallet.address,
-        balance,
-        gas,
-        title: this.ctxArticle.title,
-        planet: this.ctxArticle.planet.name,
-      }
+      const info = await this.fairPrepare(this.ctxArticle)
       log.debug('fair request info', info)
       fairRequestDialog.webContents.send('article-fair-request', info)
     })
