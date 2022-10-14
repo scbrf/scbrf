@@ -166,7 +166,7 @@ class ApiServer {
   }
 
   async apiPublishDraft(ctx) {
-    const { planetid, id, title, content, attachments, audioFilename, videoFilename } = ctx.request.body
+    const { planetid, id, title, content, attachments, audioFilename, videoFilename, created } = ctx.request.body
     const planet = rt.planets.filter((p) => p.id === planetid)[0]
     if (!planet) {
       ctx.body = { error: `invalid planet id ${planetid}` }
@@ -176,6 +176,7 @@ class ApiServer {
       id,
       title,
       content,
+      created,
       audioFilename,
       videoFilename,
       attachments: attachments.map((a) => ({ name: a })),
