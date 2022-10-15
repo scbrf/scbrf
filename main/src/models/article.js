@@ -89,7 +89,10 @@ class Article {
       )
       log.debug('fetch article comments done!')
     } catch (ex) {
-      log.error('error when fetch comments', ex.message)
+      log.error('error when fetch comments', {
+        error: ex.message,
+        center: `${this.planet.commentsBridge}/${this.id.toUpperCase()}`,
+      })
     }
   }
 
