@@ -1,10 +1,9 @@
 <template>
-    <div v-if="!title || isLoading" class="h-screen w-screen flex flex-col items-center justify-center">
+    <div v-if="(!title || isLoading) && !error" class="h-screen w-screen flex flex-col items-center justify-center">
         <XCircleIcon @click="closeWin" class="absolute right-4 top-4 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
         </XCircleIcon>
         <progress class="progress w-56 mb-4"></progress>
         <div>Loading, may take a few minutes depend on your network...</div>
-        <div v-if="error" class="flex-1 flex items-center justify-center text-red-600 font-bold mt-4">{{ error }}</div>
     </div>
     <div v-else class="h-screen w-screen flex flex-col p-4">
         <div class="text-lg text-center font-bold my-2">投放到集市</div>
@@ -37,7 +36,8 @@
                     class="input flex-1 input-bordered input-sm" />
             </label>
         </div>
-        <div class="flex-1 flex items-center justify-center text-red-600 font-bold">{{ error }}</div>
+        <div class="flex-1 flex items-center justify-center text-red-600 font-bold line-clamp-1">{{ error.substr(0, 100)
+        }}</div>
         <div class="border-t flex p-2">
             <button @click="closeWin" class="btn btn-ghost btn-sm mr-4">Close</button>
             <div class="flex-1"></div>
@@ -61,7 +61,6 @@ export default {
             duration: 24,
             passwd: '',
             isLoading: false,
-            error: ''
         }
     },
     methods: {
@@ -79,7 +78,7 @@ export default {
     },
     computed: {
         validated() {
-            return this.value && parseFloat(this.value) > 0 && this.duration && parseInt(this.duration) > 0 && parseFloat(this.value) < parseFloat(this.balance) && this.passwd && !this.isLoading
+            return this.value && (parseFloat(this.value) > 0) && this.duration && (parseInt(this.duration) > 0) && (parseFloat(this.value) < parseFloat(this.balance)) && this.passwd && !this.error && !this.isLoading
         },
         ...mapState(useFairStore, ['title', 'address', 'balance', 'gas', 'planet', 'error'])
     }
