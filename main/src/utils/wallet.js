@@ -131,6 +131,10 @@ class Wallet {
     })
   }
 
+  async durationLimit() {
+    return await this.donateContract.DurationLimit()
+  }
+
   async fairHot50() {
     return await this.donateContract.hot50()
   }

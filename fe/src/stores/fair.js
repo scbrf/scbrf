@@ -7,6 +7,7 @@ export const useFairStore = defineStore("fair", {
     gas: "",
     balance: "",
     address: "",
+    durationLimit: 0,
     error: "",
   }),
 });

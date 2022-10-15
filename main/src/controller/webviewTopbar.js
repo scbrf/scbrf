@@ -250,9 +250,11 @@ class WebviewTopbar {
   async fairPrepare(artilce) {
     const balance = await require('../utils/wallet').balance()
     const gas = await require('../utils/wallet').estimateGasForFair(artilce.planet.ipns, artilce.id, 24 * 3600, 0.01)
+    const durationLimit = await require('../utils/wallet').durationLimit()
     const info = {
       address: require('../utils/wallet').wallet.address,
       balance,
+      durationLimit: durationLimit.toNumber(),
       gas,
       title: artilce.title,
       planet: artilce.planet.name,

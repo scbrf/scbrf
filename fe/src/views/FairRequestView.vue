@@ -36,7 +36,8 @@
                     class="input flex-1 input-bordered input-sm" />
             </label>
         </div>
-        <div class="flex-1 flex items-center justify-center text-red-600 font-bold line-clamp-1">{{ error.substr(0, 100)
+        <div class="flex-1 flex items-center w-100 justify-center text-red-600 font-bold">{{
+        error.substr(0, 100)
         }}</div>
         <div class="border-t flex p-2">
             <button @click="closeWin" class="btn btn-ghost btn-sm mr-4">Close</button>
@@ -47,7 +48,7 @@
     </div>
 </template>
 <script>
-import { mapState, } from 'pinia';
+import { mapState, mapWritableState } from 'pinia';
 import { useFairStore } from '../stores/fair';
 import { XCircleIcon } from '@heroicons/vue/24/outline'
 
@@ -61,6 +62,13 @@ export default {
             duration: 24,
             passwd: '',
             isLoading: false,
+        }
+    },
+    watch: {
+        error() {
+            if (this.error) {
+                this.isLoading = false;
+            }
         }
     },
     methods: {
@@ -78,9 +86,22 @@ export default {
     },
     computed: {
         validated() {
-            return this.value && (parseFloat(this.value) > 0) && this.duration && (parseInt(this.duration) > 0) && (parseFloat(this.value) < parseFloat(this.balance)) && this.passwd && !this.error && !this.isLoading
+            this.error = ''
+            if ((parseFloat(this.value) >= parseFloat(this.balance))) {
+                this.error = '余额不足';
+            }
+            if (parseInt(this.duration) * 3600 >= this.durationLimit) {
+                this.error = `投放时长过长，请确保小于 ${Math.round(this.durationLimit / 3600)} 小时`;
+            }
+            return this.value &&
+                (parseFloat(this.value) > 0) &&
+                this.duration &&
+                (parseInt(this.duration) > 0) &&
+                this.passwd &&
+                !this.isLoading
         },
-        ...mapState(useFairStore, ['title', 'address', 'balance', 'gas', 'planet', 'error'])
+        ...mapState(useFairStore, ['title', 'address', 'balance', 'gas', 'planet', 'durationLimit']),
+        ...mapWritableState(useFairStore, ['error'])
     }
 }
 </script>
