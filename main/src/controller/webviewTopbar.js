@@ -119,7 +119,7 @@ class WebviewTopbar {
     if (pathes && pathes.length > 0) {
       const image = await Jimp.read(pathes[0])
       log.info('need store avatar at:', rt.sidebarFocus.avatarPath)
-      image.resize(256, 256).quality(80).write(rt.sidebarFocus.avatarPath)
+      await image.resize(256, 256).quality(80).writeAsync(rt.sidebarFocus.avatarPath)
       rt.sidebarFocus.avatar = 'avatar.png'
       await rt.sidebarFocus.save()
       evt.emit(evt.evRuntimePlanetsChange)

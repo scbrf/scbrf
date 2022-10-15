@@ -210,11 +210,15 @@ class PlanetSidebarController {
   async createPlanet(param) {
     let planet
     if (param.id) {
-      if (param.id === rt.planetEditing.id) {
+      if (rt.planetEditing == null) {
+        //maybe from phone
+        rt.planetEditing = rt.planets.filter((p) => p.id === param.id)[0]
+      }
+      if (rt.planetEditing && param.id === rt.planetEditing.id) {
         planet = rt.planetEditing
         rt.planetEditing.name = param.name
         rt.planetEditing.about = param.about
-        rt.planetEditing.commentsBridge = param.commentsBridge
+        rt.planetEditing.commentsBridge = param.commentsBridge || rt.planetEditing.commentsBridge
         if (rt.planetEditing.template !== param.template) {
           rt.planetEditing.template = param.template
         }

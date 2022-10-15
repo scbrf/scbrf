@@ -100,7 +100,7 @@ class FollowingPlanet {
         log.info('update site succ', { name: this.name })
       }
     } catch (ex) {
-      log.error('error when update', ex)
+      log.error('error when update', ex.message)
     }
 
     this.updating = false

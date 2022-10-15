@@ -314,7 +314,7 @@ class Planet {
           resolve(files)
         })
       })
-      for (let name of articles) {
+      for (let name of articles || []) {
         const article = await Article.load(name, planet)
         if (article) {
           planet.articles.push(article)

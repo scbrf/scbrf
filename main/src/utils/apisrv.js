@@ -6,6 +6,7 @@ const wallet = require('./wallet')
 const ipfs = require('./ipfs')
 const evt = require('../utils/events')
 const { Draft, Planet, FollowingArticle } = require('../models')
+const Jimp = require('jimp')
 
 //API for mobile
 class ApiServer {
@@ -310,6 +311,22 @@ class ApiServer {
     ctx.body = { error: '' }
   }
 
+  async apiUpdateAvatar(ctx) {
+    const { id, avatar } = ctx.request.body
+    const planet = rt.planets.filter((p) => p.id === id)[0]
+    if (!planet) {
+      ctx.body = { error: `invalid id: ${id}` }
+      return
+    }
+    const image = await Jimp.read(Buffer.from(avatar, 'base64'))
+    await image.resize(256, 256).quality(80).writeAsync(planet.avatarPath)
+    planet.avatar = 'avatar.png'
+    await planet.save()
+    evt.emit(evt.evRuntimePlanetsChange)
+    planet.publish()
+    ctx.body = { error: '' }
+  }
+
   async apiDeleteArticle(ctx) {
     const { id, planetid } = ctx.request.body
     const planet = rt.planets.filter((p) => p.id === planetid)[0]
@@ -360,6 +377,7 @@ class ApiServer {
     router.post('/planet/delete', this.apiDeletePlanet.bind(this))
     router.post('/fair/markreaded', this.apiFairMarkReaded.bind(this))
     router.post('/planet/unfollow', this.apiUnfollowPlanet.bind(this))
+    router.post('/planet/avatar', this.apiUpdateAvatar.bind(this))
     router.post('/site', this.apiListSite.bind(this))
     router.post('/upload', this.upload.bind(this))
 
