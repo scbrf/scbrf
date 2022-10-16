@@ -346,8 +346,10 @@ class ApiServer {
   startListen() {
     const app = new Koa()
     const bodyParser = require('koa-body')
+    const range = require('koa-range')
     const Router = require('koa-router')
     const serve = require('koa-static')
+    app.use(range)
     app.use(serve(Planet.PublicRoot))
     const router = new Router()
     app.use(
