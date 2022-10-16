@@ -14,6 +14,7 @@
         "package": "electron-forge package",
         "premake": "cd ../fe && yarn build",
         "make": "electron-forge make",
+        "postversion": "git push && git push --tags",
         "test": "jest --roots=./src"
     },
     "devDependencies": {
