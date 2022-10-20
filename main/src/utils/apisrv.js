@@ -187,6 +187,7 @@ class ApiServer {
           obj.summary = FollowingArticle.extractSummary(a)
           delete obj.content
           obj.url = `${ipfsGateway}/ipfs/${p.cid}/${a.id}/`
+          obj.pinState = a.pinState
           return obj
         }),
       })),

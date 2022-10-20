@@ -62,6 +62,7 @@ class ArticleController {
       articles: rt.middleSideBarArticles.map((a) => ({
         ...a.json(),
         url: a.url,
+        pinState: a.pinState,
         planet: a.planet.json(),
       })),
       focus: rt.middleSideBarFocusArticle ? rt.middleSideBarFocusArticle.id : '',

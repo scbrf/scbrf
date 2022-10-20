@@ -20,7 +20,7 @@
                     <div class="font-bold">{{ a.title }}</div>
                     <div class="text-sm text-gray-400 line-clamp-2">{{ a.summary }}</div>
                     <div class="text-xs text-gray-400 mt-1 mb-3 flex items-center">
-                        <span> {{ date(a.created) }} </span>
+                        <span> {{ date(a.created) }} {{ a.pinState }} </span>
                         <MicrophoneIcon v-if="a.audioFilename" class="w-4 h-4 ml-4"></MicrophoneIcon>
                         <FilmIcon v-if="a.videoFilename" class="w-4 h-4 ml-4"></FilmIcon>
                     </div>

@@ -21,6 +21,7 @@ class Planet {
     const now = new Date().getTime()
     this.created = params.created || now
     this.updated = params.updated || now
+    this.cid = params.cid || ''
     this.ipns = params.ipns || null
     this.commentsBridge = params.commentsBridge || ''
     this.githubUsername = params.githubUsername || null
@@ -149,6 +150,7 @@ class Planet {
     return {
       id: this.id,
       ipns: this.ipns,
+      cid: this.cid,
       name: this.name,
       about: this.about,
       commentsBridge: this.commentsBridge,
@@ -248,6 +250,7 @@ class Planet {
     try {
       const cid = await ipfs.addDirectory(this.publicBasePath)
       log.debug('publish dir return:', cid)
+      this.cid = cid
       await ipfs.publish(this.id, cid)
       log.info(`publish site succ`, { key: this.id, cid })
     } catch (ex) {
@@ -275,6 +278,7 @@ class Planet {
     try {
       log.debug('refresh comments done!')
       const cid = await ipfs.addDirectory(this.publicBasePath)
+      this.cid = cid
       log.info('publish dir return:', { planetid: this.id, cid })
       await ipfs.publish(this.id, cid)
     } catch (ex) {

@@ -10,6 +10,7 @@ class EventCenter {
   evIPFSShutdown // 'tell ipfs module to shutdown ipfs'
   evAppInit // 'tell all module now do init work, and the callback should be sync function'
   evAppQuit // app quit
+  evIpfsDaemonReady //ipfs readay
 
   /**  Runtime event **/
   evRuntimeFollowingChange // '增加或者删除了Following数据，following的某个article内容改变不会触发该事件'

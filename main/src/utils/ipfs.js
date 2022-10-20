@@ -62,17 +62,31 @@ class IPFSDaemon {
     }
     log.error('resolve ipns return unknown', result)
   }
-  async pin(cid) {
+  //list all cid local pined
+  async listPin() {
+    const out = await this.runIPFSCmd('pin', 'ls', '-t', 'direct', '--encoding=json')
+    const json = JSON.parse(out)
+    return Object.keys(json.Keys)
+  }
+  async rmPin(cid) {
+    if (!cid.trim()) return
+    log.debug('remove pin recursive for', cid)
+    const result = await this.runIPFSCmd('pin', 'rm', '-r', cid)
+    log.debug('remove pin return', result)
+  }
+  async pin(cid, recursive = false) {
     log.info('pin cid', cid)
     try {
-      await this.api(
+      const data = await this.api(
         'pin/add',
         {
           arg: cid,
+          recursive,
         },
         { timeout: 60000 }
       )
-      log.info('pin cid done')
+      log.info('pin cid done', { path: cid, result: data })
+      return data.Pins[0]
     } catch (ex) {
       log.error('pin error, this may not problem', ex.toString())
     }
@@ -198,6 +212,7 @@ class IPFSDaemon {
       log.info(`daemon: ${data}`)
       if (`${data}`.indexOf('Daemon is ready')) {
         this.updateOnlineStatus()
+        evt.emit(evt.evIpfsDaemonReady)
       }
     })
     this.daemon.stderr.on('data', (data) => {
