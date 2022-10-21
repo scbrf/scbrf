@@ -11,10 +11,7 @@ jobs:
     strategy:
       matrix:
         platform: [macos-latest, windows-latest]
-        arch: [x86_64, arm64]
-        exclude:
-        - platform: windows-latest
-          arch: arm64
+        arch: [x86_64]
     steps:
       - uses: actions/checkout@v3
       - name: Install Node.js
