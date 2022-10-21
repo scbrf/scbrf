@@ -59,6 +59,14 @@ class PinManager {
     //其它的pin全部删除
     const invalidPins = allPins.filter((p) => validpins.indexOf(p) < 0)
     await Promise.all(invalidPins.map((p) => require('../utils/ipfs').rmPin(p)))
+    //所有旧文章移除pin标记
+    rt.following.forEach((p) => {
+      p.articles.forEach((a) => {
+        if (new Date().getTime() - a.created >= 21 * 24 * 3600 * 1000) {
+          a.pinState = ''
+        }
+      })
+    })
   }
 }
 
