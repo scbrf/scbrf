@@ -83,7 +83,7 @@ class IPFSDaemon {
           arg: cid,
           recursive,
         },
-        { timeout: 60000 }
+        { timeout: 120000 }
       )
       log.info('pin cid done', { path: cid, result: data })
       return data.Pins[0]

@@ -57,8 +57,11 @@ class PinManager {
     //新文章的cid和自建站点的cid应该保留pin
     const validpins = allNewArticles.map((a) => a.cidPin)
     //其它的pin全部删除
-    const invalidPins = allPins.filter((p) => validpins.indexOf(p) < 0)
-    await Promise.all(invalidPins.map((p) => require('../utils/ipfs').rmPin(p)))
+
+    //TODO 暂时不移除旧文章的pin，未来可能更改为每周一清理
+    // const invalidPins = allPins.filter((p) => validpins.indexOf(p) < 0)
+    // await Promise.all(invalidPins.map((p) => require('../utils/ipfs').rmPin(p)))
+
     //所有旧文章移除pin标记
     rt.following.forEach((p) => {
       p.articles.forEach((a) => {
