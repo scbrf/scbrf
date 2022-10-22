@@ -16,7 +16,7 @@
                 <div v-else-if="a.read === false" class="w-2 h-2 mr-4 mt-2 rounded-full bg-green-500">
                 </div>
                 <div v-else class="w-4 h-4 mr-2"></div>
-                <div style="text-align: justify;" :style="{maxWidth: isWin ? '200px' : '228px'}">
+                <div :style="{maxWidth: isWin ? '200px' : '228px'}">
                     <div class="font-bold">{{ a.title }}</div>
                     <div class="text-sm text-gray-400 line-clamp-2">{{ a.summary }}</div>
                     <div class="text-xs text-gray-400 mt-1 mb-3 flex items-center">
