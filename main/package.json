@@ -45,6 +45,7 @@
         "md5": "^2.3.0",
         "moment": "^2.29.4",
         "multicast-dns": "^7.2.5",
+        "nodecast-js": "^1.0.3",
         "nunjucks": "^3.2.3",
         "portfinder": "^1.0.32",
         "uuid": "^9.0.0"

@@ -328,6 +328,31 @@ class ApiServer {
     ctx.body = { error: '' }
   }
 
+  async apiDlnaList(ctx) {
+    ctx.body = {
+      devices: require('./dlna')
+        .nodeCast.getList()
+        .map((d) => ({
+          name: d.name,
+          host: d.host,
+          type: d.type,
+        })),
+    }
+  }
+
+  async apiDlnaPlay(ctx) {
+    const { device, url } = ctx.request.body
+    const d = require('./dlna')
+      .nodeCast.getList()
+      .filter((d) => (d.name = device))[0]
+    if (d) {
+      d.play(url)
+      ctx.body = { error: '' }
+    } else {
+      ctx.body = { error: 'no device' }
+    }
+  }
+
   async apiDeleteArticle(ctx) {
     const { id, planetid } = ctx.request.body
     const planet = rt.planets.filter((p) => p.id === planetid)[0]
@@ -386,6 +411,8 @@ class ApiServer {
     router.post('/planet/unfollow', this.apiUnfollowPlanet.bind(this))
     router.post('/planet/avatar', this.apiUpdateAvatar.bind(this))
     router.post('/site', this.apiListSite.bind(this))
+    router.post('/dlna/list', this.apiDlnaList.bind(this))
+    router.post('/dlna/play', this.apiDlnaPlay.bind(this))
     router.post('/upload', this.upload.bind(this))
 
     app.use(router.routes()).use(router.allowedMethods())

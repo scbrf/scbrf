@@ -8,6 +8,7 @@ require('./upmanager')
 require('./mainwindow')
 require('./trayIcon')
 require('./fair')
+require('../utils/dlna')
 require('../controller/pin_manager')
 
 class ScarboroughApp {
