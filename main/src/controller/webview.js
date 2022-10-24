@@ -33,7 +33,7 @@ class Webview {
     this.loadWeb()
   }
   shareOpen() {
-    require('electron').shell.openExternal(this.view.webContents.getURL())
+    require('electron').shell.openExternal(this.targetUrl || this.view.webContents.getURL())
   }
   async loadWeb() {
     if (!this.view) return
@@ -44,10 +44,8 @@ class Webview {
         const url = `http://${require('../utils/apisrv').ipAddr}:${require('../utils/apisrv').apiPort}/${
           rt.middleSideBarFocusArticle.planet.id
         }/${rt.middleSideBarFocusArticle.id}/index.html`
-        this.view.webContents.loadURL(
-          rt.middleSideBarFocusArticle.url.startsWith('file://') ? url : rt.middleSideBarFocusArticle.url,
-          { userAgent: 'Planet/JS' }
-        )
+        this.targetUrl = rt.middleSideBarFocusArticle.url.startsWith('file://') ? url : rt.middleSideBarFocusArticle.url
+        this.view.webContents.loadURL(this.targetUrl, { userAgent: 'Planet/JS' })
       })
     } else {
       const url = `${require('../utils/websrv').WebRoot}/empty`
