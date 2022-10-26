@@ -139,7 +139,7 @@ class PlanetSidebarController {
       x: win.getPosition()[0] + win.getSize()[0] / 2 - 300,
       y: win.getPosition()[1] + win.getSize()[1] / 2 - 150,
       width: 400,
-      height: 500,
+      height: 400,
       frame: false,
       resizable: false,
       webPreferences: {
