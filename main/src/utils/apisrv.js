@@ -369,6 +369,40 @@ class ApiServer {
     ctx.body = { error: '' }
   }
 
+  async apiAltStore(ctx) {
+    const ipaAttachment = (a) => {
+      for (let at of a.attachments) {
+        if (at.toLowerCase().endsWith('.ipa')) return at
+      }
+    }
+    const ipfsGateway = `http://${this.getIpAddress()}:${ipfs.gatewayPort}`
+    ctx.body = {
+      name: 'Scbrf Local AltStore',
+      identifier: 'eth.yygqg',
+      apps: rt.following
+        .reduce((r, p) => {
+          if (!require('fs').existsSync(p.rawPath)) return r
+          const rawArticles = JSON.parse(require('fs').readFileSync(p.rawPath).toString()).articles || []
+          return [...r, ...rawArticles.filter((a) => ipaAttachment(a)).map((a) => ({ ...a, planet: p }))]
+        }, [])
+        .map((a) => ({
+          name: a.bundlename,
+          bundleIdentifier: a.bundleid,
+          developerName: a.author,
+          version: a.version,
+          versionDate: new Date(require('../utils/datetime').timeFromReferenceDate(a.created)),
+          versionDescription: a.content,
+          downloadURL: `${ipfsGateway}/ipfs/${a.planet.cid}/${a.id}/${encodeURIComponent(ipaAttachment(a))}`,
+          localizedDescription: a.desc,
+          iconURL: a.icon,
+          tintColor: '018084',
+          size: a.ipaSize,
+          screenshotURLs: [],
+        })),
+      news: [],
+    }
+  }
+
   startListen() {
     const app = new Koa()
     const bodyParser = require('koa-body')
@@ -414,6 +448,7 @@ class ApiServer {
     router.post('/dlna/list', this.apiDlnaList.bind(this))
     router.post('/dlna/play', this.apiDlnaPlay.bind(this))
     router.post('/upload', this.upload.bind(this))
+    router.get('/altstore', this.apiAltStore.bind(this))
 
     app.use(router.routes()).use(router.allowedMethods())
     log.debug('api server started at port:', this.apiPort)

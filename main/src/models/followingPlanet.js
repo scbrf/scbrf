@@ -27,6 +27,7 @@ class FollowingPlanet {
     this.basePath = require('path').join(FollowingPlanet.followingPlanetsPath, this.id)
     this.articlesPath = require('path').join(this.basePath, 'Articles')
     this.infoPath = require('path').join(this.basePath, 'planet.json')
+    this.rawPath = require('path').join(this.basePath, 'raw.json')
     this.avatarPath = require('path').join(this.basePath, 'avatar.png')
   }
   save() {
@@ -272,6 +273,7 @@ class FollowingPlanet {
 
     require('fs').mkdirSync(planet.basePath, { recursive: true })
     require('fs').mkdirSync(planet.articlesPath, { recursive: true })
+    require('fs').writeFileSync(planet.rawPath, JSON.stringify(publicPlanet))
     planet.articles = (publicPlanet.articles || []).map((a) =>
       FollowingArticle.create(
         {
