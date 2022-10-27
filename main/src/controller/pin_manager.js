@@ -65,13 +65,12 @@ class PinManager {
       await Promise.all(targets.map(async (a) => await this.pinArticle(a)))
     }
     //当前ipfs栈内所有的pin
-    // const allPins = [...(await require('../utils/ipfs').listPin()), ...rt.planets.map((p) => p.cid)]
+    const allPins = await require('../utils/ipfs').listPin()
     //新文章的cid和自建站点的cid应该保留pin
-    // const validpins = allNewArticles.map((a) => a.cidPin)
+    const validpins = [...allNewArticles.map((a) => a.cidPin), ...rt.planets.map((p) => p.cid)]
     //其它的pin全部删除
-    //TODO 暂时不移除旧文章的pin，未来可能更改为每周一清理
-    // const invalidPins = allPins.filter((p) => validpins.indexOf(p) < 0)
-    // await Promise.all(invalidPins.map((p) => require('../utils/ipfs').rmPin(p)))
+    const invalidPins = allPins.filter((p) => validpins.indexOf(p) < 0)
+    await Promise.all(invalidPins.map((p) => require('../utils/ipfs').rmPin(p)))
   }
 }
 
