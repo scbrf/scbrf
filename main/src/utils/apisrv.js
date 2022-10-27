@@ -371,7 +371,7 @@ class ApiServer {
 
   async apiAltStore(ctx) {
     const ipaAttachment = (a) => {
-      for (let at of a.attachments) {
+      for (let at of a.attachments || []) {
         if (at.toLowerCase().endsWith('.ipa')) return at
       }
     }
