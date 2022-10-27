@@ -57,14 +57,25 @@ class PinManager {
       ]
       return r
     }, [])
-    //所有三周以内没有被pin过的文章
+    //所有没有被pin过的文章
     let allTargets = allNewArticles
       .filter((a) => !a.pinState || a.pinState == 'wait')
       .sort((a, b) => b.created - a.created)
     //分批pin这些文章
-    while (allTargets.length > 0) {
-      const targets = allTargets.splice(0, 5)
-      await Promise.all(targets.map(async (a) => await this.pinArticle(a)))
+    const pinning = []
+    while (allTargets.length > 0 || pinning.length > 0) {
+      //同步pin5个
+      while (pinning.length < 5) {
+        if (allTargets.length > 0) {
+          const a = allTargets.splice(0, 1)
+          pinning.push(a)
+          this.pinArticle(a).finally(() => {
+            pinning.splice(pinning.indexOf(a), 1)
+          })
+        }
+      }
+      //等待1秒
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
     //当前ipfs栈内所有的pin
     const allPins = await require('../utils/ipfs').listPin()
