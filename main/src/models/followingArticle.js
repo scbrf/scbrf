@@ -15,6 +15,7 @@ class FollowingArticle {
     this.created = a.created
     this.read = a.read || false
     this.starred = a.starred || false
+    this.pinState = a.pinState || ''
     this.videoFilename = a.videoFilename
     this.audioFilename = a.audioFilename
     this.attachments = a.attachments

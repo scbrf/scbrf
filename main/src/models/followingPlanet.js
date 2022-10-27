@@ -290,8 +290,10 @@ class FollowingPlanet {
       planet.articles.forEach((a) => {
         const rtArticle = rtPlanet.articles.filter((aa) => aa.id === a.id)[0]
         if (rtArticle) {
+          //以下状态需要继承自老状态
           a.read = rtArticle.read
           a.starred = rtArticle.starred
+          a.pinState = rtArticle.pinState
         }
       })
     }

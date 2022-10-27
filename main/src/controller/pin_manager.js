@@ -43,33 +43,35 @@ class PinManager {
 
   async checkPin() {
     log.debug('another round of check pin ...')
+
     //所有三周以内的文章
     const allNewArticles = rt.following.reduce((r, p) => {
-      r = [...r, ...p.articles.filter((a) => new Date().getTime() - a.created < 21 * 24 * 3600 * 1000)]
+      //默认保留全部内容
+      //支持单独保留某一篇
+      const keepDuration = p.keepDuration || 0
+      r = [
+        ...r,
+        ...p.articles.filter(
+          (a) => a.keep || (keepDuration > 0 ? new Date().getTime() - a.created < keepDuration : true)
+        ),
+      ]
       return r
     }, [])
     //所有三周以内没有被pin过的文章
-    const allTargets = allNewArticles.filter((a) => !a.pinState || a.pinState == 'wait')
-    //pin这些文章
-    await Promise.all(allTargets.map(async (a) => await this.pinArticle(a)))
+    let allTargets = allNewArticles.filter((a) => !a.pinState || a.pinState == 'wait')
+    //分批pin这些文章
+    while (allTargets.length > 0) {
+      const targets = allTargets.splice(0, 5)
+      await Promise.all(targets.map(async (a) => await this.pinArticle(a)))
+    }
     //当前ipfs栈内所有的pin
-    const allPins = [...(await require('../utils/ipfs').listPin()), ...rt.planets.map((p) => p.cid)]
+    // const allPins = [...(await require('../utils/ipfs').listPin()), ...rt.planets.map((p) => p.cid)]
     //新文章的cid和自建站点的cid应该保留pin
-    const validpins = allNewArticles.map((a) => a.cidPin)
+    // const validpins = allNewArticles.map((a) => a.cidPin)
     //其它的pin全部删除
-
     //TODO 暂时不移除旧文章的pin，未来可能更改为每周一清理
     // const invalidPins = allPins.filter((p) => validpins.indexOf(p) < 0)
     // await Promise.all(invalidPins.map((p) => require('../utils/ipfs').rmPin(p)))
-
-    //所有旧文章移除pin标记
-    rt.following.forEach((p) => {
-      p.articles.forEach((a) => {
-        if (new Date().getTime() - a.created >= 21 * 24 * 3600 * 1000) {
-          a.pinState = ''
-        }
-      })
-    })
   }
 }
 
