@@ -67,7 +67,7 @@ class PinManager {
       //同步pin5个
       while (pinning.length < 5) {
         if (allTargets.length > 0) {
-          const a = allTargets.splice(0, 1)
+          const a = allTargets.splice(0, 1)[0]
           pinning.push(a)
           this.pinArticle(a).finally(() => {
             pinning.splice(pinning.indexOf(a), 1)
