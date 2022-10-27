@@ -63,6 +63,7 @@ class PinManager {
       .sort((a, b) => b.created - a.created)
     //分批pin这些文章
     const pinning = []
+    allTargets.forEach((a) => (a.pinState = 'wait'))
     while (allTargets.length > 0 || pinning.length > 0) {
       //同步pin5个
       while (pinning.length < 5) {
