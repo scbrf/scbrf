@@ -72,10 +72,12 @@ class PinManager {
           this.pinArticle(a).finally(() => {
             pinning.splice(pinning.indexOf(a), 1)
           })
+        } else {
+          break
         }
       }
       //等待1秒
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 3000))
     }
     //当前ipfs栈内所有的pin
     const allPins = await require('../utils/ipfs').listPin()
