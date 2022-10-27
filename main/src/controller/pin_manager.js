@@ -58,7 +58,9 @@ class PinManager {
       return r
     }, [])
     //所有三周以内没有被pin过的文章
-    let allTargets = allNewArticles.filter((a) => !a.pinState || a.pinState == 'wait')
+    let allTargets = allNewArticles
+      .filter((a) => !a.pinState || a.pinState == 'wait')
+      .sort((a, b) => b.created - a.created)
     //分批pin这些文章
     while (allTargets.length > 0) {
       const targets = allTargets.splice(0, 5)
