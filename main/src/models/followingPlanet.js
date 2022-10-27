@@ -287,13 +287,19 @@ class FollowingPlanet {
     planet.articles.sort((a, b) => b.created - a.created)
     const rtPlanet = rt.following.filter((p) => p.id === planet.id)[0]
     if (rtPlanet) {
+      const sameCID = rtPlanet.cid === cid
+      if (!sameCID) {
+        log.info(`planet ${rtPlanet.name} content change from ${rtPlanet.cid} to ${cid}`)
+      }
       planet.articles.forEach((a) => {
         const rtArticle = rtPlanet.articles.filter((aa) => aa.id === a.id)[0]
         if (rtArticle) {
           //以下状态需要继承自老状态
           a.read = rtArticle.read
           a.starred = rtArticle.starred
-          a.pinState = rtArticle.pinState
+          if (sameCID) {
+            a.pinState = rtArticle.pinState
+          }
         }
       })
     }
