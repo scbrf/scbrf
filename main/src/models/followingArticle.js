@@ -59,6 +59,10 @@ class FollowingArticle {
     }
   }
 
+  async delete() {
+    require('fs').rmSync(this.path)
+  }
+
   static create(param, planet) {
     let article = new FollowingArticle(param)
     article.summary = FollowingArticle.extractSummary(article, planet)

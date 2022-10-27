@@ -94,6 +94,12 @@ class FollowingPlanet {
                 a.starred = oldarticle.starred
               }
             })
+            const newArticles = newPlanet.articles.map((a) => a.id)
+            rt.following[i].articles.forEach((a) => {
+              if (newArticles.indexOf(a.id) < 0) {
+                a.delete()
+              }
+            })
             rt.following[i] = newPlanet
             break
           }
