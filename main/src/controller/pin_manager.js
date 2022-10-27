@@ -39,6 +39,18 @@ class PinManager {
       article.pinState = 'wait'
       log.error(`new article ${article.title} pin error, wait another round!`)
     }
+    //有可能这时候实例已经变了，因为刷新什么的
+    this.confirmArticlePinState(article)
+  }
+
+  confirmArticlePinState(article) {
+    const p = rt.following.filter((p) => p.id == article.planet.id)[0]
+    if (p) {
+      const a = p.articles.filter((a) => a.id == article.id)[0]
+      if (a) {
+        a.pinState = article.pinState
+      }
+    }
   }
 
   async checkPin() {
@@ -58,9 +70,7 @@ class PinManager {
       return r
     }, [])
     //所有没有被pin过的文章
-    let allTargets = allNewArticles
-      .filter((a) => !a.pinState || a.pinState == 'wait')
-      .sort((a, b) => b.created - a.created)
+    let allTargets = allNewArticles.filter((a) => a.pinState !== 'ready').sort((a, b) => b.created - a.created)
     //分批pin这些文章
     const pinning = []
     allTargets.forEach((a) => (a.pinState = 'wait'))
