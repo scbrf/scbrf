@@ -16,3 +16,4 @@ Scarborough 的灵感来源是 [Livid 的 Planet](https://github.com/Planetable/
 > 1. cd main && yarn make
 
 
+想了解开发进展可以follow planet://k51qzi5uqu5dhq1lrl4uz0q7hqxxxvef5ow9x41e3da1owypc873hwbkdzt62c
