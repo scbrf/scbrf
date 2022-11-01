@@ -43,7 +43,7 @@ class Webview {
       this.view.webContents.once('dom-ready', () => {
         const url = `http://${require('../utils/apisrv').ipAddr}:${require('../utils/apisrv').apiPort}/${
           rt.middleSideBarFocusArticle.planet.id
-        }/${rt.middleSideBarFocusArticle.id}/index.html`
+        }/${rt.middleSideBarFocusArticle.id}/index.html?seed=${new Date().getTime()}`
         this.targetUrl = rt.middleSideBarFocusArticle.url.startsWith('file://') ? url : rt.middleSideBarFocusArticle.url
         this.view.webContents.loadURL(this.targetUrl, { userAgent: 'Planet/JS' })
       })

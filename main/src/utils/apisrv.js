@@ -410,11 +410,7 @@ class ApiServer {
     const Router = require('koa-router')
     const serve = require('koa-static')
     app.use(range)
-    app.use(
-      serve(Planet.PublicRoot, {
-        maxage: 600000,
-      })
-    )
+    app.use(serve(Planet.PublicRoot, {}))
     const router = new Router()
     app.use(
       bodyParser({
