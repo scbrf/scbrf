@@ -369,6 +369,26 @@ class ApiServer {
     ctx.body = { error: '' }
   }
 
+  async apiAndroidVersions(ctx) {
+    const packageName = ctx.params.package
+    const ipfsGateway = `http://${this.getIpAddress()}:${ipfs.gatewayPort}`
+    ctx.body = rt.following
+      .reduce((r, p) => {
+        if (!require('fs').existsSync(p.rawPath)) return r
+        const raw = JSON.parse(require('fs').readFileSync(p.rawPath).toString())
+        const apks = raw.articles.filter((a) => a.bundleid === packageName).map((a) => ({ ...a, planet: p }))
+        return [...r, ...apks]
+      }, [])
+      .map((a) => ({
+        version: a.version,
+        url: `${ipfsGateway}/ipfs/${a.planet.cid}/${a.id}/${encodeURIComponent(
+          a.attachments.filter((at) => at.endsWith('.apk'))[0]
+        )}`,
+        releaseNotes: a.content,
+        releaseDate: new Date(require('../utils/datetime').timeFromReferenceDate(a.created)),
+      }))
+  }
+
   async apiAltStore(ctx) {
     const ipaAttachment = (a) => {
       for (let at of a.attachments || []) {
@@ -445,6 +465,7 @@ class ApiServer {
     router.post('/dlna/play', this.apiDlnaPlay.bind(this))
     router.post('/upload', this.upload.bind(this))
     router.get('/altstore', this.apiAltStore.bind(this))
+    router.get('/versions/:package', this.apiAndroidVersions.bind(this))
 
     app.use(router.routes()).use(router.allowedMethods())
     log.debug('api server started at port:', this.apiPort)
