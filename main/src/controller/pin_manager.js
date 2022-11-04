@@ -4,6 +4,8 @@
 const log = require('../utils/log')('pinmanaer')
 const rt = require('../models/runtime')
 const evt = require('../utils/events')
+const ffmpeg = require('fluent-ffmpeg')
+
 class PinManager {
   constructor() {
     evt.bindBusTable(this, [[evt.evIpfsDaemonReady, this.init]])
@@ -26,6 +28,31 @@ class PinManager {
     }
   }
 
+  //如果包含视频并且本地没有预览文件并且存在ffmpeg可执行文件
+  async extractVideoThumbnail(article) {
+    log.debug(`extract video thumbnail for ${article.planet.id}/${article.id}...`)
+    if (!article.videoFilename) return
+    if (!article.videoThumbnailPath) return
+    if (require('fs').existsSync(article.videoThumbnailPath)) return
+    const dir = require('path').dirname(article.videoThumbnailPath)
+    if (!require('fs').existsSync(dir)) {
+      require('fs').mkdirSync(dir, { recursive: true })
+    }
+    return new Promise((resolve) => {
+      ffmpeg(`http://127.0.0.1:${require('../utils/ipfs').gatewayPort}/ipfs/${article.cidPin}/${article.videoFilename}`)
+        .on('end', () => {
+          log.debug(`thumbnail for ${article.planet.id}/${article.id} done!`)
+          resolve()
+        })
+        .screenshots({
+          timestamps: ['1%'],
+          filename: require('path').basename(article.videoThumbnailPath),
+          folder: require('path').dirname(article.videoThumbnailPath),
+          size: '1024x?',
+        })
+    })
+  }
+
   //四种pinState: '':太老的文章 'wait':因为失败重试或者别的原因还没有在pin 'inprogress': 正在pin 'ready':pin成功了
   async pinArticle(article) {
     log.info(`pin new article ${article.title}`)
@@ -34,6 +61,7 @@ class PinManager {
     if (cid) {
       article.cidPin = cid
       article.pinState = 'ready'
+      await this.extractVideoThumbnail(article)
       log.info(`after pin, article ${article.title} ${article.planet.cid}/${article.id} got cid ${cid}`)
     } else {
       article.pinState = 'wait'

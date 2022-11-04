@@ -75,6 +75,7 @@ class ScarboroughApp {
     FollowingPlanet.followingPlanetsPath = require('path').join(app.__root__, 'Following')
     Planet.myPlanetsPath = require('path').join(app.__root__, 'My')
     Planet.PublicRoot = require('path').join(app.__root__, 'Public')
+    FollowingPlanet.PublicRoot = require('path').join(app.__root__, 'Public')
     FairArticle.FairArticlesPath = require('path').join(app.__root__, 'Fair')
     ipfs.constructor.REPO_PATH = require('path').join(app.__root__, 'ipfs')
   }

@@ -7,7 +7,8 @@ const uuid = require('uuid').v4
 const ipfs = require('../utils/ipfs')
 
 class FollowingArticle {
-  constructor(a) {
+  static PublicRoot
+  constructor(a, planet) {
     this.id = (a.id || uuid()).toUpperCase()
     this.link = a.link
     this.title = a.title
@@ -17,6 +18,10 @@ class FollowingArticle {
     this.starred = a.starred || false
     this.pinState = a.pinState || ''
     this.videoFilename = a.videoFilename
+    log.debug(`*********** load following article ${this.title}  ....`)
+    if (this.videoFilename) {
+      this.videoThumbnailPath = `${planet.constructor.PublicRoot}/thumbnail/${this.id}.thumbnail.jpg`
+    }
     this.audioFilename = a.audioFilename
     this.attachments = a.attachments
   }
@@ -64,7 +69,7 @@ class FollowingArticle {
   }
 
   static create(param, planet) {
-    let article = new FollowingArticle(param)
+    let article = new FollowingArticle(param, planet)
     article.summary = FollowingArticle.extractSummary(article, planet)
     article.planet = planet
     return article

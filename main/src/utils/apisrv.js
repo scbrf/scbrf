@@ -188,6 +188,9 @@ class ApiServer {
           delete obj.content
           obj.url = `${ipfsGateway}/ipfs/${p.cid}/${a.id}/`
           obj.pinState = a.pinState
+          if (a.videoThumbnailPath) {
+            obj.thumbnail = `http://${this.ipAddr}:${this.apiPort}/${require('path').basename(a.videoThumbnailPath)}`
+          }
           return obj
         }),
       })),
