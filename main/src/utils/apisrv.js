@@ -381,7 +381,9 @@ class ApiServer {
       .reduce((r, p) => {
         if (!require('fs').existsSync(p.rawPath)) return r
         const raw = JSON.parse(require('fs').readFileSync(p.rawPath).toString())
-        const apks = raw.articles.filter((a) => a.bundleid === packageName).map((a) => ({ ...a, planet: p }))
+        const apks = raw.articles
+          .filter((a) => a.bundleid === packageName && a.pinState === 'ready')
+          .map((a) => ({ ...a, planet: p }))
         return [...r, ...apks]
       }, [])
       .map((a) => ({
