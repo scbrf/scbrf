@@ -24,7 +24,7 @@ class PinManager {
       } catch (ex) {
         log.error('error when check pin', ex)
       }
-      await new Promise((resolve) => setTimeout(resolve, 10000)) //每10秒钟检查一次
+      await new Promise((resolve) => setTimeout(resolve, 1000)) //等待1秒
     }
   }
 
@@ -116,7 +116,7 @@ class PinManager {
         }
       }
       //等待1秒
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
     //当前ipfs栈内所有的pin
     const allPins = await require('../utils/ipfs').listPin()
