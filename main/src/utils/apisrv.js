@@ -382,8 +382,9 @@ class ApiServer {
         if (!require('fs').existsSync(p.rawPath)) return r
         const raw = JSON.parse(require('fs').readFileSync(p.rawPath).toString())
         const apks = raw.articles
-          .filter((a) => a.bundleid === packageName && a.pinState === 'ready')
+          .filter((a) => a.bundleid === packageName)
           .map((a) => ({ ...a, planet: p }))
+          .filter((a) => p.articles.filter((aa) => aa.id === a.id)[0].pinState === 'ready')
         return [...r, ...apks]
       }, [])
       .map((a) => ({
