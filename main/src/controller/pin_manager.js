@@ -44,6 +44,10 @@ class PinManager {
           log.debug(`thumbnail for ${article.planet.id}/${article.id} done!`)
           resolve()
         })
+        .on('error', (err, stdout, stderr) => {
+          log.error(`extract video thumbnail for article ${article.id} error: ${stdout} ${stderr}`, err)
+          resolve()
+        })
         .screenshots({
           timestamps: ['1%'],
           filename: require('path').basename(article.videoThumbnailPath),
