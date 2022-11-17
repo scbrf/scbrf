@@ -49,6 +49,7 @@ class EventCenter {
   ipcDraftAddPhoto //增加图片
   ipcDraftAddAudio //增加声音
   ipcDraftAddVideo //增加视频
+  ipcDraftAddOnlyFans //增加onlyfans标记
   ipcDraftRemoveAttachment //移除附件
   ipcDraftVideoContextMenu //弹出视频菜单
 

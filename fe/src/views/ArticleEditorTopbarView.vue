@@ -16,6 +16,9 @@
             </div>
 
             <div class="flex-1"></div>
+            <CurrencyPoundIcon @click="attachOnlyfansTag"
+                class="e2e-photo mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
+            </CurrencyPoundIcon>
             <PhotoIcon @click="attachPhoto"
                 class="e2e-photo mr-6 mt-1 h-6 w-6 text-gray-500 hover:text-gray-900 nodrag">
             </PhotoIcon>
@@ -28,11 +31,11 @@
     </div>
 </template>
 <script>
-import { ArrowUpCircleIcon, FilmIcon, PhotoIcon, MicrophoneIcon, XCircleIcon } from '@heroicons/vue/24/outline'
+import { CurrencyPoundIcon, ArrowUpCircleIcon, FilmIcon, PhotoIcon, MicrophoneIcon, XCircleIcon } from '@heroicons/vue/24/outline'
 
 export default {
     components: {
-        ArrowUpCircleIcon, FilmIcon, PhotoIcon, MicrophoneIcon, XCircleIcon
+        ArrowUpCircleIcon, FilmIcon, PhotoIcon, MicrophoneIcon, XCircleIcon, CurrencyPoundIcon
     },
     computed: {
         isWin() {
@@ -48,6 +51,9 @@ export default {
         },
         attachPhoto() {
             api.send('ipcDraftAddPhoto')
+        },
+        attachOnlyfansTag() {
+            api.send('ipcDraftAddOnlyFans')
         },
         publish() {
             api.send('ipcDraftPublish')

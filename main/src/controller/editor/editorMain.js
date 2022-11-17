@@ -11,6 +11,7 @@ class EditorTopbar {
       [evt.ipcDraftAddPhoto, this.addPhoto],
       [evt.ipcDraftAddAudio, this.addAudio],
       [evt.ipcDraftAddVideo, this.addVideo],
+      [evt.ipcDraftAddOnlyFans, this.addOnlyfansTag],
       [evt.ipcDraftRemoveAttachment, this.removeAttachment],
       [evt.ipcDraftVideoContextMenu, this.showVideoCtxMenu],
     ])
@@ -27,6 +28,17 @@ class EditorTopbar {
     log.info('draft need remove attachment', name)
     await rt.draft.removeAttachment(name)
     this.updateUI()
+  }
+
+  async addOnlyfansTag() {
+    rt.draft.content = await this.view.webContents.executeJavaScript(`(()=>{
+      const node = document.querySelector('textarea')
+      node.value = node.value.substring(0, node.selectionStart)
+          + '<onlyfans media=180 />'
+          + node.value.substring(node.selectionStart)
+      return node.value
+    })()`)
+    rt.draft.save()
   }
 
   async addVideo(event, path) {
