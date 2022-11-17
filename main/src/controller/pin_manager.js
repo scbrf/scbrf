@@ -6,6 +6,20 @@ const rt = require('../models/runtime')
 const evt = require('../utils/events')
 const ffmpeg = require('fluent-ffmpeg')
 
+const OS = require('os').platform()
+const FFMPEG_FILE = OS === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
+const FFPROBE_FILE = OS === 'win32' ? 'ffprobe.exe' : 'ffprobe'
+const FFMPEG_PATH = require('path').join(__dirname, '..', '..', '..', 'ipfsbin', FFMPEG_FILE)
+const FFPROBE_PATH = require('path').join(__dirname, '..', '..', '..', 'ipfsbin', FFPROBE_FILE)
+if (require('fs').existsSync(FFMPEG_PATH)) {
+  process.env.FFMPEG_PATH = FFMPEG_PATH
+  log.info(`find ffmpeg at ${FFMPEG_PATH}`)
+}
+if (require('fs').existsSync(FFPROBE_PATH)) {
+  process.env.FFPROBE_PATH = FFPROBE_PATH
+  log.info(`find ffprobe at ${FFPROBE_PATH}`)
+}
+
 class PinManager {
   constructor() {
     evt.bindBusTable(this, [[evt.evIpfsDaemonReady, this.init]])
