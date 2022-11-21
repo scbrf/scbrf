@@ -34,7 +34,7 @@ class EditorTopbar {
     rt.draft.content = await this.view.webContents.executeJavaScript(`(()=>{
       const node = document.querySelector('textarea')
       node.value = node.value.substring(0, node.selectionStart)
-          + '<onlyfans media=180 />'
+          + '<fansonly media=180 />'
           + node.value.substring(node.selectionStart)
       return node.value
     })()`)

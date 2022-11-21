@@ -3,6 +3,7 @@ const jsdom = require('jsdom')
 const { JSDOM } = jsdom
 const log = require('../utils/log')('modelsDraft')
 const rt = require('./runtime')
+const evt = require('../utils/events')
 
 const uuid = require('uuid').v4
 const Article = require('./article')
@@ -135,10 +136,6 @@ class Draft {
     if (!this.article) {
       this.article = article
     }
-    if (!(await this.confirmBigFileCopy())) {
-      log.error('on publish copy file error, give up')
-      return
-    }
 
     log.info('when publish, created time is', {
       draft: this.created,
@@ -161,31 +158,6 @@ class Draft {
       middleSideBarFocusArticle: article,
     })
     this.planet.publish()
-  }
-
-  copyOK(path) {
-    return !path || path.startsWith(this.attachmentsPath) || path.startsWith(this.article.publicBase)
-  }
-
-  async confirmBigFileCopy() {
-    let startat = new Date().getTime()
-    while (!this.copyOK(this.audioFilename)) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      if (new Date().getTime() - startat > 5000) {
-        startat = new Date().getTime()
-        log.error('confirm big copy takes too long!', this.audioFilename)
-        return false
-      }
-    }
-    while (!this.copyOK(this.videoFilename)) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      if (new Date().getTime() - startat > 5000) {
-        startat = new Date().getTime()
-        log.error('confirm big copy takes too long!', this.audioFilename)
-        return false
-      }
-    }
-    return true
   }
 
   //在编辑的时候移除附件
@@ -246,73 +218,92 @@ class Draft {
     this.save()
   }
 
-  async publishAttachmentsWin32(article) {
-    if (!require('fs').existsSync(article.publicBase)) {
-      require('fs').mkdirSync(article.publicBase, { recursive: true })
-    }
-
-    for (let item of article.attachments || []) {
-      require('fs').cpSync(
-        require('path').join(this.attachmentsPath, item.name),
-        require('path').join(article.publicBase, item.name)
-      )
-    }
-    if (this.audioFilename && !this.audioFilename.startsWith(article.publicBase)) {
-      require('fs').cpSync(
-        this.audioFilename,
-        require('path').join(article.publicBase, require('path').basename(this.audioFilename))
-      )
-    }
-    if (this.videoFilename && !this.videoFilename.startsWith(article.publicBase)) {
-      require('fs').cpSync(
-        this.videoFilename,
-        require('path').join(article.publicBase, require('path').basename(this.videoFilename))
-      )
-    }
-  }
-
+  //mkdir a temp dir, cp everything there, close all file which may be opened, rename the temp dir to target.
   async publishAttachments(article) {
-    //由于windows系统对于重命名或者删除操作过于严格的限制，这里直接进行拷贝，不做复杂判断
-    //可能造成的后果就是Public目录里可能遗留一些没有用到的文件，这个问题可以通过后期在适当时机整理public目录
-    //进行优化
-
-    if (process.platform === 'win32') {
-      this.publishAttachmentsWin32(article)
-      return
+    const tmpPublicDir = require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), `scbrf_public_`))
+    let tmpFansDir
+    if (article.hasFansOnlyContent()) {
+      tmpFansDir = require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), `scbrf_fansonly_`))
+    }
+    for (let item of article.attachments || []) {
+      if (article.attchmentIsFansOnly(item)) {
+        require('fs').cpSync(
+          require('path').join(this.attachmentsPath, item.name),
+          require('path').join(tmpFansDir, item.name)
+        )
+      } else {
+        require('fs').cpSync(
+          require('path').join(this.attachmentsPath, item.name),
+          require('path').join(tmpPublicDir, item.name)
+        )
+        if (article.hasFansOnlyContent()) {
+          require('fs').cpSync(
+            require('path').join(this.attachmentsPath, item.name),
+            require('path').join(tmpFansDir, item.name)
+          )
+        }
+      }
+    }
+    if (this.audioFilename) {
+      const previewLen = article.mediaPreviewLen()
+      if (article.hasFansOnlyContent() && previewLen > 0) {
+        const previewPath = require('path').join(tmpPublicDir, require('path').basename(this.audioFilename))
+        await article.buildPreviewMedia(this.audioFilename, previewPath, previewLen)
+        require('fs').cpSync(
+          this.audioFilename,
+          require('path').join(tmpFansDir, require('path').basename(this.audioFilename))
+        )
+      } else {
+        require('fs').cpSync(
+          this.audioFilename,
+          require('path').join(tmpPublicDir, require('path').basename(this.audioFilename))
+        )
+      }
+    }
+    if (this.videoFilename) {
+      const previewLen = article.mediaPreviewLen()
+      if (article.hasFansOnlyContent() && previewLen > 0) {
+        const previewPath = require('path').join(tmpPublicDir, require('path').basename(this.videoFilename))
+        await article.buildPreviewMedia(this.videoFilename, previewPath, previewLen)
+        require('fs').cpSync(
+          this.videoFilename,
+          require('path').join(tmpFansDir, require('path').basename(this.videoFilename))
+        )
+      } else {
+        require('fs').cpSync(
+          this.videoFilename,
+          require('path').join(tmpPublicDir, require('path').basename(this.videoFilename))
+        )
+      }
     }
 
     if (require('fs').existsSync(article.publicBase)) {
-      //首先将用到的Public目录的文件拷贝过来
-      if (this.audioFilename && this.audioFilename.startsWith(article.publicBase)) {
-        const target = require('path').join(this.attachmentsPath, require('path').basename(this.audioFilename))
-        require('fs').renameSync(this.audioFilename, target)
-        this.audioFilename = target
+      //TODO any module which prevent rmSync, should handle this event and close handler!
+      evt.emit(evt.evCloseFileHandler, article.id)
+      while (true) {
+        try {
+          require('fs').rmSync(article.publicBase, { recursive: true })
+        } catch (ex) {
+          log.error(`error rm public dir: ${ex.toString()}`)
+          await new Promise((r) => setTimeout(r, 1000))
+        }
       }
-      if (this.videoFilename && this.videoFilename.startsWith(article.publicBase)) {
-        const target = require('path').join(this.attachmentsPath, require('path').basename(this.videoFilename))
-        require('fs').renameSync(this.videoFilename, target)
-        this.videoFilename = target
-      }
-      //将剩余的Public目录整个删除重建
-      require('fs').rmSync(article.publicBase, { recursive: true, force: true })
     }
 
-    require('fs').mkdirSync(article.publicBase, { recursive: true })
+    if (tmpFansDir && require('fs').existsSync(article.fansonlyBase)) {
+      while (true) {
+        try {
+          require('fs').rmSync(article.fansonlyBase, { recursive: true })
+        } catch (ex) {
+          log.error(`error rm public dir: ${ex.toString()}`)
+          await new Promise((r) => setTimeout(r, 1000))
+        }
+      }
+    }
 
-    //再将其用到的文件拷贝过去
-    for (let item of this.attachments || []) {
-      require('fs').renameSync(
-        require('path').join(this.attachmentsPath, item.name),
-        require('path').join(article.publicBase, item.name)
-      )
-    }
-    if (this.audioFilename) {
-      const target = require('path').join(article.publicBase, require('path').basename(this.audioFilename))
-      require('fs').renameSync(this.audioFilename, target)
-    }
-    if (this.videoFilename) {
-      const target = require('path').join(article.publicBase, require('path').basename(this.videoFilename))
-      require('fs').renameSync(this.videoFilename, target)
+    require('fs').renameSync(tmpPublicDir, article.publicBase)
+    if (tmpFansDir) {
+      require('fs').renameSync(tmpFansDir, article.fansonlyBase)
     }
   }
 }

@@ -24,6 +24,7 @@ class EventCenter {
   evRuntimeFairChange //集市内容变更
 
   evRebounds // 重新排列窗口，比如当用户切换左边栏或者切换声音播放器的时候
+  evCloseFileHandler //需要更改article的文件内容，之前应该先关闭可能打开的文件句柄
 
   //直接在这里定义歌 ipc 的通道名，必须以 ipc + 任意一个大写字母开头
   ipcSetSidebarFocus //前端网页通过ipc通道设置侧边栏的 focus 节点

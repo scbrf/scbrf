@@ -1,6 +1,7 @@
 const marked = require('marked')
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
+const ffmpeg = require('../utils/ffmpeg')
 
 const log = require('../utils/log')('modelsArticle')
 
@@ -28,6 +29,8 @@ class Article {
     this.publicArticlePath = require('path').join(this.publicBase, 'article.json')
     this.publicCommentsPath = require('path').join(this.publicBase, 'comments.js')
     this.publicIndexPath = require('path').join(this.publicBase, 'index.html')
+
+    this.fansonlyBase = require('path').join(planet.fansOnlyBasePath, this.id)
   }
 
   static async load(name, planet) {
@@ -53,6 +56,27 @@ class Article {
     } else {
       return 'Empty Content'
     }
+  }
+
+  hasFansOnlyContent() {
+    return this.content.search(/<fansonly/i) >= 0
+  }
+
+  attchmentIsFansOnly(attach) {
+    if (!this.hasFansOnlyContent()) return false
+    const pos = this.content.search(new RegExp(`<img[^>]*src="${attach.name}"`))
+    if (pos < 0) return true
+    const fansonlyPos = this.content.search(/<fansonly/i)
+    return pos > fansonlyPos
+  }
+
+  mediaPreviewLen() {
+    const result = this.content.match(/<fansonly[^>]*preview=([\d]*)/)
+    return result ? parseInt(result[1]) : 0
+  }
+
+  buildPreviewMedia(mediaPath, previewPath, previewLen) {
+    return ffmpeg.preview(mediaPath, previewPath, previewLen)
   }
 
   json() {

@@ -4,21 +4,7 @@
 const log = require('../utils/log')('pinmanaer')
 const rt = require('../models/runtime')
 const evt = require('../utils/events')
-const ffmpeg = require('fluent-ffmpeg')
-
-const OS = require('os').platform()
-const FFMPEG_FILE = OS === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
-const FFPROBE_FILE = OS === 'win32' ? 'ffprobe.exe' : 'ffprobe'
-const FFMPEG_PATH = require('path').join(__dirname, '..', '..', '..', 'ipfsbin', FFMPEG_FILE)
-const FFPROBE_PATH = require('path').join(__dirname, '..', '..', '..', 'ipfsbin', FFPROBE_FILE)
-if (require('fs').existsSync(FFMPEG_PATH)) {
-  process.env.FFMPEG_PATH = FFMPEG_PATH
-  log.info(`find ffmpeg at ${FFMPEG_PATH}`)
-}
-if (require('fs').existsSync(FFPROBE_PATH)) {
-  process.env.FFPROBE_PATH = FFPROBE_PATH
-  log.info(`find ffprobe at ${FFPROBE_PATH}`)
-}
+const ffmpeg = require('../utils/ffmpeg')
 
 class PinManager {
   constructor() {
@@ -52,23 +38,15 @@ class PinManager {
     if (!require('fs').existsSync(dir)) {
       require('fs').mkdirSync(dir, { recursive: true })
     }
-    return new Promise((resolve) => {
-      ffmpeg(`http://127.0.0.1:${require('../utils/ipfs').gatewayPort}/ipfs/${article.cidPin}/${article.videoFilename}`)
-        .on('end', () => {
-          log.debug(`thumbnail for ${article.planet.id}/${article.id} done!`)
-          resolve()
-        })
-        .on('error', (err, stdout, stderr) => {
-          log.error(`extract video thumbnail for article ${article.id} error: ${stdout} ${stderr}`, err)
-          resolve()
-        })
-        .screenshots({
-          timestamps: ['1%'],
-          filename: require('path').basename(article.videoThumbnailPath),
-          folder: require('path').dirname(article.videoThumbnailPath),
-          size: '1024x?',
-        })
-    })
+    return ffmpeg.cover(
+      `http://127.0.0.1:${require('../utils/ipfs').gatewayPort}/ipfs/${article.cidPin}/${article.videoFilename}`,
+      {
+        timestamps: ['1%'],
+        filename: require('path').basename(article.videoThumbnailPath),
+        folder: require('path').dirname(article.videoThumbnailPath),
+        size: '1024x?',
+      }
+    )
   }
 
   //四种pinState: '':太老的文章 'wait':因为失败重试或者别的原因还没有在pin 'inprogress': 正在pin 'ready':pin成功了

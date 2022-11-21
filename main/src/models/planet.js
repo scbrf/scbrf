@@ -37,12 +37,16 @@ class Planet {
     this.faviconPath = require('path').join(this.basePath, 'favicon.ico')
     this.draftsPath = require('path').join(this.basePath, 'Drafts')
     this.articleDraftsPath = require('path').join(this.articlesPath, 'Drafts')
+
     this.publicBasePath = require('path').join(Planet.PublicRoot, this.id)
     this.publicInfoPath = require('path').join(this.publicBasePath, 'planet.json')
     this.publicAvatarPath = require('path').join(this.publicBasePath, 'avatar.png')
     this.publicFaviconPath = require('path').join(this.publicBasePath, 'favicon.ico')
     this.publicIndexPath = require('path').join(this.publicBasePath, 'index.html')
     this.publicAssetsPath = require('path').join(this.publicBasePath, 'assets')
+
+    this.fansOnlyBasePath = require('path').join(Planet.PublicRoot, 'fansonly', this.id)
+    this.fansOnlyAssetsPath = require('path').join(this.fansOnlyBasePath, 'fansonly', this.id)
   }
 
   // 加载 Drafts 里面的所有 Draft
@@ -143,6 +147,8 @@ class Planet {
     require('fs').mkdirSync(planet.draftsPath, { recursive: true })
     require('fs').mkdirSync(planet.articleDraftsPath, { recursive: true })
     require('fs').mkdirSync(planet.publicBasePath, { recursive: true })
+    require('fs').mkdirSync(planet.fansOnlyBasePath, { recursive: true })
+
     await planet.copyTemplateAssets()
     return planet
   }
@@ -165,6 +171,10 @@ class Planet {
   copyTemplateAssets() {
     const src = require('path').join(Planet.templateBase, this.template.toLowerCase(), 'assets')
     require('fs').cpSync(src, this.publicAssetsPath, {
+      recursive: true,
+      force: true,
+    })
+    require('fs').cpSync(src, this.fansOnlyAssetsPath, {
       recursive: true,
       force: true,
     })
