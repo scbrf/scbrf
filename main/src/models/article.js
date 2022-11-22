@@ -2,7 +2,9 @@ const marked = require('marked')
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
 const ffmpeg = require('../utils/ffmpeg')
-
+const ipfs = require('../utils/ipfs')
+const wallet = require('../utils/wallet')
+const EthCrypto = require('eth-crypto')
 const log = require('../utils/log')('modelsArticle')
 
 const uuid = require('uuid').v4
@@ -29,8 +31,11 @@ class Article {
     this.publicArticlePath = require('path').join(this.publicBase, 'article.json')
     this.publicCommentsPath = require('path').join(this.publicBase, 'comments.js')
     this.publicIndexPath = require('path').join(this.publicBase, 'index.html')
+    this.fansDeliverPath = require('path').join(this.publicBase, 'fans.json')
 
     this.fansonlyBase = require('path').join(planet.fansOnlyBasePath, this.id)
+    this.fansonlyAssetsPath = require('path').join(this.fansonlyBase, 'assets')
+    this.fansonlyIndexPath = require('path').join(this.fansonlyBase, 'index.html')
   }
 
   static async load(name, planet) {
@@ -77,6 +82,22 @@ class Article {
 
   buildPreviewMedia(mediaPath, previewPath, previewLen) {
     return ffmpeg.preview(mediaPath, previewPath, previewLen)
+  }
+
+  async encrypt(pubkey, cid) {
+    const fromHexString = (hexString) => Uint8Array.from(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)))
+    const encrypted = await EthCrypto.encryptWithPublicKey(fromHexString(pubkey), cid)
+    return EthCrypto.cipher.stringify(encrypted)
+  }
+
+  async deliverToFans() {
+    const cid = await ipfs.addDirectory(this.fansonlyBase)
+    const fans = await wallet.myfans(this.planet.ipns)
+    const result = {}
+    for (let fan of fans || []) {
+      result[fan.addr] = await this.encrypt(fan.pubkey, cid)
+    }
+    require('fs').writeFileSync(this.fansDeliverPath, JSON.stringify(result))
   }
 
   json() {
@@ -150,26 +171,72 @@ class Article {
     )
   }
 
+  getPublicContent() {
+    if (this.hasFansOnlyContent()) {
+      const pos = this.content.search(/<fansonly/i)
+      return this.content.substring(0, pos)
+    }
+    return this.content
+  }
+
+  getFansOnlyContent() {
+    if (this.hasFansOnlyContent()) return this.content
+  }
+
   publicRender() {
-    const content_html = marked.parse(this.content)
-    const template = 'blog.html'
-    const html = require('../utils/render')
-      .getEnv(this.planet)
-      .render(template, {
-        planet: this.planet,
-        planet_ipns: this.planet.ipns,
-        assets_prefix: '../',
-        article: {
-          ...this.json(),
-          hasAudio: !!this.audioFilename,
-          hasVideo: !!this.videoFilename,
-        },
-        article_title: this.title,
-        page_title: this.title,
-        content_html: content_html,
-        build_timestamp: new Date().getTime(),
+    let content = this.getPublicContent()
+    if (content) {
+      const content_html = marked.parse(content)
+      const template = 'blog.html'
+      const html = require('../utils/render')
+        .getEnv(this.planet)
+        .render(template, {
+          planet: this.planet,
+          planet_ipns: this.planet.ipns,
+          assets_prefix: '../',
+          article: {
+            ...this.json(),
+            hasAudio: !!this.audioFilename,
+            hasVideo: !!this.videoFilename,
+          },
+          article_title: this.title,
+          page_title: this.title,
+          content_html: content_html,
+          build_timestamp: new Date().getTime(),
+        })
+      require('fs').writeFileSync(this.publicIndexPath, html)
+    }
+    content = this.getFansOnlyContent()
+    if (content) {
+      const content_html = marked.parse(content)
+      const template = 'blog.html'
+      const html = require('../utils/render')
+        .getEnv(this.planet)
+        .render(template, {
+          planet: this.planet,
+          planet_ipns: this.planet.ipns,
+          assets_prefix: './',
+          article: {
+            ...this.json(),
+            hasAudio: !!this.audioFilename,
+            hasVideo: !!this.videoFilename,
+          },
+          article_title: this.title,
+          page_title: this.title,
+          content_html: content_html,
+          build_timestamp: new Date().getTime(),
+        })
+      require('fs').writeFileSync(this.fansonlyIndexPath, html)
+      const assetsPath = require('path').join(
+        this.planet.constructor.templateBase,
+        this.planet.template.toLowerCase(),
+        'assets'
+      )
+      require('fs').cpSync(assetsPath, this.fansonlyAssetsPath, {
+        recursive: true,
+        force: true,
       })
-    require('fs').writeFileSync(this.publicIndexPath, html)
+    }
   }
 
   static fromDraft(draft) {

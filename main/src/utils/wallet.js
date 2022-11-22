@@ -6,7 +6,8 @@ const log = require('../utils/log')('wallet')
 
 const ENS_NETWORK = 'homestead'
 const CONTRACT_NETWORK = 'goerli'
-const FairContractAddr = '0x8969573027575a1478DAcc5694876B6DF349c832'
+const FairContractAddr = '0xA8b6D1Dbd93f13c592AD4045bD1A73FA18Db888a'
+const OnlyfansContractAddr = '0x7Ff2089Df8F1849c8770954E4bD76fA3EE786C35'
 
 class Wallet {
   init() {
@@ -76,6 +77,24 @@ class Wallet {
       ],
       new ethers.Wallet(this.wallet.privateKey, this.provider(CONTRACT_NETWORK))
     )
+    this.onlyfansContract = new ethers.Contract(
+      OnlyfansContractAddr,
+      [
+        'event FanAdded(string ipns, address fan, uint256 expire)',
+        'event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)',
+        'event PlanetAdded(string ipns, address owner, uint256 price)',
+        'event PlanetModified(string ipns, address owner, uint256 price)',
+        'function owner() view returns (address)',
+        'function rate() view returns (uint256)',
+        'function renounceOwnership()',
+        'function transferOwnership(address newOwner)',
+        'function myfans(string ipns) view returns (tuple(bytes pubkey, uint256 expire)[])',
+        'function setRate(uint256 value)',
+        'function registerPlanet(string ipns, address owner, uint256 price)',
+        'function subscribe(string ipns, uint256 duration, bytes pubkey) payable',
+      ],
+      new ethers.Wallet(this.wallet.privateKey, this.provider(CONTRACT_NETWORK))
+    )
   }
 
   provider(network) {
@@ -137,6 +156,10 @@ class Wallet {
 
   async fairHot50() {
     return await this.donateContract.hot50()
+  }
+
+  async myfans(ipns) {
+    return await this.onlyfansContract.myfans(ipns)
   }
 }
 

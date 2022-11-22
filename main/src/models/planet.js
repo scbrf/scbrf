@@ -46,7 +46,6 @@ class Planet {
     this.publicAssetsPath = require('path').join(this.publicBasePath, 'assets')
 
     this.fansOnlyBasePath = require('path').join(Planet.PublicRoot, 'fansonly', this.id)
-    this.fansOnlyAssetsPath = require('path').join(this.fansOnlyBasePath, 'fansonly', this.id)
   }
 
   // 加载 Drafts 里面的所有 Draft
@@ -174,10 +173,6 @@ class Planet {
       recursive: true,
       force: true,
     })
-    require('fs').cpSync(src, this.fansOnlyAssetsPath, {
-      recursive: true,
-      force: true,
-    })
     log.info('copt assets dir done', {
       from: src,
       to: this.publicAssetsPath,
@@ -254,6 +249,7 @@ class Planet {
         log.info('during public,save to public dir', a.id)
         await a.savePublic()
         await a.publicRender()
+        await a.deliverToFans()
       })
     )
 

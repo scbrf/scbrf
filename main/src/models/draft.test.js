@@ -1,4 +1,5 @@
 const fs = require('fs')
+const ffmpeg = require('../utils/ffmpeg')
 const wallet = require('../utils/wallet')
 require('nunjucks')
 const ipfs = require('../utils/ipfs')
@@ -40,6 +41,8 @@ fs.renameSync.mockImplementation((a, b) => {
     })
   )
 })
+wallet.myfans.mockReturnValue([{ addr: '11', pubkey: require('ethers').Wallet.createRandom().publicKey.substring(2) }])
+ipfs.addDirectory.mockReturnValue('cid123')
 
 function mockfsExists(path) {
   return mockfs.has(path)
@@ -96,66 +99,6 @@ test('draft from article', async () => {
   expect(a2.videoFilename).toBe('b.mp4')
 })
 
-test('publish pending on wait copy audio', async () => {
-  const draft = new Draft(new Planet({ id: 'p1' }), null, {
-    id: 'A1',
-    title: 'test',
-    content: 'this is a test',
-  })
-  await draft.attachAudio('/tmp/a.mp3')
-  let publishDone = false
-  draft.publish().then(() => {
-    publishDone = true
-  })
-  await new Promise((resolve) => setTimeout(resolve, 150))
-  expect(publishDone).toBe(false)
-  cpcb()
-  await new Promise((resolve) => setTimeout(resolve, 150))
-  expect(publishDone).toBe(true)
-})
-
-test('publish pending on wait copy video', async () => {
-  const draft = new Draft(new Planet({ id: 'p1' }), null, {
-    id: 'a1',
-    title: 'test',
-    content: 'this is a test',
-  })
-  await draft.attachVideo('/tmp/a.mp4')
-  let publishDone = false
-  draft.publish().then(() => {
-    publishDone = true
-  })
-  await new Promise((resolve) => setTimeout(resolve, 150))
-  expect(publishDone).toBe(false)
-  cpcb()
-  await new Promise((resolve) => setTimeout(resolve, 150))
-  expect(publishDone).toBe(true)
-})
-
-test('remove juke files', async () => {
-  const draft = new Draft(new Planet({ id: 'p1' }), null, {
-    id: 'A1',
-    title: 'test',
-    content: 'this is a test',
-    attachments: [{ name: 'a.png' }, { name: 'b.png' }],
-  })
-  const targets = []
-  fs.renameSync.mockImplementation((s, t) => {
-    targets.push(t)
-  })
-  fs.existsSync.mockReturnValue(true)
-  fs.rmSync = jest.fn()
-  await draft.removeAttachment('b.png')
-  await draft.publish()
-  if (process.platform === 'win32') {
-    expect(targets.length).toBe(0)
-    expect(fs.rmSync).toHaveBeenCalledTimes(1) //rm draft
-  } else {
-    expect(targets.length).toBe(1)
-    expect(fs.rmSync).toHaveBeenCalledTimes(2) //rm public and rm draft
-  }
-})
-
 test('publish draft contains fansonly tag', async () => {
   const draft = new Draft(new Planet({ id: 'p1' }), null, {
     id: 'd1',
@@ -167,4 +110,6 @@ test('publish draft contains fansonly tag', async () => {
   await draft.publish()
   expect(mockfsExists('/tmp/public/p1/D1/c111.jpg')).toBeTruthy()
   expect(mockfsExists('/tmp/public/p1/D1/d111.png')).toBeFalsy()
+  expect(mockfsExists('/tmp/public/fansonly/p1/D1/c111.jpg')).toBeTruthy()
+  expect(mockfsExists('/tmp/public/fansonly/p1/D1/d111.png')).toBeTruthy()
 })
