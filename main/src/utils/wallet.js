@@ -6,8 +6,8 @@ const log = require('../utils/log')('wallet')
 
 const ENS_NETWORK = 'homestead'
 const CONTRACT_NETWORK = 'goerli'
-const FairContractAddr = '0x5C1F5750764508B52025D7ea6a50beFc8EF7fdC1'
-const OnlyfansContractAddr = '0x60f1400CEF89D076Dc3A27afe4613FA534eA4b9C'
+const FairContractAddr = '0xB8ca83Bd875e9f396dD48A76f14c57e056F112dc'
+const OnlyfansContractAddr = '0x7A083feCf2068F8b15962DdE1EA223d36d2BBE71'
 
 class Wallet {
   init() {
@@ -70,6 +70,12 @@ class Wallet {
     return binary_to_base58(ipnsbytes)
   }
 
+  async publicKeyFromId(id) {
+    const pk = await this.ipfsPkFromId(id)
+    const publickey = await ed.getPublicKey(pk)
+    return Buffer.from(publickey).toString('hex')
+  }
+
   async createWallet(event, passwd) {
     const win = BrowserWindow.fromWebContents(event.sender)
     this.wallet = ethers.Wallet.createRandom()
@@ -113,9 +119,10 @@ class Wallet {
         'function rate() view returns (uint256)',
         'function renounceOwnership()',
         'function transferOwnership(address newOwner)',
+        'function planet(bytes32 ipns) view returns (uint256, address, bytes)',
         'function myfans(bytes32 ipns) view returns (tuple(bytes pubkey, uint256 expire)[])',
         'function setRate(uint256 value)',
-        'function registerPlanet(bytes32 ipns, bytes32 r, bytes32 s, address owner, uint256 price)',
+        'function registerPlanet(bytes32 ipns, bytes signature, address owner, uint256 price)',
         'function subscribe(bytes32 ipns, uint256 duration, bytes pubkey) payable',
       ],
       new ethers.Wallet(this.wallet.privateKey, this.provider(CONTRACT_NETWORK))
@@ -170,6 +177,16 @@ class Wallet {
     const bn = await this.donateContract.estimateGas.donate(ipns, uuid, duration, {
       value: ethers.utils.parseEther(`${value}`),
     })
+    return ethers.utils.formatEther(bn)
+  }
+
+  async estimateGasForRegisterOnlyfans(ipns, signature, price) {
+    const bn = await this.onlyfansContract.estimateGas.registerPlanet(
+      ipns,
+      signature,
+      this.wallet.address,
+      ethers.utils.parseEther(`${price}`)
+    )
     return ethers.utils.formatEther(bn)
   }
 

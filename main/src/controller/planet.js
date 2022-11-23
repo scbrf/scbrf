@@ -382,6 +382,46 @@ class PlanetSidebarController {
     // this.view.webContents.openDevTools()
   }
 
+  async registerOnlyfans() {
+    const win = BrowserWindow.fromWebContents(this.view.webContents)
+    const subwin = new BrowserWindow({
+      parent: win,
+      x: win.getPosition()[0] + win.getSize()[0] / 2 - 300,
+      y: win.getPosition()[1] + win.getSize()[1] / 2 - 225,
+      width: 600,
+      height: 470,
+      frame: false,
+      resizable: false,
+      webPreferences: {
+        preload: require('path').join(__dirname, '..', '..', 'preload.js'),
+      },
+    })
+    subwin.loadURL(`${require('../utils/websrv').WebRoot}/dialog/onlyfans/register`)
+    subwin.webContents.on('did-finish-load', async () => {
+      const info = await this.registerOnlyfansPrepare(this.planetCtxMenuTargetPlanet)
+      log.debug('register onlyfans info', info)
+      subwin.webContents.send('register-onlyfans-request', info)
+    })
+    subwin.show()
+  }
+
+  async registerOnlyfansPrepare(planet) {
+    const balance = await require('../utils/wallet').balance()
+    const pk = await require('../utils/wallet').ipfsPkFromId(planet.id)
+    const ed = require('@noble/ed25519')
+    const ipns = await ed.getPublicKey(pk)
+    const price = '0.0001'
+    const signature = await ed.sign(Buffer.from(require('wallet').wallet.address.toUpperCase()), pk)
+    const gas = await require('../utils/wallet').estimateGasForRegisterOnlyfans(ipns, signature, price)
+    const info = {
+      address: require('../utils/wallet').wallet.address,
+      balance,
+      gas,
+      planet: artilce.planet.name,
+    }
+    return info
+  }
+
   createMenu() {
     this.createFollowMenu = Menu.buildFromTemplate([
       {
@@ -465,6 +505,17 @@ class PlanetSidebarController {
           rt.planetEditing = rt.planets.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)[0]
           this.showCreatePlanetDialog()
         },
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Register Onlyfans',
+        click: this.registerOnlyfans.bind(this),
+      },
+      {
+        label: 'Change Subscribe Price',
+        click: () => {},
       },
       {
         type: 'separator',
