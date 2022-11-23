@@ -35,6 +35,7 @@ class ScarboroughApp {
     await this.initDirBase()
     //启动前端页面服务器
     await require('../utils/websrv').init()
+    require('./mainmenu').init()
 
     //解锁钱包
     await wallet.init()

@@ -158,6 +158,10 @@ class Wallet {
     return ethers.utils.formatEther(bn)
   }
 
+  async network() {
+    return this.provider(CONTRACT_NETWORK).getNetwork()
+  }
+
   async validatePasswd(passwd) {
     return md5(passwd) === this.passwdSign
   }

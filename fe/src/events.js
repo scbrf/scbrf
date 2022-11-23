@@ -6,6 +6,7 @@ import { usePlanetInfoStore } from "./stores/planetinfo";
 import { useEditPlanetStore } from "./stores/editplanet";
 import { useSiteStore } from "./stores/site";
 import { useFairStore } from "./stores/fair";
+import { useWalletStore } from "./stores/wallet";
 
 export default function () {
   const ipfs = useIPFSStore();
@@ -16,6 +17,7 @@ export default function () {
   const planetEditor = useEditPlanetStore();
   const site = useSiteStore();
   const fair = useFairStore();
+  const wallet = useWalletStore();
 
   api.recieve("ipfsOnlineState", (p) => {
     for (let key of Object.keys(p[0])) {
@@ -75,6 +77,11 @@ export default function () {
   api.recieve("article-fair-request", (p) => {
     for (let key of Object.keys(p[0])) {
       fair[key] = p[0][key];
+    }
+  });
+  api.recieve("wallet-detail", (p) => {
+    for (let key of Object.keys(p[0])) {
+      wallet[key] = p[0][key];
     }
   });
 }

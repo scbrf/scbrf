@@ -13,6 +13,7 @@ import ArticleEditorWaiting from "../views/ArticleEditorWaiting.vue";
 import PlanetInfoView from "../views/PlanetInfoView.vue";
 import EmptyView from "../views/EmptyView.vue";
 import CreateWalletView from "../views/CreateWalletView.vue";
+import WalletView from "../views/WalletView.vue";
 import UnlockWalletView from "../views/UnlockWalletView.vue";
 import QrcodeView from "../views/QrcodeView.vue";
 import FairRequestView from "../views/FairRequestView.vue";
@@ -70,6 +71,10 @@ const router = createRouter({
     {
       path: "/wallet/create",
       component: CreateWalletView,
+    },
+    {
+      path: "/wallet/detail",
+      component: WalletView,
     },
     {
       path: "/wallet/unlock",

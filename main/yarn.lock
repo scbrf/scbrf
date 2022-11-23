@@ -3060,6 +3060,11 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
+electron-default-menu@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/electron-default-menu/-/electron-default-menu-1.0.2.tgz#a652144703ddaf6fa8043a62f91855e422e1005e"
+  integrity sha512-YAL/UNR3kPG58wOOlmDpTG3i6+bzwhHx6NllIOaLuVrU7uYifeYGGdk5IH2Hap4wVEx2YTA8cqQ2PGSplYwDWQ==
+
 electron-installer-common@^0.10.2:
   version "0.10.3"
   resolved "https://registry.yarnpkg.com/electron-installer-common/-/electron-installer-common-0.10.3.tgz#40f9db644ca60eb28673d545b67ee0113aef4444"
