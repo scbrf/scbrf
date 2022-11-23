@@ -42,9 +42,24 @@ class IPFSDaemon {
     log.info('shutdown daemon called!')
     return this.runIPFSCmd('shutdown')
   }
+
+  async importKeyRaw(name, bufferLike) {
+    const tmpfile = require('path').join(require('os').tmpdir(), `${name}.pem`)
+    require('fs').writeFileSync(
+      tmpfile,
+      `-----BEGIN PRIVATE KEY-----
+${Buffer.concat([Buffer.from('302e020100300506032b657004220420', 'hex'), Buffer.from(bufferLike)]).toString('base64')}
+-----END PRIVATE KEY-----`
+    )
+    const result = await this.importKey(name, tmpfile)
+    log.debug(`import key raw for ${name} return ${result}`)
+    require('fs').rmSync(tmpfile)
+    return result
+  }
+
   async importKey(name, path) {
     log.info(`import IPFS keypair from ${path}`)
-    const rsp = await this.runIPFSCmd('key', 'import', name, path)
+    const rsp = await this.runIPFSCmd('key', 'import', name, '--ipns-base=b58mh', '--format=pem-pkcs8-cleartext', path)
     return rsp.trim()
   }
   async generateKey(id) {

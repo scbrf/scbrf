@@ -6,7 +6,7 @@
                 class="font-bold">不要往这个数字钱包中转移数字货币</span>，除非您清楚知道自己在做什么。
         </div>
         <div class="text-justify pt-2 leading-6">
-            在下面的文本框中输入一个密码，我们不会记录这个密码，忘记密码代表着您无法再修改之前发表的评论。
+            在下面的文本框中输入一个密码，我们不会记录这个密码，忘记密码将丢失所有数据及资产。
         </div>
         <div class="flex-1"></div>
         <label class="input-group input-group-sm w-100 flex mt-2 nodrag">

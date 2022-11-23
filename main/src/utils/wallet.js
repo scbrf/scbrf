@@ -6,8 +6,8 @@ const log = require('../utils/log')('wallet')
 
 const ENS_NETWORK = 'homestead'
 const CONTRACT_NETWORK = 'goerli'
-const FairContractAddr = '0xA8b6D1Dbd93f13c592AD4045bD1A73FA18Db888a'
-const OnlyfansContractAddr = '0x7Ff2089Df8F1849c8770954E4bD76fA3EE786C35'
+const FairContractAddr = '0x5C1F5750764508B52025D7ea6a50beFc8EF7fdC1'
+const OnlyfansContractAddr = '0x60f1400CEF89D076Dc3A27afe4613FA534eA4b9C'
 
 class Wallet {
   init() {
@@ -45,6 +45,31 @@ class Wallet {
       }
     })
   }
+
+  //return a 32bytes buffer
+  async ipfsPkFromId(id) {
+    const uuidBuffer = require('uuid-buffer')
+    const b = uuidBuffer.toBuffer(id)
+    const idbuffer = Buffer.concat([b, b])
+    const walletpk = Buffer.from(this.wallet.privateKey.substring(2), 'hex')
+    const seed = Buffer.alloc(32)
+    for (let i = 0; i < 32; i++) {
+      seed[i] = (idbuffer[i] + walletpk[i]) % 256
+    }
+    const ed = require('@noble/ed25519')
+    const pk = await ed.getPublicKey(seed)
+    return pk
+  }
+
+  async ipnsFromId(id) {
+    const ed = require('@noble/ed25519')
+    const pk = await this.ipfsPkFromId(id)
+    const publickey = await ed.getPublicKey(pk)
+    const { binary_to_base58 } = require('base58-js')
+    const ipnsbytes = Buffer.concat([Buffer.from('002408011220', 'hex'), publickey])
+    return binary_to_base58(ipnsbytes)
+  }
+
   async createWallet(event, passwd) {
     const win = BrowserWindow.fromWebContents(event.sender)
     this.wallet = ethers.Wallet.createRandom()
@@ -80,18 +105,18 @@ class Wallet {
     this.onlyfansContract = new ethers.Contract(
       OnlyfansContractAddr,
       [
-        'event FanAdded(string ipns, address fan, uint256 expire)',
+        'event FanAdded(bytes32 ipns, address fan, uint256 expire)',
         'event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)',
-        'event PlanetAdded(string ipns, address owner, uint256 price)',
-        'event PlanetModified(string ipns, address owner, uint256 price)',
+        'event PlanetAdded(bytes32 ipns, address owner, uint256 price)',
+        'event PlanetModified(bytes32 ipns, address owner, uint256 price)',
         'function owner() view returns (address)',
         'function rate() view returns (uint256)',
         'function renounceOwnership()',
         'function transferOwnership(address newOwner)',
-        'function myfans(string ipns) view returns (tuple(bytes pubkey, uint256 expire)[])',
+        'function myfans(bytes32 ipns) view returns (tuple(bytes pubkey, uint256 expire)[])',
         'function setRate(uint256 value)',
-        'function registerPlanet(string ipns, address owner, uint256 price)',
-        'function subscribe(string ipns, uint256 duration, bytes pubkey) payable',
+        'function registerPlanet(bytes32 ipns, bytes32 r, bytes32 s, address owner, uint256 price)',
+        'function subscribe(bytes32 ipns, uint256 duration, bytes pubkey) payable',
       ],
       new ethers.Wallet(this.wallet.privateKey, this.provider(CONTRACT_NETWORK))
     )

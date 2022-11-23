@@ -8,8 +8,8 @@
     "scripts": {
         "predebug": "cd ../fe && yarn build",
         "debug": "electron-forge start",
-        "start": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='..' electron-forge start",
-        "start:watch": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='..' nodemon --watch main.js --watch ./src --exec 'yarn start'",
+        "start": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='../runtime' electron-forge start",
+        "start:watch": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='../runtime' nodemon --watch main.js --watch ./src --exec 'yarn start'",
         "prepackage": "cd ../fe && yarn build",
         "package": "electron-forge package",
         "premake": "cd ../fe && yarn build",
@@ -28,7 +28,9 @@
         "jest": "^29.0.3"
     },
     "dependencies": {
+        "@noble/ed25519": "^1.7.1",
         "axios": "^0.27.2",
+        "base58-js": "^1.0.5",
         "bunyan": "^1.8.15",
         "electron-squirrel-startup": "^1.0.0",
         "eth-crypto": "^2.4.0",
@@ -50,7 +52,11 @@
         "nodecast-js": "^1.0.3",
         "nunjucks": "^3.2.3",
         "portfinder": "^1.0.32",
-        "uuid": "^9.0.0"
+        "uuid": "^9.0.0",
+        "uuid-buffer": "^1.0.3"
+    },
+    "resolutions": {
+        "nan": "github:jkleinsc/nan#remove_accessor_signature"
     },
     "config": {
         "forge": {

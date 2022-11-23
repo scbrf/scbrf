@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-screen nodrag flex flex-col p-2">
-        <div class="text-center pb-2">{{ id ? 'Edit' : 'Create'}} Planet</div>
+        <div class="text-center pb-2">{{ id ? 'Edit' : 'Create' }} Planet</div>
         <div class="flex-1 flex flex-col p-2">
             <label class="input-group input-group-sm w-100 flex">
                 <span class="w-32">* Name:</span>
@@ -21,15 +21,16 @@
                 <input type="text" placeholder="comments ipns bridge" v-model="commentsBridge"
                     class="input flex-1 input-sm input-bordered" />
             </label>
-            <textarea v-if="!following" placeholder="About your new Planet"
+            <textarea v-if="!following" placeholder="About your new Planet, Markdown supported"
                 class="textarea mt-2 textarea-bordered flex-1 dark:bg-slate-800 p-4" v-model="about"></textarea>
 
         </div>
         <div class="flex flex-row p-2">
             <button class="btn btn-sm btn-ghost" @click="doclose">Close</button>
             <div class="flex-1"></div>
-            <button class="btn btn-sm btn-ghost" @click="doCreate" :disabled="!validate">{{ id?'Update'
-            :'Create'}}</button>
+            <button class="btn btn-sm btn-ghost" @click="doCreate" :disabled="!validate">{{ id ? 'Update'
+                    : 'Create'
+            }}</button>
         </div>
     </div>
 </template>

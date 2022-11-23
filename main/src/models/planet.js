@@ -6,6 +6,7 @@ const ipfs = require('../utils/ipfs')
 const rt = require('./runtime')
 const Draft = require('./draft')
 const Article = require('./article')
+const wallet = require('../utils/wallet')
 
 class Planet {
   static myPlanetsPath
@@ -135,7 +136,9 @@ class Planet {
     log.info('create planet from param', param)
     const planet = new Planet(param)
     if (!planet.ipns) {
-      planet.ipns = await ipfs.generateKey(planet.id)
+      const pk = await wallet.ipfsPkFromId(planet.id)
+      planet.ipns = await ipfs.importKeyRaw(planet.id, pk)
+      // planet.ipns = await wallet.ipnsFromId(planet.id)
     }
     planet.avatar = null
     planet.drafts = []
