@@ -6,8 +6,8 @@ const log = require('../utils/log')('wallet')
 
 const ENS_NETWORK = 'homestead'
 const CONTRACT_NETWORK = 'goerli'
-const FairContractAddr = '0xB8ca83Bd875e9f396dD48A76f14c57e056F112dc'
-const OnlyfansContractAddr = '0x7A083feCf2068F8b15962DdE1EA223d36d2BBE71'
+const FairContractAddr = '0xCd2852D3A92FDeAd826EF05366e10d824212ca57'
+const OnlyfansContractAddr = '0x233962Deb7501d9cAB1241e3ABe4D7E5478898CC'
 
 class Wallet {
   init() {
@@ -111,10 +111,9 @@ class Wallet {
     this.onlyfansContract = new ethers.Contract(
       OnlyfansContractAddr,
       [
-        'event FanAdded(bytes32 ipns, address fan, uint256 expire)',
+        'event FanAdded(bytes32 indexed ipns, address indexed fan, uint256 expire)',
         'event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)',
-        'event PlanetAdded(bytes32 ipns, address owner, uint256 price)',
-        'event PlanetModified(bytes32 ipns, address owner, uint256 price)',
+        'event PlanetRegistered(bytes32 indexed ipns, address indexed owner, uint256 price)',
         'function owner() view returns (address)',
         'function rate() view returns (uint256)',
         'function renounceOwnership()',
@@ -241,6 +240,11 @@ class Wallet {
 
   async myfans(ipns) {
     return await this.onlyfansContract.myfans(ipns)
+  }
+
+  async listOnlyfansSubscribeEvents() {
+    const result = await this.onlyfansContract.filters.PlanetAdded(null, this.wallet.address)
+    log.debug('filter planet added events:', result)
   }
 }
 

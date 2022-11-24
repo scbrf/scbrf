@@ -17,6 +17,10 @@ class MainMenu {
     Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
   }
 
+  async listWalletEvents() {
+    require('../utils/wallet').listOnlyfansSubscribeEvents()
+  }
+
   async openWalletWindow(_, parent) {
     const { BrowserWindow } = require('electron')
     const win = new BrowserWindow({
@@ -40,6 +44,7 @@ class MainMenu {
         network: (await require('../utils/wallet').network()).name,
         address: require('../utils/wallet').wallet.address,
         balance: await require('../utils/wallet').balance(),
+        events: await this.listWalletEvents(),
       })
     })
     win.show()
