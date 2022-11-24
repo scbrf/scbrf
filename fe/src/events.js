@@ -26,6 +26,11 @@ export default function () {
       onlyfans[key] = p[0][key];
     }
   });
+  api.recieve("subscribe-onlyfans-request", (p) => {
+    for (let key of Object.keys(p[0])) {
+      onlyfans[key] = p[0][key];
+    }
+  });
 
   api.recieve("ipfsOnlineState", (p) => {
     for (let key of Object.keys(p[0])) {

@@ -189,32 +189,17 @@ class FollowingPlanet {
 
   static async followDotBit(link, cb) {
     cb(`resolve .bit content hash ...`)
-    const body = {
-      account: link,
-    }
-    const rsp = await axios.post('https://indexer-v1.did.id/v1/account/records', body)
-    const data = rsp.data
-    if (data.errno === 0) {
-      let key
-      let res = data.data.records.filter((r) => r.key === 'dweb.ipns')[0]
-      if (res) {
-        key = `/ipns/${res.value}`
-      }
-      res = data.data.records.filter((r) => r.key === 'dweb.ipfs')[0]
-      if (res) {
-        key = `/ipns/${rec.value}`
-      }
-      if (key) {
-        cb(`resolve succ: ${key}`)
-        const planet = await FollowingPlanet.followIPNSorDNSLink(key, cb)
-        planet.planetType = '.bit'
-        planet.link = link
-        cb(`save planet content locally ...`)
-        await planet.save()
-        await Promise.all(planet.articles.map((a) => a.save()))
-        cb(`done!`)
-        return planet
-      }
+    const ipns = await FollowingPlanet.resolveBit(link)
+    if (ipns) {
+      cb(`resolve succ: ${ipns}`)
+      const planet = await FollowingPlanet.followIPNSorDNSLink(ipns, cb)
+      planet.planetType = '.bit'
+      planet.link = link
+      cb(`save planet content locally ...`)
+      await planet.save()
+      await Promise.all(planet.articles.map((a) => a.save()))
+      cb(`done!`)
+      return planet
     } else {
       log.error('resolve .bit domain fail', data.errmsg)
       cb('.bit indexer error:' + data.errmsg)
@@ -245,6 +230,40 @@ class FollowingPlanet {
       return planet
     } else {
       cb(`resolve ens fail!`)
+    }
+  }
+
+  static async resolveBit(link) {
+    const body = {
+      account: link,
+    }
+    const rsp = await axios.post('https://indexer-v1.did.id/v1/account/records', body)
+    const data = rsp.data
+    if (data.errno === 0) {
+      let key
+      let res = data.data.records.filter((r) => r.key === 'dweb.ipns')[0]
+      if (res) {
+        key = `ipns://${res.value}`
+      }
+      res = data.data.records.filter((r) => r.key === 'dweb.ipfs')[0]
+      if (res) {
+        key = `ipfs://${rec.value}`
+      }
+      if (key) {
+        return key
+      }
+    } else {
+      log.error('resolve .bit domain fail', data.errmsg)
+    }
+  }
+
+  async getIPNS() {
+    if (this.link.endsWith('.eth')) {
+      return await wallet.resolveENS(this.link)
+    } else if (this.link.endsWith('.bit')) {
+      return await FollowingPlanet.resolveBit(this.link)
+    } else if (this.link.startsWith('12D3')) {
+      return this.link
     }
   }
 

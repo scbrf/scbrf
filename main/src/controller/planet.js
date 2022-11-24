@@ -28,7 +28,21 @@ class PlanetSidebarController {
       [evt.ipcFollowPlanet, this.closeWinAndRun.bind(this, this.followWithProgress.bind(this))],
       [evt.ipcOpenFocusInBrowser, this.openFocusInBrowser],
       [evt.ipcOnlyfansRegisterPlanetRequest, this.doRegisterPlanet],
+      [evt.ipcOnlyfansSubscribePlanetRequest, this.doSubscribePlanet],
     ])
+  }
+
+  async doSubscribePlanet(event, p) {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const { passwd, pubkey, price, days } = p
+    const error = await this.subscribePlanetAction(passwd, pubkey, price, days)
+    if (error) {
+      win.webContents.send('subscribe-onlyfans-request', {
+        error,
+      })
+    } else {
+      win.close()
+    }
   }
 
   async doRegisterPlanet(event, p) {
@@ -41,6 +55,20 @@ class PlanetSidebarController {
       })
     } else {
       win.close()
+    }
+  }
+
+  async subscribePlanetAction(passwd, pubkey, price, days) {
+    if (!(await require('../utils/wallet').validatePasswd(passwd))) {
+      return '密码错误'
+    }
+    try {
+      const tx = await require('../utils/wallet').subscribePlanet(pubkey, price, days)
+      const rsp = await tx.wait()
+      log.info('onlyfans subscribe planet return', rsp)
+    } catch (ex) {
+      log.debug('onlyfans subscribe planet error', ex)
+      return ex.message
     }
   }
 
@@ -67,7 +95,11 @@ class PlanetSidebarController {
   popupAndStoreP(menu, e, p) {
     const win = BrowserWindow.fromWebContents(e.sender)
     menu.popup(win)
-    this.planetCtxMenuTargetPlanet = p
+    log.debug('popup and store called with', p)
+    this.planetCtxMenuTargetPlanet = rt.following.filter((pp) => pp.id == p.id)[0]
+    if (!this.planetCtxMenuTargetPlanet) {
+      this.planetCtxMenuTargetPlanet = rt.planets.filter((pp) => pp.id == p.id)[0]
+    }
   }
 
   async openFocusInBrowser() {
@@ -417,20 +449,77 @@ class PlanetSidebarController {
   }
 
   async onlyfansSubscribe() {
-    const info = await require('../utils/wallet').onlyfansPlanetInfo(this.planetCtxMenuTargetPlanet.id)
-    log.debug('query onlyfans planet info return', info)
-    if (!info) {
-      require('electron').dialog.showMessageBoxSync({
-        message: `This planet ${this.planetCtxMenuTargetPlanet.name} not registed at onlyfans?`,
+    let ipns = await this.planetCtxMenuTargetPlanet.getIPNS()
+    if (ipns.startsWith('ipns://')) {
+      ipns = ipns.substring('ipns://'.length)
+    }
+    log.info(`target link is ${this.planetCtxMenuTargetPlanet.link} resolve as ${ipns}`)
+    if (!ipns.startsWith('12D3')) {
+      return require('electron').dialog.showMessageBoxSync({
+        message: `This planet ${this.planetCtxMenuTargetPlanet.name} can not be subscribed!`,
         buttons: ['OK'],
         cancelId: 0,
       })
-      return
     }
+
+    const { base58_to_binary } = require('base58-js')
+    const pubkey = base58_to_binary(ipns).slice(6)
+    log.info('decode ipns got', pubkey)
+    const info = await require('../utils/wallet').onlyfansPlanetInfo(pubkey)
+    log.debug('query onlyfans planet info return', info)
+    if (!info) {
+      return require('electron').dialog.showMessageBoxSync({
+        message: `This planet ${this.planetCtxMenuTargetPlanet.name} not registed at onlyfans!`,
+        buttons: ['OK'],
+        cancelId: 0,
+      })
+    }
+    const [price, owner, signature] = info
+    log.debug('planet info', owner, signature)
+    const ed = require('@noble/ed25519')
+    const isValid = await ed.verify(
+      Buffer.from(signature.substring(2), 'hex'),
+      Buffer.from(owner.toUpperCase()),
+      pubkey
+    )
+    if (!isValid) {
+      return require('electron').dialog.showMessageBoxSync({
+        message: `This planet ${this.planetCtxMenuTargetPlanet.name} has wrong signature!`,
+        buttons: ['OK'],
+        cancelId: 0,
+      })
+    }
+    const win = BrowserWindow.fromWebContents(this.view.webContents)
+    const subwin = new BrowserWindow({
+      parent: win,
+      x: win.getPosition()[0] + win.getSize()[0] / 2 - 300,
+      y: win.getPosition()[1] + win.getSize()[1] / 2 - 225,
+      width: 600,
+      height: 470,
+      frame: false,
+      resizable: false,
+      webPreferences: {
+        preload: require('path').join(__dirname, '..', '..', 'preload.js'),
+      },
+    })
+    subwin.loadURL(`${require('../utils/websrv').WebRoot}/dialog/onlyfans/subscribe`)
+    subwin.webContents.on('did-finish-load', async () => {
+      const info = await this.subscribeOnlyfansPrepare(
+        this.planetCtxMenuTargetPlanet,
+        pubkey,
+        require('ethers').utils.formatEther(price)
+      )
+      log.debug('subscribe onlyfans info', info)
+      subwin.webContents.send('subscribe-onlyfans-request', info)
+    })
+    subwin.show()
   }
 
   async registerOnlyfans() {
-    const info = await require('../utils/wallet').onlyfansPlanetInfo(this.planetCtxMenuTargetPlanet.id)
+    const pk = await this.ipfsPkFromId(this.planetCtxMenuTargetPlanet.id)
+    const ed = require('@noble/ed25519')
+    const ipns = await ed.getPublicKey(pk)
+    const info = await require('../utils/wallet').onlyfansPlanetInfo(ipns)
     if (info) {
       log.info('already registed', info)
       return
@@ -455,6 +544,20 @@ class PlanetSidebarController {
       subwin.webContents.send('register-onlyfans-request', info)
     })
     subwin.show()
+  }
+
+  async subscribeOnlyfansPrepare(planet, ipns, price) {
+    const balance = await require('../utils/wallet').balance()
+    const gas = await require('../utils/wallet').estimateGasForSubscribeOnlyfans(ipns, price, 1)
+    const info = {
+      address: require('../utils/wallet').wallet.address,
+      balance,
+      gas,
+      planet: planet.name,
+      price,
+      pubkey: '0x' + Buffer.from(ipns).toString('hex'),
+    }
+    return info
   }
 
   async registerOnlyfansPrepare(planet) {

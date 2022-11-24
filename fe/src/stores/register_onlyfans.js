@@ -7,5 +7,7 @@ export const useOnlyfansStore = defineStore("onlyfans", {
     gas: "",
     planet: "",
     error: "",
+    price: "",
+    pubkey: "",
   }),
 });

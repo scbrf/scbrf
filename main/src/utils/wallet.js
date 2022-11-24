@@ -180,6 +180,18 @@ class Wallet {
     return ethers.utils.formatEther(bn)
   }
 
+  async estimateGasForSubscribeOnlyfans(ipns, price, days) {
+    const bn = await this.onlyfansContract.estimateGas.subscribe(
+      ipns,
+      days,
+      '0x' + this.wallet.publicKey.substring(4),
+      {
+        value: ethers.utils.parseEther(`${price * days}`),
+      }
+    )
+    return ethers.utils.formatEther(bn)
+  }
+
   async estimateGasForRegisterOnlyfans(ipns, signature, price) {
     const bn = await this.onlyfansContract.estimateGas.registerPlanet(
       ipns,
@@ -196,6 +208,12 @@ class Wallet {
     })
   }
 
+  async subscribePlanet(pubkey, price, days) {
+    return await this.onlyfansContract.subscribe(pubkey, days, '0x' + this.wallet.publicKey.substring(4), {
+      value: ethers.utils.parseEther(`${price * days}`),
+    })
+  }
+
   async registerPlanet(ipns, signature, price) {
     return await this.onlyfansContract.registerPlanet(
       ipns,
@@ -205,10 +223,7 @@ class Wallet {
     )
   }
 
-  async onlyfansPlanetInfo(id) {
-    const pk = await this.ipfsPkFromId(id)
-    const ed = require('@noble/ed25519')
-    const ipns = await ed.getPublicKey(pk)
+  async onlyfansPlanetInfo(ipns) {
     const info = await this.onlyfansContract.planet(ipns)
     const price = parseFloat(ethers.utils.formatEther(info[0]))
     if (price > 0) {

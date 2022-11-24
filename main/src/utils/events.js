@@ -68,6 +68,7 @@ class EventCenter {
 
   ipcFairRequest //投放到集市
   ipcOnlyfansRegisterPlanetRequest //注册站点
+  ipcOnlyfansSubscribePlanetRequest //订阅站点
 
   constructor() {
     this.bus = EvtBus()
