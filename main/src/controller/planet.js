@@ -27,7 +27,41 @@ class PlanetSidebarController {
       [evt.ipcCreatePlanet, this.closeWinAndRun.bind(this, this.createPlanet.bind(this))],
       [evt.ipcFollowPlanet, this.closeWinAndRun.bind(this, this.followWithProgress.bind(this))],
       [evt.ipcOpenFocusInBrowser, this.openFocusInBrowser],
+      [evt.ipcOnlyfansRegisterPlanetRequest, this.doRegisterPlanet],
     ])
+  }
+
+  async doRegisterPlanet(event, p) {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const { passwd, price } = p
+    const error = await this.registerPlanetAction(price, passwd)
+    if (error) {
+      win.webContents.send('register-onlyfans-request', {
+        error,
+      })
+    } else {
+      win.close()
+    }
+  }
+
+  async registerPlanetAction(price, passwd) {
+    if (!(await require('../utils/wallet').validatePasswd(passwd))) {
+      return '密码错误'
+    }
+
+    const pk = await require('../utils/wallet').ipfsPkFromId(this.planetCtxMenuTargetPlanet.id)
+    const ed = require('@noble/ed25519')
+    const ipns = await ed.getPublicKey(pk)
+    const signature = await ed.sign(Buffer.from(require('../utils/wallet').wallet.address.toUpperCase()), pk)
+
+    try {
+      const tx = await require('../utils/wallet').registerPlanet(ipns, signature, price)
+      const rsp = await tx.wait()
+      log.info('onlyfans register planet return', rsp)
+    } catch (ex) {
+      log.debug('onlyfans register planet error', ex)
+      return ex.message
+    }
   }
 
   popupAndStoreP(menu, e, p) {
@@ -383,6 +417,11 @@ class PlanetSidebarController {
   }
 
   async registerOnlyfans() {
+    const info = await require('../utils/wallet').onlyfansPlanetInfo(this.planetCtxMenuTargetPlanet.id)
+    if (info) {
+      log.info('already registed', info)
+      return
+    }
     const win = BrowserWindow.fromWebContents(this.view.webContents)
     const subwin = new BrowserWindow({
       parent: win,
@@ -411,13 +450,13 @@ class PlanetSidebarController {
     const ed = require('@noble/ed25519')
     const ipns = await ed.getPublicKey(pk)
     const price = '0.0001'
-    const signature = await ed.sign(Buffer.from(require('wallet').wallet.address.toUpperCase()), pk)
+    const signature = await ed.sign(Buffer.from(require('../utils/wallet').wallet.address.toUpperCase()), pk)
     const gas = await require('../utils/wallet').estimateGasForRegisterOnlyfans(ipns, signature, price)
     const info = {
       address: require('../utils/wallet').wallet.address,
       balance,
       gas,
-      planet: artilce.planet.name,
+      planet: planet.name,
     }
     return info
   }

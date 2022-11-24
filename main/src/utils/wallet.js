@@ -196,6 +196,22 @@ class Wallet {
     })
   }
 
+  async registerPlanet(ipns, signature, price) {
+    return await this.onlyfansContract.registerPlanet(
+      ipns,
+      signature,
+      this.wallet.address,
+      ethers.utils.parseEther(`${price}`)
+    )
+  }
+
+  async onlyfansPlanetInfo(id) {
+    const pk = await this.ipfsPkFromId(id)
+    const ed = require('@noble/ed25519')
+    const ipns = await ed.getPublicKey(pk)
+    return await this.onlyfansContract.planet(ipns)
+  }
+
   async durationLimit() {
     return await this.donateContract.DurationLimit()
   }

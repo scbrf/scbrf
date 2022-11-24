@@ -67,6 +67,7 @@ class EventCenter {
   ipcShareOpen //webview的右上角按钮
 
   ipcFairRequest //投放到集市
+  ipcOnlyfansRegisterPlanetRequest //注册站点
 
   constructor() {
     this.bus = EvtBus()

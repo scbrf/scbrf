@@ -7,6 +7,7 @@ import { useEditPlanetStore } from "./stores/editplanet";
 import { useSiteStore } from "./stores/site";
 import { useFairStore } from "./stores/fair";
 import { useWalletStore } from "./stores/wallet";
+import { useOnlyfansStore } from "./stores/register_onlyfans";
 
 export default function () {
   const ipfs = useIPFSStore();
@@ -18,6 +19,13 @@ export default function () {
   const site = useSiteStore();
   const fair = useFairStore();
   const wallet = useWalletStore();
+  const onlyfans = useOnlyfansStore();
+
+  api.recieve("register-onlyfans-request", (p) => {
+    for (let key of Object.keys(p[0])) {
+      onlyfans[key] = p[0][key];
+    }
+  });
 
   api.recieve("ipfsOnlineState", (p) => {
     for (let key of Object.keys(p[0])) {
