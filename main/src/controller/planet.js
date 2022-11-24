@@ -416,6 +416,19 @@ class PlanetSidebarController {
     // this.view.webContents.openDevTools()
   }
 
+  async onlyfansSubscribe() {
+    const info = await require('../utils/wallet').onlyfansPlanetInfo(this.planetCtxMenuTargetPlanet.id)
+    log.debug('query onlyfans planet info return', info)
+    if (!info) {
+      require('electron').dialog.showMessageBoxSync({
+        message: `This planet ${this.planetCtxMenuTargetPlanet.name} not registed at onlyfans?`,
+        buttons: ['OK'],
+        cancelId: 0,
+      })
+      return
+    }
+  }
+
   async registerOnlyfans() {
     const info = await require('../utils/wallet').onlyfansPlanetInfo(this.planetCtxMenuTargetPlanet.id)
     if (info) {
@@ -514,6 +527,13 @@ class PlanetSidebarController {
           rt.following = [...rt.following]
           evt.emit(evt.evRuntimeMiddleSidebarContentChange)
         },
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Onlyfans Subscribe',
+        click: this.onlyfansSubscribe.bind(this),
       },
       {
         type: 'separator',

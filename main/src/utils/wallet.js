@@ -209,7 +209,11 @@ class Wallet {
     const pk = await this.ipfsPkFromId(id)
     const ed = require('@noble/ed25519')
     const ipns = await ed.getPublicKey(pk)
-    return await this.onlyfansContract.planet(ipns)
+    const info = await this.onlyfansContract.planet(ipns)
+    const price = parseFloat(ethers.utils.formatEther(info[0]))
+    if (price > 0) {
+      return info
+    }
   }
 
   async durationLimit() {
