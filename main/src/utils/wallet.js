@@ -6,8 +6,8 @@ const log = require('../utils/log')('wallet')
 
 const ENS_NETWORK = 'homestead'
 const CONTRACT_NETWORK = 'goerli'
-const FairContractAddr = '0xCd2852D3A92FDeAd826EF05366e10d824212ca57'
-const OnlyfansContractAddr = '0x233962Deb7501d9cAB1241e3ABe4D7E5478898CC'
+const FairContractAddr = '0x91c9C522FB70D4000fFF0d5A0825458A621CaDe0'
+const OnlyfansContractAddr = '0x0ba704D95272854038072ed5898d8990698E1890'
 
 class Wallet {
   init() {
@@ -243,8 +243,24 @@ class Wallet {
   }
 
   async listOnlyfansSubscribeEvents() {
-    const result = await this.onlyfansContract.filters.PlanetAdded(null, this.wallet.address)
-    log.debug('filter planet added events:', result)
+    const filter1 = await this.onlyfansContract.filters.PlanetRegistered(null, this.wallet.address)
+    const result1 = await this.onlyfansContract.queryFilter(filter1)
+    const filter2 = await this.onlyfansContract.filters.FanAdded(null, this.wallet.address)
+    const result2 = await this.onlyfansContract.queryFilter(filter2)
+    return [
+      ...result1.map((e) => ({
+        type: 'register',
+        ipns: e.args.ipns,
+        price: ethers.utils.formatEther(e.args.price),
+        block: e.blockNumber,
+      })),
+      ...result2.map((e) => ({
+        type: 'subscrible',
+        ipns: e.args.ipns,
+        expire: e.args.expire.toNumber(),
+        block: e.blockNumber,
+      })),
+    ]
   }
 }
 

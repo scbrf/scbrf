@@ -1,3 +1,6 @@
+const log = require('../utils/log')('mainmenu')
+const rt = require('../models/runtime')
+
 class MainMenu {
   init() {
     const defaultMenu = require('electron-default-menu')
@@ -18,7 +21,7 @@ class MainMenu {
   }
 
   async listWalletEvents() {
-    require('../utils/wallet').listOnlyfansSubscribeEvents()
+    return require('../utils/wallet').listOnlyfansSubscribeEvents()
   }
 
   async openWalletWindow(_, parent) {
@@ -40,11 +43,33 @@ class MainMenu {
     })
     win.loadURL(`${require('../utils/websrv').WebRoot}/wallet/detail`)
     win.webContents.on('did-finish-load', async () => {
-      win.webContents.send('wallet-detail', {
+      const info = {
         network: (await require('../utils/wallet').network()).name,
         address: require('../utils/wallet').wallet.address,
         balance: await require('../utils/wallet').balance(),
         events: await this.listWalletEvents(),
+      }
+      log.debug('got wallet info', info)
+      await Promise.all(
+        info.events.map(async (e) => {
+          for (let planet of [...rt.following, ...rt.planets]) {
+            const ipnsb58 = planet.ipns
+            const { base58_to_binary } = require('base58-js')
+            const pubkey = base58_to_binary(ipnsb58).slice(6)
+            const ipns = '0x' + Buffer.from(pubkey).toString('hex')
+            if (e.ipns == ipns) {
+              e.planet = planet
+              break
+            }
+          }
+        })
+      )
+      win.webContents.send('wallet-detail', {
+        ...info,
+        events: info.events.map((e) => ({
+          ...e,
+          planet: e.planet ? e.planet.name : '',
+        })),
       })
     })
     win.show()

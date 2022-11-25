@@ -17,6 +17,7 @@ class FollowingPlanet {
     this.about = params.about || ''
     this.link = params.link || ''
     this.cid = params.cid || ''
+    this.ipns = params.ipns || ''
     this.created = params.created
     this.updated = params.updated
     this.githubUsername = params.githubUsername || null
@@ -48,6 +49,7 @@ class FollowingPlanet {
       name: this.name,
       about: this.about,
       link: this.link,
+      ipns: this.ipns,
       cid: this.cid,
       created: this.created,
       updated: this.updated,
@@ -156,21 +158,25 @@ class FollowingPlanet {
 
   static async follow(target, cb = () => {}) {
     let link = target.trim()
-    if (link.startsWith('planet://')) {
-      link = link.substring('planet://'.length)
+    let ipns = await FollowingPlanet.getIPNS(link)
+    let cid
+    if (ipns && ipns.startsWith('ipns://')) {
+      ipns = ipns.substring('ipns://'.length)
+    } else if (link.startsWith('12D3')) {
+      ipns = link
     }
-    if (link.endsWith('.eth')) {
-      return FollowingPlanet.followENS(link, cb)
+    if (ipns) {
+      cid = await FollowingPlanet.getCID(ipns)
+    } else if (link.startsWith('ipfs://')) {
+      cid = link.substring('ipfs://'.length)
     }
-    if (link.endsWith('.bit')) {
-      return FollowingPlanet.followDotBit(link, cb)
-    }
-    if (link.match(/^http[s]{0,1}:/)) {
-      cb(`error: not support http[s] or rss yet and maybe never!`)
-      // return FollowingPlanet.followHTTP(link)
-    }
-    const planet = await FollowingPlanet.followIPNSorDNSLink(link, cb)
+    const planet = await FollowingPlanet.followCID(cid, cb)
     if (planet) {
+      planet.link = link
+      planet.planetType = link.endsWith('.eth') ? '.ens' : link.endsWith('.bit') ? '.bit' : '.ipns'
+      if (ipns) {
+        planet.ipns = ipns
+      }
       await planet.save()
       await Promise.all(planet.articles.map((a) => a.save()))
       return planet
@@ -178,32 +184,8 @@ class FollowingPlanet {
   }
 
   static async getCID(ipns) {
-    if (ipns.startsWith('ipfs://')) {
-      return ipns.substring('ipfs://'.length)
-    }
-    if (ipns.startsWith('ipns://')) {
-      return ipfs.resolveIPNSorDNSLink(ipns.substring('ipns://'.length))
-    }
+    log.debug(`resolve ipns to cid`, ipns)
     return ipfs.resolveIPNSorDNSLink(ipns)
-  }
-
-  static async followDotBit(link, cb) {
-    cb(`resolve .bit content hash ...`)
-    const ipns = await FollowingPlanet.resolveBit(link)
-    if (ipns) {
-      cb(`resolve succ: ${ipns}`)
-      const planet = await FollowingPlanet.followIPNSorDNSLink(ipns, cb)
-      planet.planetType = '.bit'
-      planet.link = link
-      cb(`save planet content locally ...`)
-      await planet.save()
-      await Promise.all(planet.articles.map((a) => a.save()))
-      cb(`done!`)
-      return planet
-    } else {
-      log.error('resolve .bit domain fail', data.errmsg)
-      cb('.bit indexer error:' + data.errmsg)
-    }
   }
 
   static async followENS(link, cb) {
@@ -257,13 +239,11 @@ class FollowingPlanet {
     }
   }
 
-  async getIPNS() {
-    if (this.link.endsWith('.eth')) {
-      return await wallet.resolveENS(this.link)
-    } else if (this.link.endsWith('.bit')) {
-      return await FollowingPlanet.resolveBit(this.link)
-    } else if (this.link.startsWith('12D3')) {
-      return this.link
+  static async getIPNS(link) {
+    if (link.endsWith('.eth')) {
+      return await wallet.resolveENS(link)
+    } else if (link.endsWith('.bit')) {
+      return await FollowingPlanet.resolveBit(link)
     }
   }
 
@@ -276,9 +256,7 @@ class FollowingPlanet {
     }
   }
 
-  static async followIPNSorDNSLink(ipns, cb) {
-    cb(`resolve cid from ipns if needed ...`)
-    const cid = await FollowingPlanet.getCID(ipns)
+  static async followCID(cid, cb) {
     log.info('resolve cnt', cid)
     cb(`got ${cid}, try pin, it may takes a few minutes ...`)
     await ipfs.pin(cid)
@@ -291,8 +269,6 @@ class FollowingPlanet {
     // now publicPlanet contains the planet.json
     const planet = new FollowingPlanet({
       ...publicPlanet,
-      planetType: '.ipns',
-      link: ipns,
       cid,
     })
 

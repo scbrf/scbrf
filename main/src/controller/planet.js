@@ -449,10 +449,7 @@ class PlanetSidebarController {
   }
 
   async onlyfansSubscribe() {
-    let ipns = await this.planetCtxMenuTargetPlanet.getIPNS()
-    if (ipns.startsWith('ipns://')) {
-      ipns = ipns.substring('ipns://'.length)
-    }
+    let ipns = this.planetCtxMenuTargetPlanet.ipns
     log.info(`target link is ${this.planetCtxMenuTargetPlanet.link} resolve as ${ipns}`)
     if (!ipns.startsWith('12D3')) {
       return require('electron').dialog.showMessageBoxSync({
@@ -516,7 +513,7 @@ class PlanetSidebarController {
   }
 
   async registerOnlyfans() {
-    const pk = await this.ipfsPkFromId(this.planetCtxMenuTargetPlanet.id)
+    const pk = await require('../utils/wallet').ipfsPkFromId(this.planetCtxMenuTargetPlanet.id)
     const ed = require('@noble/ed25519')
     const ipns = await ed.getPublicKey(pk)
     const info = await require('../utils/wallet').onlyfansPlanetInfo(ipns)
