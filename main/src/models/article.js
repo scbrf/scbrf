@@ -85,9 +85,14 @@ class Article {
   }
 
   async encrypt(pubkey, cid) {
+    log.debug('need do encrypt with pubkey', pubkey)
     const fromHexString = (hexString) => Uint8Array.from(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)))
-    const encrypted = await EthCrypto.encryptWithPublicKey(fromHexString(pubkey), cid)
+    const encrypted = await EthCrypto.encryptWithPublicKey(fromHexString('04' + pubkey.substring(2)), cid)
     return EthCrypto.cipher.stringify(encrypted)
+  }
+
+  publickey2Addr(pubkey) {
+    return require('ethers').utils.computeAddress('0x04' + pubkey.slice(2))
   }
 
   async deliverToFans() {
@@ -95,7 +100,8 @@ class Article {
     const fans = await wallet.myfans(this.planet.ipns)
     const result = {}
     for (let fan of fans || []) {
-      result[fan.addr] = await this.encrypt(fan.pubkey, cid)
+      const addr = this.publickey2Addr(fan.pubkey)
+      result[addr] = await this.encrypt(fan.pubkey, cid)
     }
     require('fs').writeFileSync(this.fansDeliverPath, JSON.stringify(result))
   }
@@ -169,6 +175,7 @@ class Article {
         title: this.title,
       })
     )
+    log.debug('save public json file succ', this.publicArticlePath)
   }
 
   getPublicContent() {
@@ -186,6 +193,7 @@ class Article {
   publicRender() {
     let content = this.getPublicContent()
     if (content) {
+      log.debug('render public content:', content)
       const content_html = marked.parse(content)
       const template = 'blog.html'
       const html = require('../utils/render')
@@ -208,6 +216,7 @@ class Article {
     }
     content = this.getFansOnlyContent()
     if (content) {
+      log.debug('render fansonly content:', content)
       const content_html = marked.parse(content)
       const template = 'blog.html'
       const html = require('../utils/render')
@@ -227,6 +236,7 @@ class Article {
           build_timestamp: new Date().getTime(),
         })
       require('fs').writeFileSync(this.fansonlyIndexPath, html)
+      log.debug(`render fansonly index succ`, this.fansonlyIndexPath)
       const assetsPath = require('path').join(
         this.planet.constructor.templateBase,
         this.planet.template.toLowerCase(),
@@ -236,6 +246,15 @@ class Article {
         recursive: true,
         force: true,
       })
+    }
+  }
+
+  async prepareDir() {
+    if (!require('fs').existsSync(this.publicBase)) {
+      require('fs').mkdirSync(this.publicBase, { recursive: true })
+    }
+    if (!require('fs').existsSync(this.fansonlyAssetsPath)) {
+      require('fs').mkdirSync(this.fansonlyAssetsPath, { recursive: true })
     }
   }
 

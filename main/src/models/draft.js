@@ -136,18 +136,24 @@ class Draft {
     if (!this.article) {
       this.article = article
     }
+    await article.prepareDir()
 
-    log.info('when publish, created time is', {
+    log.debug('when publish, created time is', {
       draft: this.created,
       article: article.created,
     })
     article.updated = new Date().getTime()
     article.summary = this.extractSummary()
     await this.publishAttachments(article)
+    log.debug(`publish arrachments finish!`)
     await article.publicRender()
+    log.debug(`article public render finish!`)
     await article.save() // save to Planet's Articles
+    log.debug(`article save finish!`)
     await this.planet.addArticle(article)
+    log.debug(`article added to planet!`)
     await this.delete()
+    log.debug(`draft deleted!`)
     if (this.article) {
       this.article.removeDraft(this)
     } else {
@@ -282,7 +288,9 @@ class Draft {
       evt.emit(evt.evCloseFileHandler, article.id)
       while (true) {
         try {
-          require('fs').rmSync(article.publicBase, { recursive: true })
+          log.debug(`try to remove old public base`, article.publicBase)
+          require('fs').rmSync(article.publicBase, { recursive: true, force: true })
+          break
         } catch (ex) {
           log.error(`error rm public dir: ${ex.toString()}`)
           await new Promise((r) => setTimeout(r, 1000))
@@ -293,7 +301,9 @@ class Draft {
     if (tmpFansDir && require('fs').existsSync(article.fansonlyBase)) {
       while (true) {
         try {
-          require('fs').rmSync(article.fansonlyBase, { recursive: true })
+          log.debug(`try to remove old fansonly base`, article.fansonlyBase)
+          require('fs').rmSync(article.fansonlyBase, { recursive: true, force: true })
+          break
         } catch (ex) {
           log.error(`error rm public dir: ${ex.toString()}`)
           await new Promise((r) => setTimeout(r, 1000))

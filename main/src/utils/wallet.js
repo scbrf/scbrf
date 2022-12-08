@@ -238,7 +238,16 @@ class Wallet {
     return await this.donateContract.hot50()
   }
 
+  static ipnsB582Hex(ipns) {
+    const { base58_to_binary } = require('base58-js')
+    const pubkey = base58_to_binary(ipns).slice(6)
+    return '0x' + Buffer.from(pubkey).toString('hex')
+  }
+
   async myfans(ipns) {
+    if (ipns.startsWith('12D3')) {
+      ipns = Wallet.ipnsB582Hex(ipns)
+    }
     return await this.onlyfansContract.myfans(ipns)
   }
 

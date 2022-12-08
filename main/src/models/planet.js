@@ -273,13 +273,18 @@ class Planet {
 
   async republish() {
     if (this.publishing) {
+      log.error('publish when republishing')
       return
     }
     this.publishing = true
     rt.planets = [...rt.planets]
 
     try {
-      await Promise.all(this.articles.map((a) => a.publishComments()))
+      await Promise.all(
+        this.articles.map(async (a) => {
+          await a.deliverToFans()
+        })
+      )
     } catch (ex) {
       log.error('刷新评论异常，继续', ex)
     }
