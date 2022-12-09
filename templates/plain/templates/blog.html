@@ -29,6 +29,10 @@
 {% endblock %}
 {% block main %}
 <h1>{{ article.title|escape }}</h1>
+{% if article.isPublicVersion %}
+<div style="position:absolute;right:1em; top:1em;color:#8c8c8c;font-size: 0.8em;">Public Version</div>
+{% endif %}
+
 <div class="date" style="display:flex;">{{ article.created|formatDate }}
   <div id="scbrf-briefbar" class="scbrf-comments-container" style="margin-left:1em;"></div>
 </div>

@@ -247,14 +247,7 @@ class Planet {
       log.error('刷新评论异常，继续', ex)
     }
 
-    await Promise.all(
-      this.articles.map(async (a) => {
-        log.info('during public,save to public dir', a.id)
-        await a.savePublic()
-        await a.publicRender()
-        await a.deliverToFans()
-      })
-    )
+    await this.rebuild()
 
     try {
       const cid = await ipfs.addDirectory(this.publicBasePath)
@@ -269,6 +262,17 @@ class Planet {
     this.lastPublished = new Date().getTime()
     this.save()
     rt.planets = [...rt.planets]
+  }
+
+  async rebuild() {
+    await Promise.all(
+      this.articles.map(async (a) => {
+        log.info('during public,save to public dir', a.id)
+        await a.savePublic()
+        await a.publicRender()
+        await a.deliverToFans()
+      })
+    )
   }
 
   async republish() {

@@ -148,6 +148,12 @@ class PlanetSidebarController {
       this.updateFocus()
     })
   }
+
+  async rebuildPlanet() {
+    const planet = rt.planets.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)[0]
+    await planet.rebuild()
+  }
+
   async publishPlanet() {
     const planet = rt.planets.filter((p) => p.id === this.planetCtxMenuTargetPlanet.id)[0]
     await planet.republish()
@@ -654,6 +660,18 @@ class PlanetSidebarController {
       {
         label: 'Publish',
         click: this.publishPlanet.bind(this),
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Developer',
+        submenu: [
+          {
+            label: 'Rebuild',
+            click: this.rebuildPlanet.bind(this),
+          },
+        ],
       },
       {
         type: 'separator',

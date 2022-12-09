@@ -9,6 +9,10 @@ module.exports = (name, opt = {}) => {
         level: process.env.NODE_ENV === 'test' ? 'error' : 'debug',
         stream: process.stdout,
       },
+      {
+        level: 'error',
+        stream: process.stderr,
+      },
     ],
     ...opt,
   }
