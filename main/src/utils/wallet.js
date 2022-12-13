@@ -6,8 +6,8 @@ const log = require('../utils/log')('wallet')
 
 const ENS_NETWORK = 'homestead'
 const CONTRACT_NETWORK = 'goerli'
-const FairContractAddr = '0x91c9C522FB70D4000fFF0d5A0825458A621CaDe0'
-const OnlyfansContractAddr = '0x0ba704D95272854038072ed5898d8990698E1890'
+const FairContractAddr = '0x41A9C5c31C7DA41078705Bf0cf2abD099Ffb8B7B'
+const OnlyfansContractAddr = '0x667bE3111c878C0cC1a980a4acb556B79D0fF612'
 
 class Wallet {
   init() {
@@ -119,7 +119,7 @@ class Wallet {
         'function renounceOwnership()',
         'function transferOwnership(address newOwner)',
         'function planet(bytes32 ipns) view returns (uint256, address, bytes)',
-        'function myfans(bytes32 ipns) view returns (tuple(bytes pubkey, uint256 expire)[])',
+        'function planetFans(bytes32 ipns, bool senderOnly) view returns (tuple(bytes pubkey, uint256 expire)[])',
         'function setRate(uint256 value)',
         'function registerPlanet(bytes32 ipns, bytes signature, address owner, uint256 price)',
         'function subscribe(bytes32 ipns, uint256 duration, bytes pubkey) payable',
@@ -248,7 +248,7 @@ class Wallet {
     if (ipns.startsWith('12D3')) {
       ipns = Wallet.ipnsB582Hex(ipns)
     }
-    return await this.onlyfansContract.myfans(ipns)
+    return await this.onlyfansContract.planetFans(ipns)
   }
 
   async listOnlyfansSubscribeEvents() {

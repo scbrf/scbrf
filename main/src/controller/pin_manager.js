@@ -53,15 +53,25 @@ class PinManager {
   async pinArticle(article) {
     log.info(`pin new article ${article.title}`)
     article.pinState = 'inprogress'
-    const cid = await require('../utils/ipfs').pin(`/ipfs/${article.planet.cid}/${article.id}/`, true)
-    if (cid) {
-      article.cidPin = cid
+    try {
+      const cid = await require('../utils/ipfs').pin(`/ipfs/${article.planet.cid}/${article.id}/`, true)
+      if (cid) {
+        article.cidPin = cid
+        const fansCid = await article.decryptFansCID()
+        if (fansCid) {
+          article.fansCid = fansCid
+          await require('../utils/ipfs').pin(`/ipfs/${fansCid}/`, true)
+        }
+        article.pinState = 'ready'
+        await this.extractVideoThumbnail(article)
+        log.info(`after pin, article ${article.title} ${article.planet.cid}/${article.id} got cid ${cid}`)
+      } else {
+        article.pinState = 'wait'
+        log.error(`new article ${article.title} pin error, wait another round!`)
+      }
+    } catch (ex) {
+      log.error('exception on pin Article', ex)
       article.pinState = 'ready'
-      await this.extractVideoThumbnail(article)
-      log.info(`after pin, article ${article.title} ${article.planet.cid}/${article.id} got cid ${cid}`)
-    } else {
-      article.pinState = 'wait'
-      log.error(`new article ${article.title} pin error, wait another round!`)
     }
     //有可能这时候实例已经变了，因为刷新什么的
     this.confirmArticlePinState(article)

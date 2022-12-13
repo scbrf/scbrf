@@ -30,6 +30,30 @@ class FollowingArticle {
     return require('path').join(this.planet.articlesPath, `${this.id}.json`)
   }
 
+  async decryptFansCID() {
+    log.debug('need decrypt artilce ...', this.title)
+    if (!this.cidPin) {
+      log.error('should only be called after pin ready!')
+      return
+    }
+    const fansUrl = `${require('../utils/ipfs').gateway}/ipfs/${this.cidPin}/fans.json`
+    const data = await require('axios').get(fansUrl)
+    log.debug('got encrypt data', data.data)
+    const myaddr = require('../utils/wallet').wallet.address
+    if (!data.data[myaddr]) {
+      log.info(`my address ${myaddr} is not in the encrypted addresses!`)
+      return
+    }
+    log.debug('need decrypt data', data.data[myaddr])
+    const encryptedObject = require('eth-crypto').cipher.parse(data.data[myaddr])
+    const decrypted = await require('eth-crypto').decryptWithPrivateKey(
+      require('../utils/wallet').wallet.privateKey,
+      encryptedObject
+    )
+    log.debug('after decrypt, the origin message is', decrypted)
+    return decrypted
+  }
+
   static extractSummary(article) {
     if (article.content.length > 0) {
       const html = marked.parse(article.content)
