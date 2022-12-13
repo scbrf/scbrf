@@ -65,6 +65,9 @@ class FollowingArticle {
   }
 
   get url() {
+    if (this.fansCid) {
+      return `${ipfs.gateway}/ipfs/${this.fansCid}/`
+    }
     return `${ipfs.gateway}/ipfs/${this.planet.cid}/${this.id}/`
   }
 
