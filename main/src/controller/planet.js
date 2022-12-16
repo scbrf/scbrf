@@ -330,7 +330,7 @@ class PlanetSidebarController {
     if (!this.view) return
     let focus = rt.sidebarFocus
     if (focus.id) {
-      let planet = rt.following.filter((p) => p.id === focus.id)[0]
+      let planet = rt.following.filter((p) => p === focus)[0]
       if (planet) {
         focus = `following:${focus.id}`
       } else {

@@ -96,7 +96,7 @@ class WebviewTopbar {
   showMyArticleCtxMenu(event, a) {
     const win = BrowserWindow.fromWebContents(event.sender)
     this.ctxArticle = a
-    let planet = rt.planets.filter((p) => p.id === a.planet.id)[0]
+    let planet = rt.planets.filter((p) => p === rt.sidebarFocus)[0]
     if (planet) {
       this.articleCtxMenu.popup(win)
     }

@@ -49,7 +49,7 @@ class ArticleController {
     if (rt.sidebarFocus == 'fair') {
       this.fairArticleCtxMenu.popup(win)
     } else {
-      let planet = rt.following.filter((p) => p.id === a.planet.id)[0]
+      let planet = rt.following.filter((p) => p === rt.sidebarFocus)[0]
       if (planet) {
         this.followingArticleCtxMenu.popup(win)
       }
