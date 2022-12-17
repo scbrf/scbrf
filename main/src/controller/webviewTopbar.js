@@ -63,10 +63,13 @@ class WebviewTopbar {
     if (!rt.middleSideBarFocusArticle) return
     if (!rt.middleSideBarFocusArticle.attachments) return
     const win = BrowserWindow.fromWebContents(event.sender)
+    const attachments = rt.middleSideBarFocusArticle.attachments.filter((a) =>
+      rt.fansOnlyPreview ? a.name || a : !rt.middleSideBarFocusArticle.attchmentIsFansOnly(a)
+    )
     const downloadMenu = Menu.buildFromTemplate(
       Array.from(
         new Set([
-          ...rt.middleSideBarFocusArticle.attachments.map((a) => a.name || a),
+          ...attachments.map((a) => a.name || a),
           ...(rt.middleSideBarFocusArticle.audioFilename ? [rt.middleSideBarFocusArticle.audioFilename] : []),
           ...(rt.middleSideBarFocusArticle.videoFilename ? [rt.middleSideBarFocusArticle.videoFilename] : []),
         ])
@@ -81,7 +84,7 @@ class WebviewTopbar {
   }
 
   async downloadAttachment(item) {
-    let base = rt.middleSideBarFocusArticle.url
+    let base = rt.middleSideBarFocusArticle.url(rt.fansOnlyPreview)
     if (base.endsWith('.html')) {
       const idx = base.lastIndexOf('/')
       base = base.slice(0, idx)
@@ -141,7 +144,7 @@ class WebviewTopbar {
       updateat: planet.lastRetrieved || planet.lastPublished,
       title: planet.name,
       icon: planet.avatar ? planet.avatarPath : null,
-      isMine: !!rt.planets.filter((p) => p.id === planet.id)[0],
+      isMine: !!rt.planets.filter((p) => p === planet)[0],
     })
   }
 
