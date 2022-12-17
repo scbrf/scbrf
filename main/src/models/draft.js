@@ -280,13 +280,19 @@ class Draft {
     }
     if (this.videoFilename) {
       const previewLen = article.mediaPreviewLen()
+      log.debug('render video file for preview', { previewLen })
       if (article.hasFansOnlyContent() && previewLen > 0) {
         const previewPath = require('path').join(tmpPublicDir, require('path').basename(this.videoFilename))
+        log.debug('preview path should be', previewPath)
         await article.buildPreviewMedia(this.videoFilename, previewPath, previewLen)
         require('fs').cpSync(
           this.videoFilename,
           require('path').join(tmpFansDir, require('path').basename(this.videoFilename))
         )
+        log.debug('cp video file to fans dir done', {
+          from: this.videoFilename,
+          to: require('path').join(tmpFansDir, require('path').basename(this.videoFilename)),
+        })
       } else {
         require('fs').cpSync(
           this.videoFilename,

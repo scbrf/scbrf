@@ -79,7 +79,7 @@ class Article {
   }
 
   mediaPreviewLen() {
-    const result = this.content.match(/<fansonly[^>]*preview=([\d]*)/)
+    const result = this.content.match(/<fansonly[^>]*media=([\d]*)/)
     return result ? parseInt(result[1]) : 0
   }
 
