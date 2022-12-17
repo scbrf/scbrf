@@ -290,7 +290,7 @@ class Planet {
         })
       )
     } catch (ex) {
-      log.error('刷新评论异常，继续', ex)
+      log.error('获取粉丝数据异常，继续', ex)
     }
 
     try {

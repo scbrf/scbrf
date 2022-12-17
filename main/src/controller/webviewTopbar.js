@@ -167,21 +167,6 @@ class WebviewTopbar {
       this.updatePlanetInfoWin(planetInfoDialog)
       planetInfoDialog.show()
     })
-    // planetInfoDialog.webContents.openDevTools({ mode: 'undocked' })
-
-    // if (!rt.middleSideBarFocusArticle) return
-    // let planet = rt.middleSideBarFocusArticle.planet
-    // const win = BrowserWindow.fromWebContents(event.sender)
-    // dialog.showMessageBoxSync(win, {
-    //   message: planet.about,
-    //   detail: `update at ${require('moment')(planet.lastRetrieved || planet.lastPublished).format(
-    //     'MMM D, YYYY HH:mm:ss'
-    //   )}`,
-    //   type: 'info',
-    //   buttons: ['OK'],
-    //   title: planet.name,
-    //   icon: planet.avatar ? planet.avatarPath : null,
-    // })
   }
 
   async newArticle() {
@@ -371,7 +356,7 @@ class WebviewTopbar {
         ...article.json(),
         url: article.url(rt.fansOnlyPreview),
         planet: article.json(),
-        attachments,
+        attachments: rt.fansOnlyPreview ? attachments : attachments.filter((a) => !article.attchmentIsFansOnly(a)),
         hasFansOnlyVersion: article.hasFansOnlyContent(),
         isFansOnlyVersion: rt.fansOnlyPreview,
       }

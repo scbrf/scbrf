@@ -53,6 +53,7 @@ class PinManager {
   async pinArticle(article) {
     log.info(`pin new article ${article.title}`)
     article.pinState = 'inprogress'
+    article.planetCIDPinning = article.planet.cid
     try {
       const cid = await require('../utils/ipfs').pin(`/ipfs/${article.planet.cid}/${article.id}/`, true)
       if (cid) {
@@ -71,7 +72,7 @@ class PinManager {
       }
     } catch (ex) {
       log.error('exception on pin Article', ex)
-      article.pinState = 'ready'
+      article.pinState = 'wait'
     }
     //有可能这时候实例已经变了，因为刷新什么的
     this.confirmArticlePinState(article)
@@ -80,9 +81,11 @@ class PinManager {
   confirmArticlePinState(article) {
     const p = rt.following.filter((p) => p.id == article.planet.id)[0]
     if (p) {
-      const a = p.articles.filter((a) => a.id == article.id)[0]
-      if (a) {
-        a.pinState = article.pinState
+      if (p.cid === article.planetCIDPinning) {
+        const a = p.articles.filter((a) => a.id == article.id)[0]
+        if (a) {
+          a.pinState = article.pinState
+        }
       }
     }
   }

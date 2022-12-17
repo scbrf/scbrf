@@ -52,7 +52,11 @@ class Draft {
       log.debug('copy attachment', [draft.attachmentsPath, attachment.name])
       const attachmentPath = require('path').join(draft.attachmentsPath, attachment.name)
       if (!require('fs').existsSync(attachmentPath)) {
-        require('fs').cpSync(require('path').join(article.publicBase, attachment.name), attachmentPath)
+        if (require('fs').existsSync(require('path').join(article.fansonlyBase, attachment.name))) {
+          require('fs').cpSync(require('path').join(article.fansonlyBase, attachment.name), attachmentPath)
+        } else {
+          require('fs').cpSync(require('path').join(article.publicBase, attachment.name), attachmentPath)
+        }
       }
     }
     draft.attachments.forEach((a) => {
@@ -60,14 +64,22 @@ class Draft {
     })
 
     //对于大文件，直接引用，提高效率
-    if (draft.audioFilename) {
+    if (article.audioFilename) {
       if (!require('fs').existsSync(draft.audioFilename)) {
-        draft.audioFilename = require('path').join(article.publicBase, article.audioFilename)
+        if (require('fs').existsSync(require('path').join(article.fansonlyBase, article.audioFilename))) {
+          draft.audioFilename = require('path').join(article.fansonlyBase, article.audioFilename)
+        } else {
+          draft.audioFilename = require('path').join(article.publicBase, article.audioFilename)
+        }
       }
     }
     if (article.videoFilename) {
       if (!require('fs').existsSync(draft.videoFilename)) {
-        draft.videoFilename = require('path').join(article.publicBase, article.videoFilename)
+        if (require('fs').existsSync(require('path').join(article.fansonlyBase, article.videoFilename))) {
+          draft.videoFilename = require('path').join(article.fansonlyBase, article.videoFilename)
+        } else {
+          draft.videoFilename = require('path').join(article.publicBase, article.videoFilename)
+        }
       }
     }
     return draft

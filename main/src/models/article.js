@@ -72,7 +72,7 @@ class Article {
 
   attchmentIsFansOnly(attach) {
     if (!this.hasFansOnlyContent()) return false
-    const pos = this.content.search(new RegExp(`<img[^>]*src="${attach.name}"`))
+    const pos = this.content.search(new RegExp(`<img[^>]*src="${attach.name || attach}"`))
     if (pos < 0) return true
     const fansonlyPos = this.content.search(/<fansonly/i)
     return pos > fansonlyPos
@@ -99,13 +99,16 @@ class Article {
   }
 
   async deliverToFans() {
+    log.debug('deliverToFans called', this.title)
     const cid = await ipfs.addDirectory(this.fansonlyBase)
     const fans = await wallet.myfans(this.planet.ipns)
+    log.debug('all fans now is:', fans)
     const result = {}
     for (let fan of fans || []) {
       const addr = this.publickey2Addr(fan.pubkey)
       result[addr] = await this.encrypt(fan.pubkey, cid)
     }
+    log.debug('store fans deliver path to', this.fansDeliverPath)
     require('fs').writeFileSync(this.fansDeliverPath, JSON.stringify(result))
   }
 

@@ -37,21 +37,25 @@ class FollowingArticle {
       return
     }
     const fansUrl = `${require('../utils/ipfs').gateway}/ipfs/${this.cidPin}/fans.json`
-    const data = await require('axios').get(fansUrl)
-    log.debug('got encrypt data', data.data)
-    const myaddr = require('../utils/wallet').wallet.address
-    if (!data.data[myaddr]) {
-      log.info(`my address ${myaddr} is not in the encrypted addresses!`)
-      return
+    try {
+      const data = await require('axios').get(fansUrl)
+      log.debug('got encrypt data', data.data)
+      const myaddr = require('../utils/wallet').wallet.address
+      if (!data.data[myaddr]) {
+        log.info(`my address ${myaddr} is not in the encrypted addresses!`)
+        return
+      }
+      log.debug('need decrypt data', data.data[myaddr])
+      const encryptedObject = require('eth-crypto').cipher.parse(data.data[myaddr])
+      const decrypted = await require('eth-crypto').decryptWithPrivateKey(
+        require('../utils/wallet').wallet.privateKey,
+        encryptedObject
+      )
+      log.debug('after decrypt, the origin message is', decrypted)
+      return decrypted
+    } catch (ex) {
+      log.error('error on fetch decrypt', ex.message)
     }
-    log.debug('need decrypt data', data.data[myaddr])
-    const encryptedObject = require('eth-crypto').cipher.parse(data.data[myaddr])
-    const decrypted = await require('eth-crypto').decryptWithPrivateKey(
-      require('../utils/wallet').wallet.privateKey,
-      encryptedObject
-    )
-    log.debug('after decrypt, the origin message is', decrypted)
-    return decrypted
   }
 
   static extractSummary(article) {
@@ -66,6 +70,14 @@ class FollowingArticle {
 
   hasFansOnlyContent() {
     return !!this.fansCid
+  }
+
+  attchmentIsFansOnly(attach) {
+    if (!this.hasFansOnlyContent()) return false
+    const pos = this.content.search(new RegExp(`<img[^>]*src="${attach.name || attach}"`))
+    if (pos < 0) return true
+    const fansonlyPos = this.content.search(/<fansonly/i)
+    return pos > fansonlyPos
   }
 
   url(fansOnly) {

@@ -248,7 +248,7 @@ class Wallet {
     if (ipns.startsWith('12D3')) {
       ipns = Wallet.ipnsB582Hex(ipns)
     }
-    return await this.onlyfansContract.planetFans(ipns)
+    return await this.onlyfansContract.planetFans(ipns, false)
   }
 
   async listOnlyfansSubscribeEvents() {
