@@ -64,8 +64,12 @@ class FollowingArticle {
     }
   }
 
-  get url() {
-    if (this.fansCid) {
+  hasFansOnlyContent() {
+    return !!this.fansCid
+  }
+
+  url(fansOnly) {
+    if (fansOnly && this.fansCid) {
       return `${ipfs.gateway}/ipfs/${this.fansCid}/`
     }
     return `${ipfs.gateway}/ipfs/${this.planet.cid}/${this.id}/`

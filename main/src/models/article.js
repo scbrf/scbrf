@@ -49,7 +49,10 @@ class Article {
     return article
   }
 
-  get url() {
+  url(fansOnly) {
+    if (fansOnly && this.hasFansOnlyContent()) {
+      return 'file://' + this.fansonlyIndexPath
+    }
     return 'file://' + this.publicIndexPath
   }
 

@@ -15,6 +15,7 @@ class WebviewTopbar {
       [evt.evAppInit, this.createView],
       [evt.evRuntimeMiddleSidebarFocusChange, this.updateUI],
       [evt.evRuntimeSidebarFocusChange, this.updateUI],
+      [evt.evRuntimeFansOnlyPreview, this.updateUI],
     ])
 
     evt.bindIpcMainTable(this, [
@@ -37,7 +38,7 @@ class WebviewTopbar {
     editorMain.createView()
     editorWebview.createView()
 
-    // // this.view.webContents.openDevTools({mode: 'undocked'})
+    // this.view.webContents.openDevTools({ mode: 'undocked' })
 
     this.articleCtxMenu = Menu.buildFromTemplate([
       {
@@ -368,9 +369,11 @@ class WebviewTopbar {
       attachments = Array.from(new Set(attachments))
       article = {
         ...article.json(),
-        url: article.url,
+        url: article.url(rt.fansOnlyPreview),
         planet: article.json(),
         attachments,
+        hasFansOnlyVersion: article.hasFansOnlyContent(),
+        isFansOnlyVersion: rt.fansOnlyPreview,
       }
     } else {
       article = {}

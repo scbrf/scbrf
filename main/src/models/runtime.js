@@ -18,6 +18,7 @@ class Runtime {
   middleSideBarTitle = ['', evt.evRuntimeMiddleSidebarContentChange, '中间窗口的标题']
   middleSideBarArticles = [[], evt.evRuntimeMiddleSidebarContentChange, '中间窗口文章列表']
   sidebarFocus = [null, evt.evRuntimeSidebarFocusChange, '左边栏关注内容']
+  fansOnlyPreview = [false, evt.evRuntimeFansOnlyPreview, '优先预览付费版本的内容']
 
   constructor() {
     //这个模块定义了这些可以从前端传过来的事件

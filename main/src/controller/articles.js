@@ -61,7 +61,7 @@ class ArticleController {
       title: rt.middleSideBarTitle,
       articles: rt.middleSideBarArticles.map((a) => ({
         ...a.json(),
-        url: a.url,
+        url: a.url(rt.fansOnlyPreview),
         pinState: a.pinState,
         planet: a.planet.json(),
       })),

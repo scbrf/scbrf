@@ -21,6 +21,7 @@ class EventCenter {
   evRuntimeMiddleSidebarContentChange // '中间栏的标题或者内容发生了变化'
   evRuntimeMiddleSidebarFocusChange // '中间栏的关注文章发生了变化'
   evRuntimeSidebarFocusChange //'左侧栏的关注点发生了变化'
+  evRuntimeFansOnlyPreview //预览哪个版本的内容
   evRuntimeFairChange //集市内容变更
 
   evRebounds // 重新排列窗口，比如当用户切换左边栏或者切换声音播放器的时候
@@ -65,6 +66,7 @@ class EventCenter {
 
   ipcOpenUrlExternal //在外部浏览器打开
   ipcShareOpen //webview的右上角按钮
+  ipcSwitchFansOnly //webview 切换预览版本
 
   ipcFairRequest //投放到集市
   ipcOnlyfansRegisterPlanetRequest //注册站点

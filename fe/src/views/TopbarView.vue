@@ -16,17 +16,26 @@
             <span class="ml-2"> {{ article.attachments.length }}</span>
         </button>
         <div class="flex-1"></div>
+        <SunIcon v-if="article.hasFansOnlyVersion && article.isFansOnlyVersion" @click="ipcSwitchFansOnly"
+            class="w-4 h-6 mr-4 hover:text-gray-900 nodrag"></SunIcon>
+        <MoonIcon v-if="article.hasFansOnlyVersion && !article.isFansOnlyVersion" @click="ipcSwitchFansOnly"
+            class="w-4 h-6 mr-4 hover:text-gray-900 nodrag"></MoonIcon>
         <ShareIcon @click="ipcShareOpen" class="w-6 h-6 mr-4 hover:text-gray-900 nodrag"></ShareIcon>
     </div>
 </template>
 <script>
-import { PencilSquareIcon, ChartBarSquareIcon, InformationCircleIcon, SpeakerWaveIcon, PaperClipIcon, ShareIcon } from '@heroicons/vue/24/outline'
+import { SunIcon, MoonIcon, PencilSquareIcon, ChartBarSquareIcon, InformationCircleIcon, SpeakerWaveIcon, PaperClipIcon, ShareIcon } from '@heroicons/vue/24/outline'
 import { mapState } from 'pinia';
 import { useTopbarStore } from '../stores/topbar';
 
 export default {
+    watch: {
+        article() {
+            console.log(this.article)
+        }
+    },
     components: {
-        PencilSquareIcon, ChartBarSquareIcon, InformationCircleIcon, SpeakerWaveIcon, PaperClipIcon, ShareIcon
+        SunIcon, MoonIcon, PencilSquareIcon, ChartBarSquareIcon, InformationCircleIcon, SpeakerWaveIcon, PaperClipIcon, ShareIcon
     },
     computed: {
         ...mapState(useTopbarStore, ['planet', 'article']),
@@ -55,6 +64,9 @@ export default {
         },
         ipcShareOpen() {
             api.send('ipcShareOpen')
+        },
+        ipcSwitchFansOnly() {
+            api.send('ipcSwitchFansOnly')
         }
     }
 }

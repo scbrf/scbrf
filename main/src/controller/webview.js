@@ -9,8 +9,12 @@ class Webview {
     evt.bindBusTable(this, [
       [evt.evAppInit, this.createView],
       [evt.evRuntimeMiddleSidebarFocusChange, this.loadWeb],
+      [evt.evRuntimeFansOnlyPreview, this.loadWeb],
     ])
-    evt.bindIpcMainTable(this, [[evt.ipcShareOpen, this.shareOpen]])
+    evt.bindIpcMainTable(this, [
+      [evt.ipcShareOpen, this.shareOpen],
+      [evt.ipcSwitchFansOnly, this.switchFansOnlyPreview],
+    ])
   }
   createView() {
     this.view = new BrowserView({
@@ -35,16 +39,19 @@ class Webview {
   shareOpen() {
     require('electron').shell.openExternal(this.targetUrl || this.view.webContents.getURL())
   }
+  switchFansOnlyPreview() {
+    rt.fansOnlyPreview = !rt.fansOnlyPreview
+  }
   async loadWeb() {
     if (!this.view) return
     if (rt.middleSideBarFocusArticle) {
       //give it a loading hint
       this.view.webContents.loadURL(`${require('../utils/websrv').WebRoot}/loading`)
       this.view.webContents.once('dom-ready', () => {
-        const url = `http://${require('../utils/apisrv').ipAddr}:${require('../utils/apisrv').apiPort}/${
-          rt.middleSideBarFocusArticle.planet.id
-        }/${rt.middleSideBarFocusArticle.id}/index.html?seed=${new Date().getTime()}`
-        this.targetUrl = rt.middleSideBarFocusArticle.url.startsWith('file://') ? url : rt.middleSideBarFocusArticle.url
+        // const url = `http://${require('../utils/apisrv').ipAddr}:${require('../utils/apisrv').apiPort}/${
+        //   rt.middleSideBarFocusArticle.planet.id
+        // }/${rt.middleSideBarFocusArticle.id}/index.html?seed=${new Date().getTime()}`
+        this.targetUrl = rt.middleSideBarFocusArticle.url(rt.fansOnlyPreview)
         this.view.webContents.loadURL(this.targetUrl, { userAgent: 'Planet/JS' })
       })
     } else {
