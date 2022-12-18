@@ -361,6 +361,7 @@ class WebviewTopbar {
         planet: article.json(),
         attachments: rt.fansOnlyPreview ? attachments : attachments.filter((a) => !article.attchmentIsFansOnly(a)),
         hasFansOnlyVersion: article.hasFansOnlyContent(),
+        fansOnlyReadable: article.fansOnlyReadable(),
         isFansOnlyVersion: rt.fansOnlyPreview,
       }
     } else {

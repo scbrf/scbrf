@@ -69,6 +69,10 @@ class FollowingArticle {
   }
 
   hasFansOnlyContent() {
+    return this.content.search(/<fansonly/i) >= 0
+  }
+
+  fansOnlyReadable() {
     return !!this.fansCid
   }
 
@@ -79,6 +83,18 @@ class FollowingArticle {
     const fansonlyPos = this.content.search(/<fansonly/i)
     return pos > fansonlyPos
   }
+
+  // hasFansOnlyContent() {
+  //   return !!this.fansCid
+  // }
+
+  // attchmentIsFansOnly(attach) {
+  //   if (!this.hasFansOnlyContent()) return false
+  //   const pos = this.content.search(new RegExp(`<img[^>]*src="${attach.name || attach}"`))
+  //   if (pos < 0) return true
+  //   const fansonlyPos = this.content.search(/<fansonly/i)
+  //   return pos > fansonlyPos
+  // }
 
   url(fansOnly) {
     if (fansOnly && this.fansCid) {

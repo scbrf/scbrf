@@ -70,6 +70,10 @@ class Article {
     return this.content.search(/<fansonly/i) >= 0
   }
 
+  fansOnlyReadable() {
+    return true
+  }
+
   attchmentIsFansOnly(attach) {
     if (!this.hasFansOnlyContent()) return false
     const pos = this.content.search(new RegExp(`<img[^>]*src="${attach.name || attach}"`))

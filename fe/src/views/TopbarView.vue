@@ -18,8 +18,8 @@
         <div class="flex-1"></div>
         <SunIcon v-if="article.hasFansOnlyVersion && article.isFansOnlyVersion" @click="ipcSwitchFansOnly"
             class="w-4 h-6 mr-4 hover:text-gray-900 nodrag"></SunIcon>
-        <MoonIcon v-if="article.hasFansOnlyVersion && !article.isFansOnlyVersion" @click="ipcSwitchFansOnly"
-            class="w-4 h-6 mr-4 hover:text-gray-900 nodrag"></MoonIcon>
+        <MoonIcon v-if="article.hasFansOnlyVersion && (!article.isFansOnlyVersion || !article.fansOnlyReadable)"
+            @click="ipcSwitchFansOnly" class="w-4 h-6 mr-4 hover:text-gray-900 nodrag"></MoonIcon>
         <ShareIcon @click="ipcShareOpen" class="w-6 h-6 mr-4 hover:text-gray-900 nodrag"></ShareIcon>
     </div>
 </template>
