@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>Hello World!</title>
-  </head>
-  <body>
-    <h1>Hello World!</h1>
-    We are using Node.js <span id="node-version"></span>,
-    Chromium <span id="chrome-version"></span>,
-    and Electron <span id="electron-version"></span>.
 
-    <！-- 您也可以此进程中运行其他文件 -->
-    <script src="./renderer.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Hello World!</title>
+
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/renderer.js"></script>
+</body>
+
 </html>

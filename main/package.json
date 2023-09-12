@@ -1,99 +1,42 @@
 {
-    "name": "scarborough",
-    "version": "0.0.30",
-    "author": "yygqg.eth",
-    "description": "Clone of Livid(olivida.eth)'s Planet project",
-    "license": "MIT",
-    "main": "main.js",
-    "scripts": {
-        "predebug": "cd ../fe && yarn build",
-        "debug": "electron-forge start",
-        "start": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='../runtime' electron-forge start",
-        "start:watch": "cross-env WEBROOT='http://127.0.0.1:5173' SCARBOROUGH_ROOT='../runtime' nodemon --watch main.js --watch ./src --exec 'yarn start'",
-        "prepackage": "cd ../fe && yarn build",
-        "package": "electron-forge package",
-        "premake": "cd ../fe && yarn build",
-        "make": "electron-forge make",
-        "postversion": "git push && git push --tags",
-        "test": "jest --roots=./src"
-    },
-    "devDependencies": {
-        "@electron-forge/cli": "^6.0.0-beta.66",
-        "@electron-forge/maker-deb": "^6.0.0-beta.66",
-        "@electron-forge/maker-rpm": "^6.0.0-beta.66",
-        "@electron-forge/maker-squirrel": "^6.0.0-beta.66",
-        "@electron-forge/maker-zip": "^6.0.0-beta.66",
-        "cross-env": "^7.0.3",
-        "electron": "^20.1.4",
-        "jest": "^29.0.3"
-    },
-    "dependencies": {
-        "@noble/ed25519": "^1.7.1",
-        "axios": "^0.27.2",
-        "base58-js": "^1.0.5",
-        "bunyan": "^1.8.15",
-        "electron-default-menu": "^1.0.2",
-        "electron-squirrel-startup": "^1.0.0",
-        "eth-crypto": "^2.4.0",
-        "ethers": "^5.7.1",
-        "fluent-ffmpeg": "^2.1.2",
-        "image-size": "^1.0.2",
-        "jimp": "^0.16.2",
-        "js-event-bus": "^1.1.1",
-        "jsdom": "^20.0.0",
-        "koa": "^2.13.4",
-        "koa-body": "^5.0.0",
-        "koa-range": "^0.3.0",
-        "koa-router": "^12.0.0",
-        "koa-static": "^5.0.0",
-        "marked": "^4.1.0",
-        "md5": "^2.3.0",
-        "moment": "^2.29.4",
-        "multicast-dns": "^7.2.5",
-        "nodecast-js": "^1.0.3",
-        "nunjucks": "^3.2.3",
-        "portfinder": "^1.0.32",
-        "uuid": "^9.0.0",
-        "uuid-buffer": "^1.0.3"
-    },
-    "resolutions": {
-        "nan": "github:jkleinsc/nan#remove_accessor_signature"
-    },
-    "config": {
-        "forge": {
-            "packagerConfig": {
-                "icon": "resources/icon",
-                "extraResource": [
-                    "../ipfsbin/",
-                    "../templates/",
-                    "../fe/dist/"
-                ]
-            },
-            "makers": [
-                {
-                    "name": "@electron-forge/maker-squirrel",
-                    "config": {
-                        "name": "Scarborough"
-                    }
-                },
-                {
-                    "name": "@electron-forge/maker-zip",
-                    "platforms": [
-                        "darwin"
-                    ],
-                    "config": {
-                        "name": "Scarborough"
-                    }
-                },
-                {
-                    "name": "@electron-forge/maker-deb",
-                    "config": {}
-                },
-                {
-                    "name": "@electron-forge/maker-rpm",
-                    "config": {}
-                }
-            ]
-        }
-    }
+  "name": "elmas",
+  "productName": "elmas",
+  "version": "1.0.0",
+  "appId": "fun.wqiang.elmas",
+  "url": "put your app's url here",
+  "description": "put your app description here",
+  "copyright": "Copyright © 2023 Qiang Wang",
+  "category": "public.app-category.utilities",
+  "icon": "build/icon.icns",
+  "main": ".vite/build/main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "prebuild": "electron-forge package && rm -rf ./out ./dist",
+    "build": "electron-builder --config ./elbuilder.js",
+    "lint": "echo \"No linting configured\""
+  },
+  "keywords": [],
+  "license": "MIT",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.2.1",
+    "@electron-forge/maker-deb": "^6.2.1",
+    "@electron-forge/maker-rpm": "^6.2.1",
+    "@electron-forge/maker-squirrel": "^6.2.1",
+    "@electron-forge/maker-zip": "^6.2.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^6.2.1",
+    "@electron-forge/plugin-vite": "^6.2.1",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "@vueuse/core": "^10.3.0",
+    "electron": "^26.2.0",
+    "electron-builder": "22.14.13",
+    "vue": "^3.3.4",
+    "vue-i18n": "^9.2.2",
+    "vue-router": "^4.2.4"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
 }
