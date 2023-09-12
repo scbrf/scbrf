@@ -16,8 +16,13 @@ const createWindow = () => {
   // Create the browser window.
   setMenu();
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    minWidth: 840,
+    minHeight: 600,
+    transparency: true,
+    backgroundColor: "#00000000",
+    vibrancy: "under-window",
+    visualEffectState: "followWindow",
+    titleBarStyle: "hiddenInset",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
