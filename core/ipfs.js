@@ -15,7 +15,7 @@ class IPFS {
   async IPFSCommand() {
     const { stdout, stderr, error } = await execFile(
       this.IPFSExecutablePath,
-      arguments,
+      [...arguments],
       {
         env: {
           IPFS_PATH: this.IPFSRepositoryPath,
@@ -26,7 +26,9 @@ class IPFS {
   }
   async launchDaemon() {
     log.info("Launching daemon");
-    await this.shutdownDaemon();
+    try {
+      await this.shutdownDaemon();
+    } catch (ex) {}
     const daemon = spawn(
       this.IPFSExecutablePath,
       [
@@ -44,7 +46,7 @@ class IPFS {
     daemon.stdout.on("data", async (data) => {
       log.info({ stdout: `${data}` }, "ipfs daemon output");
       const lines = `${data}`;
-      if (lines.indexOf("Daemon is ready")) {
+      if (lines.indexOf("Daemon is ready") >= 0) {
         await this.updateOnlineStatus();
       }
     });
@@ -65,7 +67,7 @@ class IPFS {
     }
     if (online) {
       const swarmPeers = await this.api("swarm/peers");
-      peers = swarmPeers.peers.length;
+      peers = swarmPeers.Peers.length;
     }
     log.info({ online, peers }, "Daemon state");
     if (online) {
@@ -76,7 +78,7 @@ class IPFS {
   }
   async api(path, body) {
     const url = `http://127.0.0.1:${this.APIPort}/api/v0/${path}`;
-    const rsp = await fetch(path, {
+    const rsp = await fetch(url, {
       method: "POST",
       headers: {
         cache: "no-cache",
@@ -84,7 +86,7 @@ class IPFS {
       },
       body: body ? JSON.stringify(body) : "",
     });
-    const json = await rsp.json;
+    const json = await rsp.json();
     log.info({ path, body, json }, "IPFS API Request");
     return json;
   }

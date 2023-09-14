@@ -1,6 +1,7 @@
-function exportJS(base) {
+function exportJS(base, path) {
+  base = require("path").join(base, path);
   return require("fs")
-    .readdirSync(require("path").join(__dirname, base))
+    .readdirSync(base)
     .reduce((r, i) => {
       const name = i.slice(0, -3);
       r[

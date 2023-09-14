@@ -1,6 +1,6 @@
 const { exportJS } = require("../utils");
 module.exports = {
-  ...exportJS("planet"),
-  ...exportJS("follow"),
-  ...exportJS("article"),
+  ...exportJS(__dirname, "planet"),
+  ...exportJS(__dirname, "follow"),
+  ...exportJS(__dirname, "article"),
 };
