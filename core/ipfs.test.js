@@ -3,10 +3,12 @@ jest.mock("fs", () => ({
   existsSync: (path) => mockFs[path],
   mkdirSync: () => {},
 }));
+jest.mock("./log", () => () => ({ info: () => {}, error: () => {} }));
 jest.mock("node:child_process", () => ({
   execFile: (e, p, opt, cb) => {
     cb(null, "", "");
   },
+  spawn: () => ({ stdout: { on: () => {} } }),
 }));
 jest.mock("./utils", () => ({
   getPortRange: () => 10000,

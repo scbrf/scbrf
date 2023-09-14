@@ -1,13 +1,17 @@
 const util = require("node:util");
 const execFile = util.promisify(require("node:child_process").execFile);
+const { spawn } = require("node:child_process");
 const log = require("./log")("ipfs");
 const { getPortRange } = require("./utils");
 
 class IPFS {
   async init() {
     await this.IPFSRepoInit();
+    await this.launchDaemon();
   }
-  async shutdown() {}
+  async shutdown() {
+    await this.shutdownDaemon();
+  }
   async IPFSCommand() {
     const { stdout, stderr, error } = await execFile(
       this.IPFSExecutablePath,
@@ -19,6 +23,73 @@ class IPFS {
       }
     );
     log.info({ arguments, stdout, stderr, error }, "ipfs command");
+  }
+  async launchDaemon() {
+    log.info("Launching daemon");
+    await this.shutdownDaemon();
+    const daemon = spawn(
+      this.IPFSExecutablePath,
+      [
+        "daemon",
+        "--migrate",
+        "--enable-namesys-pubsub",
+        "--enable-pubsub-experiment",
+      ],
+      {
+        env: {
+          IPFS_PATH: this.IPFSRepositoryPath,
+        },
+      }
+    );
+    daemon.stdout.on("data", async (data) => {
+      log.info({ stdout: `${data}` }, "ipfs daemon output");
+      const lines = `${data}`;
+      if (lines.indexOf("Daemon is ready")) {
+        await this.updateOnlineStatus();
+      }
+    });
+  }
+  async updateOnlineStatus() {
+    log.info("Updating online status");
+    let online = false,
+      peers = 0;
+    const url = `http://127.0.0.1:${this.APIPort}/webui`;
+    const rsp = await fetch(url, {
+      headers: {
+        pragma: "no-cache",
+        "cache-control": "no-cache",
+      },
+    });
+    if (rsp.status == 200) {
+      online = true;
+    }
+    if (online) {
+      const swarmPeers = await this.api("swarm/peers");
+      peers = swarmPeers.peers.length;
+    }
+    log.info({ online, peers }, "Daemon state");
+    if (online) {
+      this.isBootstrapping = false;
+    }
+    this.online = online;
+    this.peers = peers;
+  }
+  async api(path, body) {
+    const url = `http://127.0.0.1:${this.APIPort}/api/v0/${path}`;
+    const rsp = await fetch(path, {
+      method: "POST",
+      headers: {
+        cache: "no-cache",
+        "Content-Type": "application/json",
+      },
+      body: body ? JSON.stringify(body) : "",
+    });
+    const json = await rsp.json;
+    log.info({ path, body, json }, "IPFS API Request");
+    return json;
+  }
+  async shutdownDaemon() {
+    await this.IPFSCommand("shutdown");
   }
   async IPFSRepoInit() {
     const ext = "bin";
