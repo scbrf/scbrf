@@ -6,6 +6,7 @@ jest.mock("fs", () => ({
     return Buffer.from(this.fscnt || "");
   },
 }));
+jest.mock("./log", () => () => ({ info: () => {}, error: () => {} }));
 test("basic", async () => {
   const setting = require("./setting");
   await setting.init();

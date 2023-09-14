@@ -15,6 +15,7 @@
     "jest": "^29.7.0"
   },
   "dependencies": {
-    "bunyan": "^1.8.15"
+    "bunyan": "^1.8.15",
+    "get-port": "^7.0.0"
   }
 }
