@@ -6,8 +6,12 @@ const { getPortRange } = require("./utils");
 
 class IPFS {
   async init() {
+    this.isBootstrapping = true;
+    this.online = false;
+    this.peers = 0;
     await this.IPFSRepoInit();
     await this.launchDaemon();
+    await this.onlineStatusCheck();
   }
   async shutdown() {
     await this.shutdownDaemon();
@@ -23,6 +27,14 @@ class IPFS {
       }
     );
     log.info({ arguments, stdout, stderr, error }, "ipfs command");
+  }
+  async onlineStatusCheck() {
+    this.onlineCheckTimer = setInterval(async () => {
+      await this.updateOnlineStatus();
+      if (!this.online && !this.isBootstrapping) {
+        await this.launchDaemon();
+      }
+    }, 30000);
   }
   async launchDaemon() {
     log.info("Launching daemon");

@@ -13,6 +13,7 @@ jest.mock("node:child_process", () => ({
 jest.mock("./utils", () => ({
   getPortRange: () => 10000,
 }));
+global.setInterval = () => {};
 require("./setting").prefs = {};
 const ipfs = require("./ipfs");
 test("ipfs init", async () => {
