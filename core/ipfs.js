@@ -3,12 +3,17 @@ const execFile = util.promisify(require("node:child_process").execFile);
 const { spawn } = require("node:child_process");
 const log = require("./log")("ipfs");
 const { getPortRange } = require("./utils");
+const { observable } = require("mobx");
 
 class IPFS {
+  constructor() {
+    this.state = observable({
+      isBootstrapping: true,
+      online: false,
+      peers: 0,
+    });
+  }
   async init() {
-    this.isBootstrapping = true;
-    this.online = false;
-    this.peers = 0;
     await this.IPFSRepoInit();
     await this.launchDaemon();
     await this.onlineStatusCheck();
@@ -31,7 +36,7 @@ class IPFS {
   async onlineStatusCheck() {
     this.onlineCheckTimer = setInterval(async () => {
       await this.updateOnlineStatus();
-      if (!this.online && !this.isBootstrapping) {
+      if (!this.state.online && !this.state.isBootstrapping) {
         await this.launchDaemon();
       }
     }, 30000);
@@ -83,10 +88,10 @@ class IPFS {
     }
     log.info({ online, peers }, "Daemon state");
     if (online) {
-      this.isBootstrapping = false;
+      this.state.isBootstrapping = false;
     }
-    this.online = online;
-    this.peers = peers;
+    this.state.online = online;
+    this.state.peers = peers;
   }
   async api(path, body) {
     const url = `http://127.0.0.1:${this.APIPort}/api/v0/${path}`;

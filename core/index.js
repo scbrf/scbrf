@@ -1,11 +1,17 @@
+const { observe } = require("mobx");
 class ScbrfCore {
+  constructor() {
+    this.observe = observe;
+    this.ipfs = require("./ipfs");
+    this.setting = require("./setting");
+  }
   async init(cfg) {
-    await require("./setting").init(cfg);
-    await require("./ipfs").init(cfg);
+    await this.setting.init(cfg);
+    await this.ipfs.init(cfg);
   }
   async shutdown() {
-    await require("./setting").close();
-    await require("./ipfs").shutdown();
+    await this.setting.close();
+    await this.ipfs.shutdown();
   }
 }
 
