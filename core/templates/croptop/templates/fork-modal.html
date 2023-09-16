@@ -1,0 +1,402 @@
+<div id="fork-modal" class="modal negative-space">
+  <div class="modal-content body-content centered-content content-top-offset negative-space">
+    <div class="exit-button mobile-padding negative-space">[<span class="exit-button-text negative-space">close</span>]</div>
+    <div id="fork-header" class="body-header mobile-padding negative-space">
+        To set up your site and learn how to start posting, check out <a href="https://croptop.eth.limo" target="_blank">https://croptop.eth</a>.
+      <div class="fork-info">
+        To let people pay you when collecting your posts, you'll need to make an onchain collection where your posts will go.
+      </div>
+      <div class="fork-info">
+        Croptop websites integrate with the Juicebox smart contracts for easy onchain publishing, while giving creators pro tools to manage their money with their community. Your collection's info can be accessed publicly through sites like <a href="https://juicebox.money" target="_blank">https://juicebox.money</a>, and its money rules can be adjusted only onchain by the admin of the project. 
+      </div>
+      <div class="fork-info">
+        Below, you can create and configure a collection where people can collect your croptop posts from, play around. When deploying, make sure the current website you're on is https://croptop.eth.limo, other another croptop website you trust. 
+      </div>
+    </div>
+    <div id="fork-form" class="form mobile-padding negative-space">
+      <div class="form-body">
+        <div id="fork-form-chain" class="form-section">
+          <div class="form-item">
+            <div class="form-label">Chain</div>
+            <div class="form-value form-select-value">
+              <select id="fork-form-state-chain-input" name="chain">
+                {# <option value="mainnet">mainnet</option> #}
+                <option value="goerli">goerli</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <details>
+            <summary class="form-toggle form-main-toggle">Make a new onchain collection</summary>
+            <div class="form-section">
+              <div class="form-section-description">Once deployed, you can find your collection's ID by looking for new projects at <a href="https://juicebox.money/projects?tab=new" target="_blank">https://juicebox.money/projects?tab=new</a>. The admin you set can edit this project at any time to change its description or set new money rules.</div>
+              <div class="form-item">
+                <div class="form-label">Collection name</div>
+                <div class="form-value">
+                  <input type="text" placeholder="Your collection name" id="fork-form-new-jb-collection-name-input">
+                </div>
+              </div>
+              <div class="form-item">
+                <div class="form-label">Collection Symbol</div>
+                <div class="form-value">
+                  <input type="text" placeholder="POSTS" id="fork-form-new-jb-collection-symbol-input">
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-item form-item-large">
+                <div class="form-label">Admin 
+                  <button id="fork-form-new-jb-load-address-button" class="form-load-address-button">[<span class="form-load-address-button-text">connect wallet</span>]</button>
+                </div>
+                <div class="form-value">
+                  <input type="text" placeholder="Defaults to your address" id="fork-form-new-jb-project-owner-input">
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-section-description">The price and total supply of posts onto your collection are chosen by the collector at the time they record it onchain. Anyone can post any content from anywhere to your collection, so long as these allowances that you set are met. Croptop websites just make it easy.</div>
+              <div class="form-item">
+                <div class="form-label">Minimum price</div>
+                <div class="form-value">
+                  <span class="ether form-input-preface">Ξ</span><input type="number" placeholder="free" value="0.01" id="fork-form-new-jb-minimum-price-input">
+                </div>
+              </div>
+              <div class="form-item">
+                <div class="form-label">Min total supply</div>
+                <div class="form-value">
+                  <input type="number" value="1" id="fork-form-new-jb-minimum-total-supply-input">
+                </div>
+              </div>
+              <div class="form-item">
+                <div class="form-label">Max total supply</div>
+                <div class="form-value">
+                  <input type="number" placeholder="unlimited" id="fork-form-new-jb-maximum-total-supply-input">
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-item form-item-large">
+                <div class="form-label">Allowed posting addresses (one per line)</div>
+                <div class="form-value">
+                  <textarea rows="4" id="fork-form-new-jb-addresses-input" placeholder="leave empty for no restrictions"></textarea>
+                </div>
+              </div>
+            </div>
+            <div id="fork-form-new-jb-error-message" class="form-error-message mobile-padding"></div>
+            <button id="fork-form-new-jb-submit-button" class="form-button">[<span id="fork-form-new-jb-submit-button-text" class="form-button-text">deploy project</span>]<span id="fork-form-new-jb-button-loading-animation" class="loading-animation button-loading-animation"></span></button> 
+          </details>
+          <details>
+            <summary class="form-toggle form-main-toggle">Let Croptop post to your collection</summary>
+            <div class="form-section">
+              <div class="form-section-description">Give the Croptop contract permission to post on your collection on your behalf. This will only be effective if you're the admin of the collection.</div>
+              <div class="form-item">
+                <div class="form-label">Collection ID</div>
+                <div class="form-value">
+                  <input type="number" placeholder="420" id="fork-form-operator-project-id-input">
+                </div>
+              </div>
+            </div>
+            <div id="fork-form-permission-error-message" class="form-error-message mobile-padding"></div>
+            <button id="fork-form-permission-submit-button" class="form-button">[<span id="fork-form-permission-submit-button-text" class="form-button-text">give permission</span>]<span id="fork-form-permission-button-loading-animation" class="loading-animation button-loading-animation"></span></button> 
+          </details>
+          <details>
+            <summary class="form-toggle form-main-toggle">Set how Croptop posts to your collection</summary>
+            <div class="form-section">
+              <div class="form-section-description">Add new conditions that posts must meet when made to your collection through Croptop.</div>
+              <div class="form-item">
+                <div class="form-label">Collection ID</div>
+                <div class="form-value">
+                  <input type="number" placeholder="420" id="fork-form-allowance-project-id-input">
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-section-description">A post's minting parameters are chosen by the collector at the time they record it onchain. Anyone can post any content from anywhere to your collection, so long as these allowances that you set are met. Croptop websites just make it easy.</div>
+              <div class="form-item">
+                <div class="form-label">Minimum price</div>
+                <div class="form-value">
+                  <span class="ether form-input-preface">Ξ</span><input type="number" placeholder="free" value="0.01" id="fork-form-allowance-minimum-price-input">
+                </div>
+              </div>
+              <div class="form-item">
+                <div class="form-label">Min total supply</div>
+                <div class="form-value">
+                  <input type="number" value="1" id="fork-form-allowance-minimum-total-supply-input">
+                </div>
+              </div>
+              <div class="form-item">
+                <div class="form-label">Max total supply</div>
+                <div class="form-value">
+                  <input type="number" placeholder="unlimited" id="fork-form-allowance-maximum-total-supply-input">
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-item form-item-large">
+                <div class="form-label">Allowed posting addresses (one per line)</div>
+                <div class="form-value">
+                  <textarea rows="4" id="fork-form-allowance-addresses-input" placeholder="leave empty for no restrictions"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="form-section">
+              <div class="form-item">
+                <div class="form-label">NFT category on your collection for which the above allowances apply</div>
+                <div class="form-value">
+                  <input type="number" value="0" id="fork-form-allowance-nft-category-input">
+                </div>
+              </div>
+            </div>
+            <div id="fork-form-allowance-error-message" class="form-error-message mobile-padding"></div>
+            <button id="fork-form-allowance-submit-button" class="form-button">[<span id="fork-form-allowance-submit-button-text" class="form-button-text">save allowances</span>]<span id="fork-form-allowance-button-loading-animation" class="loading-animation button-loading-animation"></span></button> 
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const decorateNewJbForm = () => {
+    const forkFormChainInput = document.getElementById("fork-form-state-chain-input");
+    const forkFormNewJbCollectionNameInput = document.getElementById("fork-form-new-jb-collection-name-input");
+    const forkFormNewJbCollectionSymbolInput = document.getElementById("fork-form-new-jb-collection-symbol-input");
+    const forkFormNewJbProjectOwnerInput = document.getElementById("fork-form-new-jb-project-owner-input");
+    const forkFormNewJbMinimumPriceInput = document.getElementById("fork-form-new-jb-minimum-price-input");
+    const forkFormNewJbMinimumTotalSupplyInput = document.getElementById("fork-form-new-jb-minimum-total-supply-input");
+    const forkFormNewJbMaximumTotalSupplyInput = document.getElementById("fork-form-new-jb-maximum-total-supply-input");
+    const forkFormNewJbAddressesInput = document.getElementById("fork-form-new-jb-addresses-input");
+    const forkFormNewJbErrorMessage = document.getElementById("fork-form-new-jb-error-message");
+    const forkFormNewJbSubmitButton = document.getElementById("fork-form-new-jb-submit-button");
+
+    // Set values in the form if the fields are not yet set.
+    if (!forkFormNewJbProjectOwnerInput.value && signer) forkFormProjectOwnerInput.value = signer;
+
+    // Allow connecting wallet to prefill beneficiary input field.
+    const loadAddressButton = document.getElementById("fork-form-new-jb-load-address-button");
+    loadAddressButton.onclick = async () => {
+      signer = (await getSigner()).address;
+      forkFormNewJbProjectOwnerInput.value = signer;
+    };
+
+    // Submit the form.
+    forkFormNewJbSubmitButton.onclick = async () => {
+      // Check for empty values.
+      if (!forkFormNewJbCollectionNameInput.value || !forkFormNewJbCollectionSymbolInput.value) {
+        forkFormNewJbErrorMessage.innerHTML = "Fill out the form.";
+        forkFormNewJbErrorMessage.style.display = "block";
+        return;
+      } else {
+        // Hide the error message.
+        forkFormNewJbErrorMessage.style.display = "none";
+      }
+
+      // Default to max
+      if (!forkFormNewJbMaximumTotalSupplyInput.value) forkFormNewJbMaximumTotalSupplyInput.value = 1000000000;
+      // Default to 1
+      if (!forkFormNewJbMinimumTotalSupplyInput.value) forkFormNewJbMinimumTotalSupplyInput.value = 1;
+      // Default to free
+      if (!forkFormNewJbMinimumPriceInput.value) forkFormNewJbMinimumPriceInput.value = 0;
+      // Default to the signer.
+      signer = (await getSigner()).address;
+      if (!forkFormNewJbProjectOwnerInput.value) forkFormNewJbProjectOwnerInput.value = signer;
+
+      // Show the loading animation.
+      startLoadingAnimation('fork-form-new-jb-button-loading-animation');
+
+      // Make sure the client is connected to the right network.
+      const chainId = await getChainId();
+      const expectedChainId = resolveChainId(forkFormChainInput.value);
+      if (chainId != expectedChainId) {
+          try {
+            await switchChain(expectedChainId); 
+          } catch (e) {
+            forkFormNewJbErrorMessage.innerHTML = `Browser not connected to ${forkFormChainInput.value}.`;
+            forkFormNewJbErrorMessage.style.display = "block";
+
+            // Hide the loading animation.
+            stopLoadingAnimation('fork-form-new-jb-button-loading-animation');
+
+            return;
+          }
+      }
+
+      // Normalize values from the form.
+      const name = forkFormNewJbCollectionNameInput.value;
+      const symbol = forkFormNewJbCollectionSymbolInput.value;
+      const owner = forkFormNewJbProjectOwnerInput.value;
+      const minimumPrice = `${Number(forkFormNewJbMinimumPriceInput.value) * 1_000_000_000_000_000_000}`;
+      const minimumTotalSupply = forkFormNewJbMinimumTotalSupplyInput.value;
+      const maximumTotalSupply = forkFormNewJbMaximumTotalSupplyInput.value;
+      const allowedAddresses = !forkFormNewJbAddressesInput.value ? [] : forkFormNewJbAddressesInput.value.split('\n');
+
+      try {
+        // Try to process the transaction.
+        const accepted = await tx_deploy_project(name, symbol, owner, minimumPrice, minimumTotalSupply, maximumTotalSupply, allowedAddresses, expectedChainId);
+
+        // Show incompatible network if needed.
+        if (!accepted) { 
+          // Show the error message.
+          forkFormNewJbErrorMessage.innerHTML = "The connected network isn't supported.";
+          forkFormNewJbErrorMessage.style.display = "block";
+        }
+
+        // Hide the loading animation.
+        stopLoadingAnimation('fork-form-new-jb-button-loading-animation');
+      } catch (e) {
+        forkFormNewJbErrorMessage.innerHTML = e;
+        forkFormNewJbErrorMessage.style.display = "block";
+
+        // Hide the loading animation.
+        stopLoadingAnimation('fork-form-new-jb-button-loading-animation');
+      }
+    }
+  }
+
+  const decoratePermissionForm = () => {
+    const forkFormChainInput = document.getElementById("fork-form-state-chain-input");
+    const forkFormOperatorProjectIdInput = document.getElementById("fork-form-operator-project-id-input");
+    const forkFormPermissionSubmitButton = document.getElementById("fork-form-permission-submit-button");
+    const forkFormPermissionErrorMessage = document.getElementById("fork-form-permission-error-message");
+
+    // Submit the form.
+    forkFormPermissionSubmitButton.onclick = async () => {
+      // Check for empty values.
+      if (!forkFormOperatorProjectIdInput.value) {
+        forkFormPermissionErrorMessage.innerHTML = "Fill out the form.";
+        forkFormPermissionErrorMessage.style.display = "block";
+        return;
+      } else {
+        // Hide the error message.
+        forkFormPermissionErrorMessage.style.display = "none";
+      }
+
+      // Show the loading animation.
+      startLoadingAnimation('fork-form-permission-button-loading-animation');
+
+      // Make sure the client is connected to the right network.
+      const chainId = await getChainId();
+      const expectedChainId = resolveChainId(forkFormChainInput.value);
+      if (chainId != expectedChainId) {
+          try {
+            await switchChain(expectedChainId); 
+          } catch (e) {
+            forkFormPermissionErrorMessage.innerHTML = `Browser not connected to ${forkFormChainInput.value}.`;
+            forkFormPermissionErrorMessage.style.display = "block";
+
+            // Hide the loading animation.
+            stopLoadingAnimation('fork-form-permission-button-loading-animation');
+
+            return;
+          }
+      }
+
+      // Normalize values from the form.
+      const projectId = forkFormOperatorProjectIdInput.value;
+
+      try {
+        // Try to process the transaction.
+        const accepted = await tx_set_operator(projectId, expectedChainId);
+
+        // Show incompatible network if needed.
+        if (!accepted) { 
+          // Show the error message.
+          forkFormPermissionErrorMessage.innerHTML = "The connected network isn't supported.";
+          forkFormPermissionErrorMessage.style.display = "block";
+        }
+
+        // Hide the loading animation.
+        stopLoadingAnimation('fork-form-permission-button-loading-animation');
+      } catch (e) {
+        forkFormPermissionErrorMessage.innerHTML = e;
+        forkFormPermissionErrorMessage.style.display = "block";
+
+        // Hide the loading animation.
+        stopLoadingAnimation('fork-form-permission-button-loading-animation');
+      }
+    }
+  }
+
+  const decorateAllowanceForm = () => {
+    const forkFormChainInput = document.getElementById("fork-form-state-chain-input");
+    const forkFormAllowanceSubmitButton = document.getElementById("fork-form-allowance-submit-button");
+    const forkFormAllowanceProjectIdInput = document.getElementById("fork-form-allowance-project-id-input");
+    const forkFormAllowanceCategoryInput = document.getElementById("fork-form-allowance-nft-category-input");
+    const forkFormAllowanceMinimumPriceInput = document.getElementById("fork-form-allowance-minimum-price-input");
+    const forkFormAllowanceMinimumTotalSupplyInput = document.getElementById("fork-form-allowance-minimum-total-supply-input");
+    const forkFormAllowanceMaximumTotalSupplyInput = document.getElementById("fork-form-allowance-maximum-total-supply-input");
+    const forkFormAllowanceAddressesInput = document.getElementById("fork-form-allowance-addresses-input");
+    const forkFormAllowanceErrorMessage = document.getElementById("fork-form-allowance-error-message");
+
+    // Submit the form.
+    forkFormAllowanceSubmitButton.onclick = async () => {
+      // Check for empty values.
+      if (!forkFormAllowanceProjectIdInput.value || !forkFormAllowanceCategoryInput.value) {
+        forkFormAllowanceErrorMessage.innerHTML = "Fill out the form.";
+        forkFormAllowanceErrorMessage.style.display = "block";
+        return;
+      } else {
+        // Hide the error message.
+        forkFormAllowanceErrorMessage.style.display = "none";
+      }
+      // Default to max
+      if (!forkFormAllowanceMaximumTotalSupplyInput.value) forkFormAllowanceMaximumTotalSupplyInput.value = 1000000000;
+      // Default to 1
+      if (!forkFormAllowanceMinimumTotalSupplyInput.value) forkFormAllowanceMinimumTotalSupplyInput.value = 1;
+      // Default to free
+      if (!forkFormAllowanceMinimumPriceInput.value) forkFormAllowanceMinimumPriceInput.value = 0;
+
+      // Show the loading animation.
+      startLoadingAnimation('fork-form-allowance-button-loading-animation');
+
+      // Get the signer.
+      signer = (await getSigner()).address;
+
+      // Make sure the client is connected to the right network.
+      const chainId = await getChainId();
+      const expectedChainId = resolveChainId(forkFormChainInput.value);
+      if (chainId != expectedChainId) {
+          try {
+            await switchChain(expectedChainId); 
+          } catch (e) {
+            forkFormAllowanceErrorMessage.innerHTML = `Browser not connected to ${forkFormChainInput.value}.`;
+            forkFormAllowanceErrorMessage.style.display = "block";
+
+            // Hide the loading animation.
+            stopLoadingAnimation('fork-form-allowance-button-loading-animation');
+
+            return;
+          }
+      }
+
+      // Normalize values from the form.
+      const projectId = forkFormAllowanceProjectIdInput.value;
+      const category = forkFormAllowanceCategoryInput.value;
+      const minimumPrice = `${Number(forkFormAllowanceMinimumPriceInput.value) * 1_000_000_000_000_000_000}`;
+      const minimumTotalSupply = forkFormAllowanceMinimumTotalSupplyInput.value;
+      const maximumTotalSupply = forkFormAllowanceMaximumTotalSupplyInput.value;
+      const allowedAddresses = !forkFormAllowanceAddressesInput.value ? [] : forkFormAllowanceAddressesInput.value.split('\n');
+
+      try {
+        // Try to process the transaction.
+        const accepted = await tx_configure(projectId, category, minimumPrice, minimumTotalSupply, maximumTotalSupply, allowedAddresses, expectedChainId);
+
+        // Show incompatible network if needed.
+        if (!accepted) { 
+          // Show the error message.
+          forkFormAllowanceErrorMessage.innerHTML = "The connected network isn't supported.";
+          forkFormAllowanceErrorMessage.style.display = "block";
+        }
+
+        // Hide the loading animation.
+        stopLoadingAnimation('fork-form-allowance-button-loading-animation');
+      } catch (e) {
+        forkFormAllowanceErrorMessage.innerHTML = e;
+        forkFormAllowanceErrorMessage.style.display = "block";
+
+        // Hide the loading animation.
+        stopLoadingAnimation('fork-form-allowance-button-loading-animation');
+      }
+    }
+  }
+</script>

@@ -1,0 +1,894 @@
+<div id="post-header" class="post-header body-header mobile-padding negative-space">
+  <div id="post-title">
+    <div id="post-date"></div>
+    <div id="post-name"></div>
+  </div>
+  <div id="post-subtitle" class="negative-space">
+      <span id="post-link"></span>
+  </div>
+</div>
+<div id="post-onchain" class="mobile-padding">
+  <details id="post-form-collect-reveal">
+    <summary id="post-form-collect-toggle" class="form-toggle">collect</summary>
+    <div id="post-form-collect-container">
+      <div id="post-form-state" class="negative-space">
+        <details id="post-form-state-reveal">
+          <summary id="post-form-state-toggle" class="form-toggle"><span id="post-form-state-chain" class="post-form-state-item-value"></span> collection <a id="post-form-state-project-id" class="post-form-state-item-value" target="_blank"></a>:<span id="post-form-state-nft-category" class="post-form-state-item-value"></span></summary>
+          <div class="form-section-description">Specify the collection that is being funded from this post's sale and the category under which it will appear. Changing these values will change the availability of this post to be collected.</div>
+          <div class="form-section">
+            <div class="form-item">
+              <div class="form-label">Chain</div>
+              <div class="form-value form-select-value">
+                <select id="post-form-state-chain-input" name="chain">
+                  <option value="mainnet">mainnet</option>
+                  <option value="goerli">goerli</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">Collection ID</div>
+              <div class="form-value"><input type="number" value="" id="post-form-state-project-id-input"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">Collection category</div>
+              <div class="form-value"><input type="number" value="" id="post-form-state-nft-category-input"></div>
+            </div>
+          </div>
+          <div id="post-form-state-error-message" class="form-error-message mobile-padding"></div>
+          <button id="post-form-state-button" class="form-button">[<span id="post-form-state-button-text" class="form-button-text">update</span>]</button>
+        </details>
+      </div>
+      <div id="collect-post-form" class="form negative-space">
+        <span id="collect-post-form-header" class="form-header"></span>
+        <div class="form-body">
+          <details id="collect-post-form-options-reveal">
+            <summary id="collect-post-form-options-toggle" class="form-toggle form-main-toggle">options</summary>
+            <div class="form-section-description">Set the address that will get the copies you are paying for.</div>
+            <div class="form-section">
+              <div class="form-item">
+                <div class="form-label">Mint count</div>
+                <div class="form-value">
+                  <input type="number" value="1" id="collect-post-form-quantity-input">
+                </div>
+              </div>
+              <div class="form-item form-item-large">
+                <div class="form-label">Address <button id="collect-post-form-load-address-button" class="form-load-address-button">[<span class="form-load-address-button-text">connect wallet</span>]</button></div>
+                <div class="form-value">
+                  <input type="text" placeholder="Defaults to your address" id="collect-post-form-beneficiary-input">
+                </div>
+              </div>
+            </div>
+            <div class="form-section-disclaimer">An added 5% is sent to the <a id="collect-post-form-cpn-anchor" href="https://goerli.juicebox.money/v2/p/669" target="_blank">Croptop Publishing Network</a> in exchange for $CPN to this site's author.</div>
+            <details id="collect-post-form-disclaimer-reveal">
+              <summary id="collect-post-form-disclaimer-toggle" class="form-toggle form-disclaimer-toggle">customize</summary>
+              <div class="form-section-description">Change who gets the $CPN</div>
+              <div class="form-section">
+                <div class="form-item form-item-large">
+                  <div class="form-label">Address</div>
+                  <div class="form-value">
+                    <input type="text" placeholder="Defaults to the address of this site's author" id="collect-post-form-cpn-beneficiary-input">
+                  </div>
+                </div>
+              </div>
+            </details>
+          </details>
+        </div>
+      </div>
+      <div id="record-post-form" class="form negative-space">
+        <span class="form-header">Record this file onchain to collect a first copy.</span>
+        <div class="form-body">
+          <details id="record-post-form-options-reveal">
+            <summary id="record-post-form-options-toggle" class="form-toggle form-main-toggle">options</summary>
+            <div class="form-section-description">Set the post's price, how many editions of this post will be made available for collecting, and the address that will be sent its first copies that you are paying for.</div>
+            <div class="form-section">
+              <div class="form-item">
+                <div class="form-label">Price</div>
+                <div class="form-value">
+                  <span class="ether form-input-preface">Ξ</span><input type="number" value="" id="record-post-form-price-input">
+                </div>
+              </div>
+              <div id="record-post-form-total-supply-field" class="form-item">
+                <div class="form-label">Total supply</div>
+                <div class="form-value">
+                  <input type="number" placeholder="10" value="" id="record-post-form-total-supply-input">
+                </div>
+              </div>
+              <div class="form-item">
+                <div class="form-label">Mint count</div>
+                <div class="form-value">
+                  <input type="number" value="1" id="record-post-form-quantity-input">
+                </div>
+              </div>
+              <div class="form-item form-item-large">
+                <div class="form-label">Address
+                  <button id="record-post-form-load-address-button" class="form-load-address-button">[<span class="form-load-addres-button-text">connect wallet</span>]</button>
+                </div>
+                <div class="form-value">
+                  <input type="text" placeholder="Defaults to your address" id="record-post-form-beneficiary-input">
+                </div>
+              </div>
+            </div>
+            <div class="form-section-disclaimer">An added 5% is sent to the <a id="record-post-form-cpn-anchor" href="https://goerli.juicebox.money/v2/p/669" target="_blank">Croptop Publishing Network</a> in exchange for $CPN to this site's author.</div>
+            <details id="record-post-form-disclaimer-reveal">
+              <summary id="record-post-form-disclaimer-toggle" class="form-toggle form-disclaimer-toggle">customize</summary>
+              <div class="form-section-description">Change who gets the $CPN</div>
+              <div class="form-section">
+                <div class="form-item form-item-large">
+                  <div class="form-label">Address</div>
+                  <div class="form-value">
+                    <input type="text" placeholder="Defaults to the address of this site's author" id="record-post-form-cpn-beneficiary-input">
+                  </div>
+                </div>
+              </div>
+            </details>
+          </details>
+        </div>
+      </div>
+      <div id="post-form-loading-animation" class="loading-animation"></div>
+      <div id="post-form-error-message" class="form-error-message"></div>
+      <button id="post-form-button" class="form-button form-main-button">[<span id="post-form-button-text" class="form-button-text">collect</span>]<span id="post-form-button-loading-animation" class="loading-animation button-loading-animation"></span></button>
+    </div>
+  </details>
+</div>
+<img id="post-cover-image"></img>
+<video id="post-cover-video"></video>
+<div id="post-cover-audio-container" class="mobile-padding">
+  <audio id="post-cover-audio"></audio>
+</div>
+<div id="post-content" class="mobile-padding"></div>
+<script>
+  const formInputReactionTimeDelay = 600;
+
+  let tiersCache = {};
+  let allowanceCache = {};
+  let defaultChain = "goerli";
+  let defaultNftCategory = 0;
+  let highlightColor = "#f056c1";
+  let signer;
+
+  const loadAndRenderArticle = (articleID) => {
+    return fetch(`{{ assets_prefix }}${articleID}/article.json`)
+      // only if response is 200 OK, parse the JSON
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.statusText); // Throw an error if response is not OK.
+        }
+        return response.json();
+      })
+      .then(data => {
+        return renderMarkdown(data.content);
+      });
+  }
+
+  /// Get admin settings.
+  const loadSettings = () => {
+    const postFormStateChain = document.getElementById("post-form-state-chain");
+    const postFormStateProjectId = document.getElementById("post-form-state-project-id");
+    const postFormStateNftCategory = document.getElementById("post-form-state-nft-category");
+
+    postFormStateChain.innerHTML = defaultChain;
+    postFormStateProjectId.innerHTML = cpnProjectId(defaultChain);
+    postFormStateNftCategory.innerHTML = defaultNftCategory;
+
+    fetch("{{ assets_prefix }}templateSettings.json")
+      // only if response is 200 OK, parse the JSON
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.statusText); // Throw an error if response is not OK.
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Two sets of variables are available if the user is using the latest template.
+        // Mainnet:
+        // - mainnetCollectionID
+        // - mainnetCollectionCategory
+        // - mainnetRPC
+        // - mainnetCPNBeneficiaryAddress
+        // Goerli:
+        // - goerliCollectionID
+        // - goerliCollectionCategory
+        // - goerliRPC
+        // - goerliCPNBeneficiaryAddress
+        env = {
+          ...env,
+          ...data
+        };
+        if (data.mainnetCollectionID != null) postFormStateProjectId.innerHTML = Number(data.mainnetCollectionID);
+        if (data.mainnetCollectionCategory != null) postFormStateNftCategory.innerHTML = Number(data.mainnetCollectionCategory);
+        if (data.highlightColor) highlightColor = data.highlightColor;
+        const r = document.querySelector(':root');
+        r.style.setProperty('--link-color', highlightColor);
+      });
+  }
+
+  const decorateRecordForm = async (chain, projectId, category, encodedIPFSUri, formattedMinTotalSupply, formattedMaxTotalSupply, formattedMinPrice, formattedAllowedAddresses) => {
+    // Get references to record form elements that need decorating.
+    const recordPostFormBeneficiaryInput = document.getElementById("record-post-form-beneficiary-input");
+    const recordPostFormCpnBeneficiaryInput = document.getElementById("record-post-form-cpn-beneficiary-input");
+    const recordPostFormTotalSupplyField = document.getElementById("record-post-form-total-supply-field");
+    const recordPostFormTotalSupplyInput = document.getElementById("record-post-form-total-supply-input");
+    const recordPostFormPriceInput = document.getElementById("record-post-form-price-input");
+    const recordPostFormQuantityInput = document.getElementById("record-post-form-quantity-input");
+    const recordPostFormOptionsReveal = document.getElementById("record-post-form-options-reveal");
+    const recordPostFormCpnAnchor = document.getElementById("record-post-form-cpn-anchor");
+    const recordPostFormDisclaimerReveal = document.getElementById("record-post-form-disclaimer-reveal");
+    const postFormErrorMessage = document.getElementById("post-form-error-message");
+    const postFormButtonText = document.getElementById("post-form-button-text");
+    const postFormButton = document.getElementById("post-form-button");
+
+    // Disable the button.
+    postFormButton.disabled = true;
+    postFormButton.style.display = "none";
+
+    // Change the button text.
+    postFormButtonText.innerHTML = "record & collect";
+
+    // If the min and max total supplies are the same, hide the total supply field.
+    if (formattedMinTotalSupply == formattedMaxTotalSupply) {
+      recordPostFormTotalSupplyField.display = "none";
+    } else {
+      recordPostFormTotalSupplyField.display = "initial";
+    }
+
+    // Toggle off the sections.
+    recordPostFormOptionsReveal.open = false;
+    recordPostFormDisclaimerReveal.open = false;
+
+    // Set the correct link given the chain.
+    recordPostFormCpnAnchor.href = `${projectLinkBase(chain)}${cpnProjectId(chain)}`;
+
+    // Re-decorate some input fields depending on the allowances set for the project and category.
+    const checkState = async () => {
+      // Set error message if not allowed.
+      if (signer && formattedAllowedAddresses.length && !formattedAllowedAddresses.includes(signer)) {
+        postFormErrorMessage.innerHTML = `Collection ${projectId} has reserved posting to category ${category} for these addresses: ${formattedAllowedAddresses}.`;
+        postFormErrorMessage.classList.add("warn");
+        postFormErrorMessage.style.display = "block";
+        postFormButton.disabled = true;
+        postFormButton.style.display = "block";
+      // Set error messages if the currently inputted values are too small.
+      } else if (Number(recordPostFormPriceInput.value) < formattedMinPrice || Number(recordPostFormTotalSupplyInput.value) < formattedMinTotalSupply || Number(recordPostFormTotalSupplyInput.value) > formattedMaxTotalSupply) {
+        postFormErrorMessage.innerHTML = `Collection ${projectId} has a minimum price of <span class="ether">Ξ</span>${formattedMinPrice}, a minimum total supply of ${formattedMinTotalSupply}, and a maximum total supply of ${formattedMaxTotalSupply} to record on category ${category}.`;
+        postFormErrorMessage.classList.add("warn");
+        postFormErrorMessage.style.display = "block";
+        postFormButton.disabled = true;
+        postFormButton.style.display = "block";
+      } else if (Number(recordPostFormQuantityInput.value) > Number(recordPostFormTotalSupplyInput.value)) {
+        postFormErrorMessage.innerHTML = `The total supply is ${recordPostFormTotalSupplyInput.value}. Can't mint ${recordPostFormQuantityInput.value}.`;
+        postFormErrorMessage.classList.add("warn");
+        postFormErrorMessage.style.display = "block";
+        postFormButton.disabled = true;
+        postFormButton.style.display = "block";
+      } else {
+        // Hide the error message.
+        postFormErrorMessage.style.display = "none";
+        postFormButton.disabled = false;
+        postFormButton.style.display = "block";
+      }
+    }
+
+    // Prevent excessive calls.
+    let checkStateTimer;
+      const queueCheckState = async () => {
+        clearTimeout(checkStateTimer);
+        checkStateTimer = setTimeout(checkState, formInputReactionTimeDelay);
+    }
+
+    // Update the form's state each time the price, total supply, or quantity changes.
+    recordPostFormPriceInput.addEventListener("input", queueCheckState);
+    recordPostFormTotalSupplyInput.addEventListener("input", queueCheckState);
+    recordPostFormQuantityInput.addEventListener("input", queueCheckState);
+
+    // Set values in the form if the fields are not yet set.
+    if (!recordPostFormBeneficiaryInput.value && signer) recordPostFormBeneficiaryInput.value = signer;
+    if (!recordPostFormPriceInput.value) recordPostFormPriceInput.value = formattedMinPrice;
+    if (!recordPostFormTotalSupplyInput.value) recordPostFormTotalSupplyInput.value = formattedMinTotalSupply;
+
+    // Allow connecting wallet to prefill beneficiary input field.
+    const loadAddressButton = document.getElementById("record-post-form-load-address-button");
+    loadAddressButton.onclick = async () => {
+      signer = (await getSigner()).address;
+      recordPostFormBeneficiaryInput.value = signer;
+      await checkState();
+    };
+
+    // Submit the form.
+    postFormButton.onclick = async () => {
+      // Check for empty values.
+      if (!recordPostFormPriceInput.value || !recordPostFormTotalSupplyInput.value || !recordPostFormQuantityInput.value) {
+        postFormErrorMessage.innerHTML = "Fill out the form.";
+        postFormErrorMessage.classList.add("warn");
+        postFormErrorMessage.style.display = "block";
+        return;
+      }
+
+      // Show the loading animation.
+      startLoadingAnimation('post-form-button-loading-animation');
+
+      // Get the signer.
+      signer = (await getSigner()).address;
+
+      // Default to the signer.
+      if (!recordPostFormBeneficiaryInput.value) recordPostFormBeneficiaryInput.value = signer;
+      // Default to the eth address, or the signer;
+      if (!recordPostFormCpnBeneficiaryInput.value) recordPostFormCpnBeneficiaryInput.value = resolveCPNBeneficiaryAddress(chain) || signer;
+
+      // Make sure the form contents make sense.
+      await checkState();
+
+      if (postFormButton.disabled) {
+        // Hide the loading animation.
+        stopLoadingAnimation('post-form-button-loading-animation');
+        return;
+      }
+
+      // Make sure the client is connected to the right network.
+      const chainId = await getChainId();
+      const expectedChainId = resolveChainId(chain);
+      if (chainId != expectedChainId) {
+          try {
+            await switchChain(expectedChainId);
+          } catch (e) {
+            postFormErrorMessage.innerHTML = `Browser not connected to ${chain}.`;
+            postFormErrorMessage.classList.add("warn");
+            postFormErrorMessage.style.display = "block";
+
+            // Hide the loading animation.
+            stopLoadingAnimation('post-form-button-loading-animation');
+
+            return;
+          }
+      }
+
+      // Normalize values from the form.
+      const totalSupply = recordPostFormTotalSupplyInput.value;
+      const quantity = recordPostFormQuantityInput.value;
+      const price = `${Number(recordPostFormPriceInput.value) * 1_000_000_000_000_000_000}`;
+      const beneficiary = recordPostFormBeneficiaryInput.value;
+      const cpnBeneficiary = recordPostFormCpnBeneficiaryInput.value;
+      const totalPrice = BigInt(price) * BigInt(quantity);
+      const value = totalPrice + ((projectId == await cpnProjectId(chain)) ? BigInt(0) : (totalPrice / BigInt(feeDivisor)));
+
+      try {
+        // Try to process the transaction.
+        const accepted = await tx_collect(projectId, category, totalSupply, price, quantity, encodedIPFSUri, beneficiary, cpnBeneficiary, value, resolveChainId(chain));
+
+          // Show incompatible network if needed.
+        if (!accepted) {
+          // Show the error message.
+          postFormErrorMessage.innerHTML = "The connected network isn't supported.";
+          postFormErrorMessage.classList.add("info");
+          postFormErrorMessage.style.display = "block";
+
+          // Hide and disable the button.
+          postFormButton.disabled = true;
+          postFormButton.style.display = "none";
+        }
+
+        // Hide the loading animation.
+        stopLoadingAnimation('post-form-button-loading-animation');
+      } catch (e) {
+        postFormErrorMessage.innerHTML = e;
+        postFormErrorMessage.classList.add("warn");
+        postFormErrorMessage.style.display = "block";
+
+        // Hide the loading animation.
+        stopLoadingAnimation('post-form-button-loading-animation');
+      }
+    }
+
+    // Check the state.
+    await checkState();
+  }
+
+  const decorateCollectForm = async (chain, projectId, category, encodedIPFSUri, formattedMintedSupply, formattedRemainingSupply, formattedPrice) => {
+    // Get references to record form elements that need decorating.
+    const collectPostFormHeader = document.getElementById("collect-post-form-header");
+    const collectPostFormBeneficiaryInput = document.getElementById("collect-post-form-beneficiary-input");
+    const collectPostFormCpnBeneficiaryInput = document.getElementById("collect-post-form-cpn-beneficiary-input");
+    const collectPostFormQuantityInput = document.getElementById("collect-post-form-quantity-input");
+    const collectPostFormOptionsReveal = document.getElementById("collect-post-form-options-reveal");
+    const collectPostFormDisclaimerReveal = document.getElementById("collect-post-form-disclaimer-reveal");
+    const collectPostFormCpnAnchor = document.getElementById("collect-post-form-cpn-anchor");
+    const postFormErrorMessage = document.getElementById("post-form-error-message");
+    const postFormButtonText = document.getElementById("post-form-button-text");
+    const postFormButton = document.getElementById("post-form-button");
+
+    // Toggle off the sections.
+    collectPostFormOptionsReveal.open = false;
+    collectPostFormDisclaimerReveal.open = false;
+
+    // Set the header text.
+    if (formattedRemainingSupply == 1) {
+      collectPostFormHeader.innerHTML = `${formattedMintedSupply} minted, only 1 remaining edition of this file available for <span class="ether">Ξ</span>${formattedPrice}.`;
+    } else {
+      collectPostFormHeader.innerHTML = `${formattedMintedSupply} minted, ${formattedRemainingSupply > 10000000 ? "infinite" : formattedRemainingSupply } editions remaining for <span class="ether">Ξ</span>${formattedPrice} each.`;
+    }
+
+    // Change the button text.
+    postFormButtonText.innerHTML = "collect";
+
+    // Disable the button.
+    postFormButton.disabled = true;
+    postFormButton.style.display = "none";
+
+    // Set the correct link given the chain.
+    collectPostFormCpnAnchor.href = `${projectLinkBase(chain)}${cpnProjectId(chain)}`;
+
+    // Re-decorate some input fields depending on the allowances set for the project and category.
+    const checkState = async () => {
+      // Set error messages if the currently inputted values are too small.
+      if (Number(collectPostFormQuantityInput.value) > formattedRemainingSupply) {
+        if (formattedRemainingSupply == 1) {
+          postFormErrorMessage.innerHTML = `There is only 1 copy remaining. Can't mint ${collectPostFormQuantityInput.value}.`;
+        } else {
+          postFormErrorMessage.innerHTML = `There are only ${formattedRemainingSupply} copies remaining. Can't mint ${collectPostFormQuantityInput.value}.`;
+        }
+        postFormErrorMessage.classList.add("warn");
+        postFormErrorMessage.style.display = "block";
+        postFormButton.disabled = true;
+        postFormButton.style.display = "block";
+      } else {
+        // Hide the error message.
+        postFormErrorMessage.style.display = "none";
+        postFormButton.disabled = false;
+        postFormButton.style.display = "block";
+      }
+    }
+
+    // Prevent excessive calls.
+    let checkStateTimer;
+    const queueCheckState = async () => {
+      clearTimeout(checkStateTimer);
+      checkStateTimer = setTimeout(checkState, formInputReactionTimeDelay);
+    }
+
+    // Update the form's state each time the price or quantity changes.
+    collectPostFormQuantityInput.addEventListener("input", queueCheckState);
+
+    // Set values in the form if the fields are not yet set.
+    if (!collectPostFormBeneficiaryInput.value && signer) collectPostFormBeneficiaryInput.value = signer;
+
+    // Allow connecting wallet to prefill beneficiary input field.
+    const loadAddressButton = document.getElementById("collect-post-form-load-address-button");
+    loadAddressButton.onclick = async () => {
+      signer = (await getSigner()).address;
+      collectPostFormBeneficiaryInput.value = signer;
+      await checkState();
+    };
+
+    // Submit the form.
+    postFormButton.onclick = async () => {
+      // Check for empty values.
+      if (!collectPostFormQuantityInput.value) {
+        postFormErrorMessage.innerHTML = "Fill out the form.";
+        postFormErrorMessage.classList.add("warn");
+        postFormErrorMessage.style.display = "block";
+        return;
+      }
+
+      // Show the loading animation.
+      startLoadingAnimation('post-form-button-loading-animation');
+
+      // Get the signer.
+      signer = (await getSigner()).address;
+
+      // Default to the signer.
+      if (!collectPostFormBeneficiaryInput.value) collectPostFormBeneficiaryInput.value = signer;
+      // Default to the eth address, or the signer;
+      if (!collectPostFormCpnBeneficiaryInput.value) collectPostFormCpnBeneficiaryInput.value = resolveCPNBeneficiaryAddress(chain) || signer;
+
+      // Make sure the form contents make sense.
+      await checkState();
+
+      if (postFormButton.disabled) {
+        // Hide the loading animation.
+        stopLoadingAnimation('post-form-button-loading-animation');
+
+        return;
+      }
+
+      // Make sure the client is connected to the right network.
+      const chainId = await getChainId();
+      const expectedChainId = resolveChainId(chain);
+      if (chainId != expectedChainId) {
+        try {
+          await switchChain(expectedChainId);
+        } catch (e) {
+          postFormErrorMessage.innerHTML = `Browser not connected to ${chain}.`;
+          postFormErrorMessage.classList.add("info");
+          postFormErrorMessage.style.display = "block";
+
+          // Hide the loading animation.
+          stopLoadingAnimation('post-form-button-loading-animation');
+
+          return;
+        }
+      }
+
+      // Normalize values from the form.
+      const totalSupply = 1;
+      const price = `${Number(formattedPrice) * 1_000_000_000_000_000_000}`;
+      const quantity = collectPostFormQuantityInput.value;
+      const beneficiary = collectPostFormBeneficiaryInput.value;
+      const cpnBeneficiary = collectPostFormCpnBeneficiaryInput.value;
+      // Add a fee if the project being paid isn't the fee project ID.
+      const totalPrice = BigInt(price) * BigInt(quantity);
+      const value = totalPrice + ((projectId == await cpnProjectId(chain)) ? BigInt(0) : (totalPrice / BigInt(feeDivisor)));
+
+      try {
+        // Try to process the transaction.
+        const accepted = await tx_collect(projectId, category, totalSupply, BigInt(price), quantity, encodedIPFSUri, beneficiary, cpnBeneficiary, value, resolveChainId(chain));
+        // Show incompatible network if needed.
+        if (!accepted) {
+          // Show the error message.
+          postFormErrorMessage.innerHTML = "The connected network isn't supported.";
+          postFormErrorMessage.classList.add("info");
+          postFormErrorMessage.style.display = "block";
+
+          // Disable the button.
+          postFormButton.disabled = true;
+          postFormButton.style.display = "none";
+        }
+
+        // Hide the loading animation.
+        stopLoadingAnimation('post-form-button-loading-animation');
+      } catch (e) {
+        postFormErrorMessage.innerHTML = e;
+        postFormErrorMessage.classList.add("warn");
+        postFormErrorMessage.style.display = "block";
+
+        // Hide the loading animation.
+        stopLoadingAnimation('post-form-button-loading-animation');
+      }
+    }
+
+    // Check the state.
+    await checkState();
+  }
+
+  const decoratePostBody = () => {
+      const postContent = document.getElementById('post-content');
+      const firstChild = postContent.firstChild;
+  }
+
+  // Re-decorate the form depending on if the provided content has already been recorded onchain, and if it's sold out.
+  const decoratePostPage = async (name, date, link, content, imageSrc, videoSrc, audioSrc, encodedIPFSUri, thumbnailAutogenerated) => {
+    // Show the loading animation.
+    startLoadingAnimation('post-form-loading-animation');
+    // Get references to the form state.
+    const postName = document.getElementById("post-name");
+    const postDate = document.getElementById("post-date");
+    const postSubtitle = document.getElementById("post-subtitle");
+    const postLink = document.getElementById("post-link");
+    const postFormStateChain = document.getElementById("post-form-state-chain");
+    const postFormStateProjectId = document.getElementById("post-form-state-project-id");
+    const postFormStateNftCategory = document.getElementById("post-form-state-nft-category");
+    const postFormStateChainInput = document.getElementById("post-form-state-chain-input");
+    const postFormStateProjectIdInput = document.getElementById("post-form-state-project-id-input");
+    const postFormStateNftCategoryInput = document.getElementById("post-form-state-nft-category-input");
+    const postFormStateReveal = document.getElementById("post-form-state-reveal");
+    const postFormStateErrorMessage = document.getElementById("post-form-state-error-message");
+    const postFormStateButton = document.getElementById("post-form-state-button");
+    const postFormErrorMessage = document.getElementById("post-form-error-message");
+    const postFormButton = document.getElementById("post-form-button");
+    const postCoverImage = document.getElementById("post-cover-image");
+    const postCoverVideo = document.getElementById("post-cover-video");
+    const postCoverAudioContainer = document.getElementById("post-cover-audio-container");
+    const postCoverAudio = document.getElementById("post-cover-audio");
+    const postContent = document.getElementById("post-content");
+    const recordPostForm = document.getElementById("record-post-form");
+    const collectPostForm = document.getElementById("collect-post-form");
+    const postFormCollectReveal = document.getElementById("post-form-collect-reveal");
+    const postFormCollectToggle = document.getElementById("post-form-collect-toggle");
+
+    if (content) {
+      postContent.style.display = "block";
+      postContent.innerHTML = content;
+      let imgs = postContent.getElementsByTagName("img");
+      for (let img of imgs) {
+        let src = img.getAttribute("src");
+        if (!src.startsWith("https://") && !src.startsWith("http://") && !src.startsWith("/")) {
+          postContent.removeChild(img);
+        }
+      }
+    } else {
+      postContent.style.display = "none";
+    }
+
+    // Hide the form.
+    collectPostForm.style.display = "none";
+    recordPostForm.style.display = "none";
+
+    // Decorate the frame's title.
+    postName.innerHTML = name;
+    postDate.innerHTML = `${date} `;
+
+    // Reset the label for the collect toggle.
+    postFormCollectToggle.innerHTML = 'collect';
+    let storedPostFormCollectToggleText;
+    const postFormCollectRevealOpenText = '---';
+    postFormCollectReveal.addEventListener('toggle', function() {
+      if (postFormCollectReveal.open) {
+        storedPostFormCollectToggleText = postFormCollectToggle.innerHTML;
+        postFormCollectToggle.innerHTML = postFormCollectRevealOpenText;
+      } else {
+        postFormCollectToggle.innerHTML = storedPostFormCollectToggleText;
+      }
+    });
+
+    // Show and populate the frame's subtitle if there's a link.
+    if (link) {
+      postSubtitle.style.display = "block";
+      postLink.innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
+    } else {
+      postSubtitle.style.display = "none";
+    }
+
+    // Decorate the image or video content.
+
+    if (videoSrc) {
+      postCoverImage.style.display = "none";
+      postCoverAudioContainer.style.display = "none";
+      postCoverVideo.style.display = "block";
+      postCoverVideo.autoplay = true;
+      postCoverVideo.loop = true;
+      postCoverVideo.muted = true;
+      postCoverVideo.controls = true;
+      postCoverImage.src = "";
+      postCoverVideo.src = videoSrc;
+      postCoverVideo.addEventListener("click", (e) => e.stopPropagation());
+    } else if (audioSrc) {
+      const postCoverAudioSource = document.createElement("source");
+      postCoverImage.style.display = "none"
+      postCoverVideo.style.display = "none"
+      postCoverAudioContainer.style.display = "block";
+      postCoverAudio.autoplay = false;
+      postCoverAudio.loop = false;
+      postCoverAudio.muted = false;
+      postCoverAudio.controls = true;
+      postCoverAudioSource.src = audioSrc;
+      postCoverVideo.src = "";
+      postCoverImage.src = "";
+      postCoverAudio.appendChild(postCoverAudioSource);
+    } else if (imageSrc && !thumbnailAutogenerated) {
+      postCoverImage.style.display = "block"
+      postCoverVideo.style.display = "none"
+      postCoverAudioContainer.style.display = "none";
+      postCoverVideo.src = "";
+      postCoverImage.src = imageSrc;
+      postCoverImage.addEventListener("click", (e) => e.stopPropagation());
+    } else {
+      postCoverImage.style.display = "none"
+      postCoverVideo.style.display = "none"
+      postCoverAudioContainer.style.display = "none";
+      postCoverVideo.src = "";
+      postCoverImage.src = "";
+    }
+
+    const updateFormState = async () => {
+      // Get a reference to the chain, project ID, and category fields.
+      const chain = postFormStateChain.innerHTML;
+      const projectId = parseInt(postFormStateProjectId.innerHTML);
+      const category = parseInt(postFormStateNftCategory.innerHTML);
+
+      // Set the project ID href.
+      postFormStateProjectId.setAttribute('href', `${projectLinkBase(chain)}${postFormStateProjectId.innerHTML}`);
+
+      // Set a chain object.
+      if (!tiersCache[chain]) tiersCache[chain] = {};
+
+      // Look in the cache for tiers within the project ID.
+      const projectIdTiers = tiersCache[chain][projectId];
+
+      // If there's no cache for the project ID, set it to an empty object.
+      if (!projectIdTiers) tiersCache[chain][projectId] = {};
+
+      // Look in the cache for a tier for the project ID and encodedIPFSUri.
+      let tier = tiersCache[chain][projectId][encodedIPFSUri];
+
+      // If nothing is cached, load from the contract.
+      if (!tier) {
+
+        // Check to see if there's a tier for this content.
+        [tier] = await tx_view_tiers(projectId, [encodedIPFSUri], resolveChainId(chain));
+
+        // If no tier, don't show the form.
+        if (!tier) {
+          // Show the error message.
+          postFormErrorMessage.innerHTML = "Browser not connected to the right blockchain.";
+          postFormErrorMessage.classList.add("info");
+          postFormErrorMessage.style.display = "block";
+          // Hide the forms.
+          recordPostForm.style.display = "none";
+          collectPostForm.style.display = "none";
+          // Disable the button.
+          postFormButton.disabled = true;
+          postFormButton.style.display = "none";
+          postFormCollectToggle.innerHTML = postFormCollectReveal.open ? postFormCollectRevealOpenText : 'collect';
+          return;
+        }
+
+        // Cache the value.
+        tiersCache[chain][projectId][encodedIPFSUri] = tier;
+      }
+
+      // Get a reference to the tier's ID.
+      const formattedTierId = parseInt(tier[0].toString());
+
+      // If there is no tier, the form's state is in RECORD mode, meaning the content must be recorded onchain before it can be collected.
+      if (formattedTierId != 0) {
+        // The form's state is in COLLECT mode, meaning new editions can be minted from an already-recorded NFT tier.
+
+        // Get a reference to the tier's remaining supply.
+        const formattedRemainingSupply = parseInt(tier[2].toString());
+
+        // If there's no remaining supply, the form's state is in SOLD_OUT mode, meaning it can't be minted anymore.
+        if (formattedRemainingSupply == 0) {
+          // Show the error message.
+          postFormErrorMessage.innerHTML = "This post is sold out";
+          postFormErrorMessage.classList.add("info");
+          postFormErrorMessage.style.display = "block";
+          // Hide the forms.
+          recordPostForm.style.display = "none";
+          collectPostForm.style.display = "none";
+          // Disable the button.
+          postFormButton.disabled = true;
+          postFormButton.style.display = "none";
+          postFormCollectToggle.innerHTML = postFormCollectReveal.open ? postFormCollectRevealOpenText : 'sold out';
+          return;
+        }
+
+        // Show the COLLECT form.
+        collectPostForm.style.display = "block";
+        // Hide the RECORD form.
+        recordPostForm.style.display = "none";
+        // Hide the error message.
+        postFormErrorMessage.style.display = "none";
+
+        // Get a reference to the tier's price.
+        const formattedPrice = ethers.formatEther(tier[1]);
+        const formattedInitialSupply = parseInt(tier[3].toString());
+
+        // The supply that has been minted.
+        const formattedMintedSupply = formattedInitialSupply - formattedRemainingSupply;
+
+        if (formattedRemainingSupply == 1) {
+          postFormCollectToggle.innerHTML = postFormCollectReveal.open ? postFormCollectRevealOpenText : `${formattedMintedSupply} minted, only 1 remaining`;
+        } else {
+          postFormCollectToggle.innerHTML = postFormCollectReveal.open ? postFormCollectRevealOpenText : `${formattedMintedSupply} minted, ${formattedRemainingSupply > 10000000 ? "infinite" : formattedRemainingSupply } remaining`;
+        }
+
+        // Show the form.
+        await decorateCollectForm(chain, projectId, category, encodedIPFSUri, formattedMintedSupply, formattedRemainingSupply, formattedPrice);
+      } else {
+        // Check to see if the project and category allow posting.
+
+        // Look in the cache for allowances within the project ID.
+        const projectIdAllowances = allowanceCache[projectId];
+
+        // If there's no cache for the project ID, set it to an empty object.
+        if (!projectIdAllowances) allowanceCache[projectId] = {};
+
+        // Look in the cache for an allowance for the category within the allowances for the project ID.
+        let allowance = allowanceCache[projectId][category];
+
+        // If nothing is cached, load from the contract.
+        if (!allowance) {
+          // Get the allowance.
+          allowance = await tx_view_allowance(projectId, category, resolveChainId(chain));
+
+          // Cache the value.
+          allowanceCache[projectId][category] = allowance;
+        }
+
+        // Get a reference to the allowance min total supply.
+        const formattedMinTotalSupply = parseInt(allowance[1].toString());
+
+        // Show an error message if there's no allowance set.
+        if (formattedMinTotalSupply == 0) {
+          // Show the error message.
+          postFormErrorMessage.innerHTML = `Collection ${projectId} isn't accepting posts on category ${category} yet. Click "fork" up top.`;
+          postFormErrorMessage.classList.add("info");
+          postFormErrorMessage.style.display = "block";
+          // Hide forms.
+          recordPostForm.style.display = "none";
+          collectPostForm.style.display = "none";
+          // Hide and disable the button.
+          postFormButton.disabled = true;
+          postFormButton.style.display = "none";
+          postFormCollectToggle.innerHTML = postFormCollectReveal.open ? postFormCollectRevealOpenText : 'collect';
+          return;
+        }
+
+        // Show the RECORD form.
+        recordPostForm.style.display = "block";
+        // Hide the COLLECT form.
+        collectPostForm.style.display = "none";
+        // Hide the error message.
+        postFormErrorMessage.style.display = "none";
+
+        // Get a reference to the allowance min price.
+        const formattedMinPrice = ethers.formatEther(allowance[0]);
+
+        // Get a reference to the allowance max total supply.
+        const formattedMaxTotalSupply = parseInt(allowance[2].toString());
+
+        // Get a reference to the allowance max total supply.
+        const formattedAllowedAddresses = allowance[3];
+
+        postFormCollectToggle.innerHTML = postFormCollectReveal.open ? postFormCollectRevealOpenText : 'collect';
+
+        await decorateRecordForm(chain, projectId, category, encodedIPFSUri, formattedMinTotalSupply, formattedMaxTotalSupply, formattedMinPrice, formattedAllowedAddresses);
+      }
+    }
+
+    // Populate the state input values when opened.
+    postFormStateReveal.addEventListener("toggle", () => {
+      if (!this.open) return;
+      postFormStateChainInput.selectedIndex = resolveChainSelectIndex(postFormStateChain.innerHTML);
+      postFormStateProjectIdInput.value = postFormStateProjectId.innerHTML;
+      postFormStateNftCategoryInput.value = postFormStateNftCategory.innerHTML;
+    });
+
+    // Change the project ID input on network change to the default.
+    postFormStateChainInput.addEventListener("change", () => {
+      postFormStateProjectIdInput.value = cpnProjectId(postFormStateChainInput.value);
+    });
+
+    // Submit the state change form.
+    postFormStateButton.onclick = async () => {
+      // Check for empty values.
+      if (!postFormStateProjectIdInput.value || !postFormStateNftCategoryInput.value) {
+        postFormStateErrorMessage.innerHTML = "Fill out the form.";
+        postFormStateErrorMessage.style.display = "block";
+        return;
+      } else {
+        postFormStateErrorMessage.style.display = "none";
+      }
+
+      // Reload the mint state if the chain changed.
+      if (postFormStateChain.innerHTML != postFormStateChainInput.value) {
+        // Set the collection ID value to the default if it hasn't changed.
+        if (postFormStateProjectId.innerHTML == postFormStateProjectIdInput.value && postFormStateProjectIdInput.value == resolveCollectionID(postFormStateChain.innerHTML)) {
+          postFormStateProjectIdInput.value = resolveCollectionId(postFormStateChainInput.value);
+        }
+        // Set the collection category value to the default if it hasn't changed.
+        if (postFormStateNftCategory.innerHTML == postFormStateNftCategoryInput.value && postFormStateNftCategoryInput.value == resolveCollectionCategory(postFormStateChain.innerHTML)) {
+          postFormStateNftCategoryInput.value = resolveCollectionCategory(postFormStateChainInput.value);
+        }
+
+        postFormStateChain.innerHTML = postFormStateChainInput.value;
+      }
+
+      postFormStateProjectId.innerHTML = postFormStateProjectIdInput.value;
+      postFormStateProjectId.setAttribute('href', `${projectLinkBase(postFormStateChain.innerHTML)}${postFormStateProjectId.innerHTML}`);
+      postFormStateNftCategory.innerHTML = postFormStateNftCategoryInput.value;
+
+      // Close the state change form.
+      postFormStateReveal.open = false;
+
+      // Show the loading animation.
+      startLoadingAnimation('post-form-loading-animation');
+
+      // Update the form's state.
+      await updateFormState();
+
+      // Stop the loading animation.
+      stopLoadingAnimation('post-form-loading-animation');
+    }
+
+    await updateFormState();
+
+    decoratePostBody();
+
+    // Hide the loading animation.
+    stopLoadingAnimation('post-form-loading-animation');
+  }
+</script>
+{% if article_type == 1 %}
+<script>
+  document.getElementById("post-onchain").style.display = "none";
+</script>
+{% endif %}

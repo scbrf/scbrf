@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% include 'modules/planet_seo.html' %}
+<!-- Pagination -->
+{% if previous_page %}
+<link rel="prev" href="./{{ previous_page }}">
+{% endif %}
+{% if next_page %}
+<link rel="next" href="./{{ next_page }}">
+{% endif %}
+{% endblock %}
+
+{% block main %}
+{% include 'modules/site_header.html' %}
+{% include 'modules/nav.html' %}
+<color-box theme="ice">
+  <div class="content">
+    {% if tag_key %}
+    <div class="tag-container">
+      <div class="tag-caption">
+        <a href="{{ assets_prefix }}tags.html">Tags</a>
+        <span class="chevron">›</span>
+      </div>
+      <div class="tag-title">{{ tag_value }}</div>
+      <div class="tag-count">{{ articles.count }} article{% if articles.count > 1 %}s{% endif %}</div>
+    </div>
+    {% endif %}
+
+    <div class="items">
+    {% for article in articles %}
+    <div class="item">
+    <div class="item-date">{{ article.created|ymd }}</div>
+    <div class="item-title"><a href=".{{ article.link }}">{{ article.title|escape }}</a></div>
+    </div>
+    {% endfor %}
+    </div>
+
+    <div class="pages-container">
+      {% if previous_page %}
+      <a href="./{{ previous_page }}" class="nav-current" id="page-prev"><span class="prev"></span>PREV</a>
+      {% else %}
+      <div class="page-placeholder"></div>
+      {% endif %}
+      {% if previous_page or next_page %}
+      <div class="pages-info">{{ current_page }} / {{ total_pages }}</div>
+      {% endif %}
+      {% if next_page %}
+      <a href="./{{ next_page }}" class="nav-current" id="page-next">NEXT<span class="next"></span></a>
+      {% else %}
+      <div class="page-placeholder"></div>
+      {% endif %}
+    </div>
+  </div>
+</color-box>
+{% endblock %}

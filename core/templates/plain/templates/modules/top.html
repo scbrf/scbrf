@@ -1,0 +1,9 @@
+<div class="top">
+  {% if has_avatar %}
+  <a href="{{ assets_prefix }}"><img src="{{ assets_prefix }}avatar.png" width="72" height="72" class="avatar" border="0" /></a>
+  {% endif %}
+  <div class="site-info">
+    <div class="site-title">{{ planet.name|escape }}</div>
+    {% if page_description_html.count > 0 %}<div class="site-about">{{ page_description_html }}</div>{% endif %}
+  </div>
+</div>

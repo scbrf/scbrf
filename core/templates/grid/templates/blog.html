@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block head %}
+{% include 'modules/post_seo.html' %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.PLANET.visitedFromPlanetClient) {
+      if(document.getElementById('audio-container')){
+        document.querySelector('.audio-container').style.display = 'block';
+      }
+      if(document.getElementById('footer')){
+        document.querySelector('#footer').style.display = 'block';
+      }
+      breadcrumb([
+        { text: "{{ planet.name|escapejs }}", url: '../' },
+      ]);
+    }
+  });
+</script>
+{% endblock %}
+{% block main %}
+<h1>{{ article.title|escape }}</h1>
+<div class="date">{{ article.created|formatDate }}</div>
+<div class="content">
+  {% if article.hasVideo %}
+  <div class="video-container">
+    <video class="video"
+           poster="_videoThumbnail.png"
+           controls
+           playsinline
+           loop
+    >
+      <source src="{{ article.videoFilename }}">
+    </video>
+  </div>
+  {% endif %}
+  {% if article.hasAudio %}
+  <div class="audio-container" id="audio-container" style="display: none;">
+    <audio class="audio" controls>
+      <source src="{{ article.audioFilename }}">
+    </audio>
+  </div>
+  {% endif %}
+  {{ content_html }}
+</div>
+{% endblock %}

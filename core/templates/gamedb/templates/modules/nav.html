@@ -1,0 +1,13 @@
+<div id="nav">
+  <div class="nav-inner">
+    <span><a href="{{ assets_prefix }}index.html"><img src="{{ assets_prefix }}assets/home.png" class="nav-icon" /></a><a href="{{ assets_prefix }}index.html" class="{% if current_item_type == "index" %}nav-current{% else %}nav-item{% endif %}">Home</a></span>
+    <span><a href="{{ assets_prefix }}tags.html"><img src="{{ assets_prefix }}assets/tags.png" class="nav-icon" /></a><a href="{{ assets_prefix }}tags.html" class="{% if current_item_type == "tags" %}nav-current{% else %}nav-item{% endif %}">Tags</a></span>
+    <span><a href="{{ assets_prefix }}archive.html"><img src="{{ assets_prefix }}assets/archive.png" class="nav-icon" /></a><a href="{{ assets_prefix }}archive.html" class="{% if current_item_type == "archive" %}nav-current{% else %}nav-item{% endif %}">Archive</a></span>
+    {% if site_navigation.count > 0 %}
+    <span class="dot">·</span>
+    {% endif %}
+    {% for item in site_navigation %}
+    <a href="{% if item.externalLink.count > 0 %}{{ item.externalLink }}{% else %}{{ assets_prefix }}{% if item.slug.count > 0 %}{{ item.slug }}{% else %}{{ item.id }}{% endif %}/{% endif %}" class="{% if item.id == article_id %}nav-current{% else %}nav-item{% endif %}"{% if item.externalLink.count > 0 %} target="_blank"{% endif %}>{{ item.title }}</a>
+    {% endfor %}
+  </div>
+</div>

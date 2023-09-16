@@ -1,0 +1,13 @@
+<mech-box class="site-header">
+  <div class="site-header-inner">
+  {% if has_avatar %}
+  <div class="site-avatar">
+    <a href="{{ assets_prefix }}index.html"><img src="{{ assets_prefix }}avatar.png" alt="{{ planet.name|escapejs }}" border="0" /></a>
+  </div>
+  {% endif %}
+  <div class="site-info">
+    <div class="site-title">{{ page_title|escape }}</div>
+    <div class="site-about">{{ page_description|escape }}</div>
+  </div>
+  </div>
+</mech-box>

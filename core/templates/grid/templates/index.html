@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block head %}
+{% include 'modules/planet_seo.html' %}
+<!-- Pagination -->
+{% if previous_page %}
+<link rel="prev" href="./{{ previous_page }}">
+{% endif %}
+{% if next_page %}
+<link rel="next" href="./{{ next_page }}">
+{% endif %}
+{% endblock %}
+{% block main %}
+<div class="top">
+  {% if has_avatar %}
+  <img src="{{ assets_prefix }}avatar.png" width="72" height="72" class="avatar">
+  {% endif %}
+  <div class="site-info">
+    <div class="site-title">{{ page_title|escape }}</div>
+    {% if page_description_html.count > 0 %}<div class="site-about">{{ page_description_html }}</div>{% endif %}
+  </div>
+</div>
+<div class="nav-container"><div class="nav">
+  <a href="./" class="nav-current">Home</a>
+  <!-- TODO: Implement Article.kind and Archive
+  <a href="./" class="nav-item">About</a>
+  <a href="./" class="nav-item">Archive</a>
+  <a href="./" class="nav-item">Contact</a>
+  -->
+  <a href="{{ assets_prefix }}rss.xml" target="_blank"><img src="{{ assets_prefix }}assets/rss.svg" alt="RSS" class="social-icon" width="1em"></a>
+  {% if has_podcast %}
+  <a href="{{ assets_prefix }}podcast.xml" target="_blank"><img src="{{ assets_prefix }}assets/podcast.svg" alt="Podcast" class="social-icon" width="1em"></a>
+  {% endif %}
+  {% if planet.twitterUsername.count > 0 %}
+  <a href="https://twitter.com/{{ planet.twitterUsername|escapejs }}" target="_blank"><img src="{{ assets_prefix }}assets/twitter.svg" alt="twitter.com/{{ planet.twitterUsername|escapejs }}" class="social-icon" width="1em"></a>
+  {% endif %}
+  {% if planet.githubUsername.count > 0 %}
+  <a href="https://github.com/{{ planet.githubUsername|escapejs }}" target="_blank"><img src="{{ assets_prefix }}assets/github.svg" alt="github.com/{{ planet.githubUsername|escapejs }}" class="social-icon" width="1em"></a>
+  {% endif %}
+  {% if planet.telegramUsername.count > 0 %}
+  <a href="https://t.me/{{ planet.telegramUsername|escapejs }}" target="_blank"><img src="{{ assets_prefix }}assets/telegram.svg" alt="t.me/{{ planet.telegramUsername|escapejs }}" class="social-icon" width="1em"></a>
+  {% endif %}
+</div></div>
+{% endblock %}
+{% block aftermain %}
+<div class="items-outer"><div class="items">
+  {% for article in articles %}
+  <div class="item">
+    {% if article.heroImage %}
+    <a href="{{ article.id }}/"><div class="item-inner" style='background-image: url("{{ article.id }}/_grid.jpg")'>
+      {% if article.hasVideo %}
+      <div class="overlay-icon video-icon"></div>
+      {% else %}
+      {% if article.hasAudio %}
+      <div class="overlay-icon audio-icon"></div>
+      {% else %}
+      {% if article.attachments.count > 1 %}
+      <div class="overlay-icon multi-icon"></div>
+      {% endif %}
+      {% endif %}
+      {% endif %}
+    </div></a>
+    {% else %}
+    <a href="{{ article.id }}/"><span class="item-title">{{ article.title|escape }}</span></a>
+    <span class="item-info">{{ article.created|ymd }}</span>
+    {% endif %}
+    </div>
+  {% endfor %}
+</div></div>
+<div class="pages-container">
+  {% if previous_page %}
+  <a href="./{{ previous_page }}" class="nav-current">Previous Page</a>
+  {% endif %}
+  <div class="pages-info">Page {{ current_page }} of {{ total_pages }}</div>
+  {% if next_page %}
+  <a href="./{{ next_page }}" class="nav-current">Next Page</a>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,9 +1,9 @@
-const { observe } = require("mobx");
 class ScbrfCore {
   constructor() {
-    this.observe = observe;
+    this.observe = require("mobx").observe;
     this.ipfs = require("./ipfs");
     this.setting = require("./setting");
+    this.planetStore = require("./model/PlanetStore");
   }
   async init(cfg) {
     await this.setting.init(cfg);

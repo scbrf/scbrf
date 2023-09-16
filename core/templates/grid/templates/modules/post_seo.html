@@ -1,0 +1,30 @@
+<!-- Open Graph Tags -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="{{ article.title|escape }}" />
+<meta property="og:site_name" content="{{ planet.name|escape }}" />
+<meta property="og:description" content="{{ article_summary|escape }}" />
+<meta property="article:published_time" content="{{ article.created|formatDateC }}" />
+{% if social_image_url %}
+  <meta property="og:image" content="{{ social_image_url }}" />
+  <meta property="og:image:alt" content="{{ article_summary|escape }}" />
+{% else %}
+  {% if has_avatar %}
+    <meta property="og:image" content="{{ assets_prefix }}avatar.png" />
+    <meta property="og:image:alt" content="{{ article_summary|escape }}" />
+  {% endif %}
+{% endif %}
+<meta name="twitter:card" content="summary_large_image" />
+{% if planet.twitterUsername.count > 0 %}
+  <meta name="twitter:site" content="@{{ planet.twitterUsername|escape }}" />
+  <meta name="twitter:creator" content="@{{ planet.twitterUsername|escape }}" />
+{% endif %}
+<meta name="twitter:title" content="{{ article.title|escape }}" />
+<meta name="twitter:description" content="{{ article_summary|escape }}" />
+{% if social_image_url %}
+  <meta name="twitter:image" content="{{ social_image_url }}" />
+{% else %}
+  {% if has_avatar %}
+    <meta name="twitter:image" content="{{ assets_prefix }}avatar.png" />
+  {% endif %}
+{% endif %}
+<!-- End Open Graph Tags -->

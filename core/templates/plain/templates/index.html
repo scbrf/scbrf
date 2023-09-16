@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block head %}
+{% include 'modules/planet_seo.html' %}
+<!-- Pagination -->
+{% if previous_page %}
+<link rel="prev" href="./{{ previous_page }}">
+{% endif %}
+{% if next_page %}
+<link rel="next" href="./{{ next_page }}">
+{% endif %}
+{% endblock %}
+{% block main %}
+{% include 'modules/top.html' %}
+{% include 'modules/nav.html' %}
+{% if tag_key %}
+<div class="tag-container">
+  <div class="tag-caption">
+    <a href="{{ assets_prefix }}tags.html">Tags</a>
+    <span class="chevron">›</span>
+  </div>
+  <div class="tag-title">{{ tag_value }}</div>
+  <div class="tag-count">{{ articles.count }} article{% if articles.count > 1 %}s{% endif %}</div>
+</div>
+{% endif %}
+<div class="items">
+  {% for article in articles %}
+  <div class="item">
+    {% if article.heroImage != nil %}
+    <!--<div class="item-hero-image"><a href="{{ article.id }}/"><img src="{{ article.id }}/{{ article.heroImage }}"></a></div>-->
+    {% endif %}
+    <div class="item-main">
+      <div class="item-title"><a href=".{{ article.link }}">{{ article.title|escape }}</a></div>
+      <div class="item-info">
+        <div class="item-date">{{ article.created|ymd }}</div>
+        {% if article.hasVideo %}<img src="{{ assets_prefix }}assets/video.svg" width="1em" class="item-video-icon" alt="Video">{% endif %}
+        {% if article.hasAudio %}<img src="{{ assets_prefix }}assets/microphone.svg" width="1em" class="item-audio-icon" alt="Video">{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% include 'modules/pages.html' %}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block head %}
+{% include 'modules/article_seo.html' %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.PLANET.visitedFromPlanetClient) {
+      if(document.getElementById('audio-container')){
+        document.querySelector('.audio-container').style.display = 'block';
+      }
+      if(document.getElementById('footer')){
+        document.querySelector('#footer').style.display = 'block';
+      }
+      console.log("Current article_type: {{ article_type }}")
+      {% if article_type == 0 %}
+      breadcrumb([
+        { text: "{{ planet.name|escapejs }}", url: '../' },
+      ]);
+      {% endif %}
+    } else {
+
+    }
+    const todos = document.querySelectorAll('li:has(input[type="checkbox"])');
+    let i = 1;
+    todos.forEach(item => {
+      item.id = "todo-item-" + i;
+      i++;
+    });
+  });
+</script>
+{% endblock %}
+{% block main %}
+{% if article_type == 1 %}
+{% include 'modules/top.html' %}
+{% include 'modules/nav.html' %}
+{% endif %}
+<h1>{{ article.title|escape }}</h1>
+<div class="date">{{ article.created|formatDate }}</div>
+<div class="content">
+  {% if article.hasVideo %}
+  <div class="video-container">
+    <video class="video" controls playsinline>
+      <source src="{{ article.videoFilename }}">
+    </video>
+  </div>
+  {% endif %}
+  {% if article.hasAudio %}
+  <div class="audio-container" id="audio-container" style="display: none;">
+    <audio class="audio" controls>
+      <source src="{{ article.audioFilename }}">
+    </audio>
+  </div>
+  {% endif %}
+  {{ content_html }}
+</div>
+{% if article.tags.count > 0 %}
+<div class="tags-container">
+<span>Tags:</span>
+<div class="tags">{% for tag in article.tags %}<a href="{{ assets_prefix }}{{ tag }}.html" class="tag-item">{{ article.tags[tag] }}</a>{% endfor %}</div>
+</div>
+{% endif %}
+{% endblock %}

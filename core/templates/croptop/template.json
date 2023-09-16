@@ -1,0 +1,68 @@
+{
+  "name": "Croptop",
+  "description": "For pictures and screenshots",
+  "author": "Jango",
+  "authorWebsite": "https://jango.eth.limo",
+  "version": "1.0.31",
+  "idealItemsPerPage": 10,
+  "generateIndexPagination": false,
+  "buildNumber": 459,
+  "generateNFTMetadata": true,
+  "generateTagPages": true,
+  "settings": {
+    "mainnetCollectionID": {
+      "name": "Mainnet NFT Collection ID",
+      "type": "int",
+      "defaultValue": "1016",
+      "description": "Your collection ID is the ID of your Juicebox project where your collection is configured. Your site will record posts onto this collection by default."
+    },
+    "mainnetCollectionCategory": {
+      "name": "Mainnet NFT Category",
+      "type": "int",
+      "defaultValue": "0",
+      "description": "The category within your collection where posts will be recorded by default."
+    },
+    "mainnetRPC": {
+      "name": "Mainnet RPC",
+      "type": "string",
+      "defaultValue": "",
+      "description": "A URL where your site will access onchain data from."
+    },
+    "mainnetCPNBeneficiaryAddress": {
+      "name": "Mainnet address",
+      "type": "string",
+      "defaultValue": "",
+      "description": "The address where $CPN resulting from your site's recorded posts will be sent."
+    },
+    "goerliCollectionID": {
+      "name": "Goerli NFT Collection ID",
+      "type": "int",
+      "defaultValue": "1016",
+      "description": ""
+    },
+    "goerliCollectionCategory": {
+      "name": "Goerli NFT Category",
+      "type": "int",
+      "defaultValue": "0",
+      "description": ""
+    },
+    "goerliRPC": {
+      "name": "Goerli RPC",
+      "type": "string",
+      "defaultValue": "",
+      "description": ""
+    },
+    "goerliCPNBeneficiaryAddress": {
+      "name": "Goerli address",
+      "type": "string",
+      "defaultValue": "",
+      "description": ""
+    },
+    "highlightColor": {
+      "name": "Highlight Color",
+      "type": "string",
+      "defaultValue": "#f056c1",
+      "description": "Color for links and buttons"
+    }
+  }
+}

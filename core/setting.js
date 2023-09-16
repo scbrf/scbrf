@@ -1,5 +1,8 @@
 const log = require("./log")("setting");
+
 class Setting {
+  documentRoot = "PlanetSettingsDocumentRootKey";
+  settingsLibraryLocation = "PlanetSettingsLibraryLocationKey";
   async init(cfg = {}) {
     this.prefs = { ...cfg };
     const prefPath = this.get(

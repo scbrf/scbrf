@@ -32,6 +32,29 @@ class IPFS {
       }
     );
     log.info({ arguments, stdout, stderr, error }, "ipfs command");
+    return { stdout, stderr, error };
+  }
+  async generateKey(name) {
+    log.info({ name }, "Generating IPFS keypair");
+    try {
+      const { error, stdout, stderr } = await this.IPFSCommand(
+        "key",
+        "gen",
+        name
+      );
+      if (!error) {
+        const ipns = `${stdout}`.trim();
+        log.info({ ipns }, "Generated IPFS keypair");
+        return ipns;
+      } else {
+        log.error({ error, stdout, stderr }, "Failed to generate IPFS keypair");
+      }
+    } catch (ex) {
+      log.info(
+        ex,
+        "Failed to generate IPFS keypair: error when running IPFS process"
+      );
+    }
   }
   async onlineStatusCheck() {
     this.onlineCheckTimer = setInterval(async () => {

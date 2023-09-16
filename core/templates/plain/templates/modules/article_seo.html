@@ -1,0 +1,23 @@
+<!-- Open Graph Tags -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="{{ article.title|escape }}" />
+<meta property="og:site_name" content="{{ planet.name|escape }}" />
+<meta property="og:description" content="{{ article_summary|escape }}" />
+<meta property="article:published_time" content="{{ article.created|formatDateC }}" />
+{% if article.heroImage != nil %}
+  <meta property="og:image" content="{{ social_image_url }}" />
+  <meta property="og:image:alt" content="{{ article.title|escape }}" />
+{% else %}
+  <meta property="og:image" content="{{ social_image_url }}" />
+  <meta property="og:image:alt" content="{{ planet.name|escape }}" />
+{% endif %}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="{{ planet.name|escape }}" />
+<meta name="twitter:title" content="{{ article.title|escape }}" />
+<meta name="twitter:description" content="{{ article_summary|escape }}" />
+{% if article.heroImage != nil %}
+  <meta name="twitter:image" content="{{ social_image_url }}" />
+{% else %}
+  <meta name="twitter:image" content="{{ social_image_url }}" />
+{% endif %}
+<!-- End Open Graph Tags -->

@@ -1,0 +1,10 @@
+{
+  "name": "Grid",
+  "description": "A template that is specially optimized for pictures",
+  "author": "Planetable Team",
+  "authorWebsite": "https://planetable.xyz",
+  "version": "1.2.0",
+  "idealItemsPerPage": 12,
+  "generateIndexPagination": true,
+  "buildNumber": 94
+}

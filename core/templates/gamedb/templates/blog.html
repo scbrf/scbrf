@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block head %}
+{% include 'modules/article_seo.html' %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.PLANET.visitedFromPlanetClient) {
+      {% if article.hasAudio %}
+      // In Planet App, the audio element should be replaced by a global player,
+      //   but we cannot simply put the element there and hide it, since CSS
+      //   sets a special margin for the first <p> element (which is likely the
+      //   first element from compiled markdown), and a hidden audio container
+      //   will takes the first element and invalidate the margin. As a result,
+      //   it is better to create the audio container and insert the element.
+      {% if article.hasVideo %}
+      let anchor = document.querySelector('.video-container');
+      let placement = 'afterend';
+      {% else %}
+      let anchor = document.querySelector('.content');
+      let placement = 'afterbegin';
+      {% endif %}
+      let audioTemplate = document.getElementById('audio-template');
+      let elem = audioTemplate.content.firstElementChild.cloneNode(true);
+      anchor.insertAdjacentElement(placement, elem);
+      {% endif %}
+      breadcrumb([
+        { text: '{{ planet.name|escapejs }}', url: '../' },
+      ]);
+    }
+  });
+</script>
+{% endblock %}
+{% block main %}
+<retro-box style="filter: drop-shadow(0px 3px 20px rgba(0, 0, 0, 0.5)); margin-bottom: 20px;">
+  <h1>{{ article.title|escape }}</h1>
+</retro-box>
+<div class="post-info"><div class="post-info-inner">
+  <div class="date">{{ article.created|ymd }}</div>
+  {% if article.tags.count > 0 %}
+  {% for tag in article.tags %}<span class="dot">·</span>
+  <a href="{{ assets_prefix }}{{ tag }}.html" class="tag-item">{{ article.tags[tag] }}</a>{% endfor %}
+  {% endif %}
+  </div>
+</div>
+<color-box theme="ice">
+  <div class="content">
+    {% if article.hasVideo %}
+    <div class="video-container">
+      <video class="video" controls playsinline>
+        <source src="{{ article.videoFilename }}">
+      </video>
+    </div>
+    {% endif %}
+    <!-- insert audio container here -->
+    {{ content_html }}
+  </div>
+</color-box>
+<div class="bottom">This site is built with <a href="https://planetable.xyz/?from=app" target="_blank">Planetable</a></div>
+{% if article.hasAudio %}
+<template id="audio-template">
+  <div class="audio-container">
+    <audio class="audio" controls>
+      <source src="{{ article.audioFilename }}">
+    </audio>
+  </div>
+</template>
+{% endif %}
+{% endblock %}

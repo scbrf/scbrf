@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta content="True" name="HandheldFriendly">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=auto">
+    <meta name="theme-color" content="#fff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+    <link rel="stylesheet" href="{{ assets_prefix }}assets/style.css?sha256={{ style_css_sha256 }}">
+    <link rel="preload" href="{{ assets_prefix }}planet.json" as="fetch" type="application/json" crossorigin="anonymous">
+    <link rel="preload" href="{{ assets_prefix }}rss.xml" as="fetch" type="application/rss+xml" crossorigin="anonymous">
+    <title>{% block title %}{{ page_title|escape }}{% endblock %}</title>
+    <script>
+      let userAgentRegex = /Planet\/\S*/;
+      window.PLANET = {
+        visitedFromPlanetClient: !!navigator.userAgent.match(userAgentRegex),
+        assetsPrefix: '{{ assets_prefix }}',
+      };
+
+      window.addEventListener('DOMContentLoaded', e => {
+        {% block dom_ready %}
+        {% endblock %}
+      });
+    </script>
+    <script>
+      let env = {};
+    </script>
+    {% if has_avatar == true %}
+    <link rel="icon" href="{{ assets_prefix }}avatar.png" sizes="144x144">
+    <link rel="shortcut icon" href="{{ assets_prefix }}favicon.ico" type="image/png">
+    {% endif %}
+    {% block head %}{% endblock %}
+    {% if planet.plausibleEnabled %}
+    <script defer data-domain="{{ planet.plausibleDomain }}" src="https://{{ planet.plausibleAPIServer }}/js/plausible.local.js"></script>
+    {% endif %}
+    {% if custom_code_head.count > 0 %}{{ custom_code_head }}{% endif %}
+  </head>
+  <body>
+    {% if custom_code_body_start.count > 0 %}{{ custom_code_body_start }}{% endif %}
+    <div class="wrapper">
+      <div class="main">
+        {% block main %}
+        {% endblock %}
+      </div>
+    </div>
+    {% if custom_code_body_end.count > 0 %}{{ custom_code_body_end }}{% endif %}
+  </body>
+</html>

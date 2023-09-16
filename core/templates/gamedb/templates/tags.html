@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% include 'modules/planet_seo.html' %}
+{% endblock %}
+
+{% block main %}
+{% include 'modules/site_header.html' %}
+{% include 'modules/nav.html' %}
+<color-box theme="fire">
+  <div class="content">
+    <div class="tag-container">
+      <div class="tag-title">Tags</div>
+      <div class="tag-count">{{ tags.count }} tags</div>
+    </div>
+    <div class="tag-cloud">
+    {% for tag in tags %}
+    <div class="tag-cloud-item">
+      <a href="{{ assets_prefix }}{{ tag }}.html">{{ tags[tag] }}</a>
+      <span class="tag-cloud-item-count">{{ tag_articles[tag].count }}</span>
+    </div>
+    {% endfor %}
+    </div>
+  </div>
+</color-box>
+{% endblock %}

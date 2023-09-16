@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% include 'modules/planet_seo.html' %}
+{% endblock %}
+
+{% block main %}
+{% include 'modules/site_header.html' %}
+{% include 'modules/nav.html' %}
+<color-box theme="grass">
+  <div class="archive-container">
+    <div class="archive-title">Archive</div>
+    <div class="archive-count">{{ articles.count }} articles</div>
+  </div>
+  <div class="archive-list">
+  {% for item in archive_sections %}
+  <div class="archive-list-header">{{ item }}</div>
+  {% for article in archive[item] %}
+  <div class="archive-list-item">
+    <a href="{{ assets_prefix }}{{ article.id }}/">{{ article.title|escape }}</a>
+  </div>
+  {% endfor %}
+  {% endfor %}
+  </div>
+</color-box>
+{% endblock %}

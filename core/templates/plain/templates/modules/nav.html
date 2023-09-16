@@ -1,0 +1,30 @@
+<div class="nav-container"><div class="nav">
+  <a href="{{ assets_prefix }}" class="{% if current_item_type == 'index' %}nav-current{% else %}nav-item{% endif %}">Home</a>
+  {% if planet.tags.count > 0 %}<a href="{{ assets_prefix }}tags.html" class="{% if current_item_type == 'tags' %}nav-current{% else %}nav-item{% endif %}">Tags</a>{% endif %}
+  <a href="{{ assets_prefix }}archive.html" class="{% if current_item_type == 'archive' %}nav-current{% else %}nav-item{% endif %}">Archive</a>
+  {% for item in site_navigation %}
+  <a href="{% if item.externalLink.count > 0 %}{{ item.externalLink }}{% else %}{{ assets_prefix }}{% if item.slug.count > 0 %}{{ item.slug }}{% else %}{{ item.id }}{% endif %}/{% endif %}" class="{% if item.id == article_id %}nav-current{% else %}nav-item{% endif %}"{% if item.externalLink.count > 0 %} target="_blank"{% endif %}>{{ item.title }}</a>
+  {% endfor %}
+  <a href="{{ assets_prefix }}rss.xml" target="_blank"><img src="{{ assets_prefix }}assets/rss.svg" alt="RSS" class="social-icon" width="1em"></a>
+  {% if has_podcast %}
+  <a href="{{ assets_prefix }}podcast.xml" target="_blank"><img src="{{ assets_prefix }}assets/podcast.svg" alt="Podcast" class="social-icon" width="1em"></a>
+  {% endif %}
+  {% if planet.twitterUsername.count > 0 %}
+  <a href="https://twitter.com/{{ planet.twitterUsername|escapejs }}" target="_blank"><img src="{{ assets_prefix }}assets/twitter.svg" alt="twitter.com/{{ planet.twitterUsername|escapejs }}" class="social-icon" width="1em"></a>
+  {% endif %}
+  {% if planet.githubUsername.count > 0 %}
+  <a href="https://github.com/{{ planet.githubUsername|escapejs }}" target="_blank"><img src="{{ assets_prefix }}assets/github.svg" alt="github.com/{{ planet.githubUsername|escapejs }}" class="social-icon" width="1em"></a>
+  {% endif %}
+  {% if planet.telegramUsername.count > 0 %}
+  <a href="https://t.me/{{ planet.telegramUsername|escapejs }}" target="_blank"><img src="{{ assets_prefix }}assets/telegram.svg" alt="t.me/{{ planet.telegramUsername|escapejs }}" class="social-icon" width="1em"></a>
+  {% endif %}
+  {% if planet.juiceboxEnabled %}
+  {% if planet.juiceboxProjectID != nil %}
+    <a href="https://juicebox.money/v2/p/{{ planet.juiceboxProjectID }}" target="_blank"><img src="{{ assets_prefix }}assets/juicebox.svg" alt="Juicebox Project ID {{ planet.juiceboxProjectID }}" class="social-icon" width="1em"></a>
+  {% else %}
+    {% if planet.juiceboxProjectIDGoerli != nil %}
+    <a href="https://goerli.juicebox.money/v2/p/{{ planet.juiceboxProjectIDGoerli }}" target="_blank"><img src="{{ assets_prefix }}assets/juicebox.svg" alt="Goerli Juicebox Project ID {{ planet.juiceboxProjectIDGoerli }}" class="social-icon" width="1em"></a>
+    {% endif %}
+  {% endif %}
+  {% endif %}
+</div></div>

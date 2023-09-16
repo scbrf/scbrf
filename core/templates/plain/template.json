@@ -1,0 +1,12 @@
+{
+  "name": "Plain",
+  "description": "A plain template for Planet",
+  "author": "Planetable Team",
+  "authorWebsite": "https://planetable.xyz",
+  "version": "1.7.3",
+  "idealItemsPerPage": 10,
+  "generateIndexPagination": true,
+  "generateTagPages": true,
+  "generateArchive": true,
+  "buildNumber": 105
+}
