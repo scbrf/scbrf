@@ -1,6 +1,8 @@
+const moment = require("moment");
 const URLUtils = require("../Helper/URLUtils");
 
 const UUID = require("uuid").v4;
+const BLOG = 0;
 class MyPlanetModel {
   constructor(params) {
     const {
@@ -198,6 +200,259 @@ class MyPlanetModel {
 
   get template() {
     return require("../Helper/TemplateStore").get(this.templateName);
+  }
+
+  async savePublic() {
+    if (!this.template) throw new Error("MissingTemplateError");
+    this.removeDSStore();
+    const siteNavigation = this.siteNavigation();
+    const allArticles = this.articles.map((item) => item.publicArticle);
+    const publicArticles = this.articles
+      .filter((item) => item.articleType == BLOG)
+      .map((item) => item.publicArticle);
+    const publicPlanet = new PublicPlanetModel({
+      id: this.id,
+      name: this.name,
+      about: this.about,
+      ipns: this.ipns,
+      created: this.created,
+      updated: this.updated,
+      articles: publicArticles,
+      plausibleEnabled: this.plausibleEnabled,
+      plausibleDomain: this.plausibleDomain,
+      plausibleAPIServer: this.plausibleAPIServer,
+      juiceboxEnabled: this.juiceboxEnabled,
+      juiceboxProjectID: this.juiceboxProjectID,
+      juiceboxProjectIDGoerli: this.juiceboxProjectIDGoerli,
+      twitterUsername: this.twitterUsername,
+      githubUsername: this.githubUsername,
+      telegramUsername: this.telegramUsername,
+      mastodonUsername: this.mastodonUsername,
+      podcastCategories: this.podcastCategories,
+      podcastLanguage: this.podcastLanguage,
+      podcastExplicit: this.podcastExplicit,
+      tags: this.tags,
+    });
+    const hasPodcastCoverArt = require("fs").existsSync(
+      this.publicPodcastCoverArtPath
+    );
+    // MARK: - Render index.html and pages
+    const itemsPerPage = this.template.idealItemsPerPage || 10;
+    const generateIndexPagination =
+      this.template.generateIndexPagination || false;
+    if (
+      generateIndexPagination &&
+      publicPlanet.articles.length > itemsPerPage
+    ) {
+      const pages = Math.ceil(publicPlanet.articles.length / itemsPerPage);
+      for (let i = 1; i <= pages; i++) {
+        const pageArticles = publicPlanet.articles.slice(
+          (i - 1) * itemsPerPage,
+          i * itemsPerPage
+        );
+        const pageContext = {
+          planet: publicPlanet,
+          my_planet: this,
+          site_navigation: siteNavigation,
+          has_avatar: this.hasAvatar,
+          og_image_url: this.ogImageURLString,
+          has_podcast: publicPlanet.hasAudioContent(),
+          has_podcast_cover_art: hasPodcastCoverArt,
+          page: i,
+          pages: pages,
+          articles: pageArticles,
+        };
+        const pageHTML = this.template.renderIndex(pageContext);
+        const pagePath = this.publicIndexPagePath(i);
+        require("fs").writeFileSync(pagePath, pageHTML);
+
+        if (i == 1) {
+          const indexHTML = this.template.renderIndex(pageContext);
+          require("fs").writeFileSync(this.publicIndexPath, indexHTML);
+        }
+      }
+    } else {
+      const pageContext = {
+        planet: publicPlanet,
+        my_planet: this,
+        site_navigation: siteNavigation,
+        has_avatar: this.hasAvatar(),
+        og_image_url: this.ogImageURLString,
+        has_podcast: publicPlanet.hasAudioContent(),
+        has_podcast_cover_art: hasPodcastCoverArt,
+        articles: publicPlanet.articles,
+      };
+      const pageHTML = this.template.renderIndex(pageContext);
+      const pagePath = this.publicIndexPagePath(1);
+      require("fs").writeFileSync(pagePath, pageHTML);
+
+      const indexHTML = this.template.renderIndex(pageContext);
+      require("fs").writeFileSync(this.publicIndexPath, indexHTML);
+    }
+
+    // MARK: - Render tags
+    const generateTagPages = this.template.generateTagPages;
+    if (generateTagPages) {
+      const tagArticles = {};
+      for (let article of allArticles) {
+        if (article.tags) {
+          const articleTags = article.tags;
+          for (let key in articleTags) {
+            if (MyPlanetModel.isReservedTag(key)) {
+              continue;
+            }
+          }
+          if (!tagArticles[key]) {
+            tagArticles[key] = [];
+          }
+          tagArticles[key].push(article);
+        }
+      }
+      for (let key in tagArticles) {
+        const value = tagArticles[key];
+        const tagContext = {
+          planet: publicPlanet,
+          my_planet: this,
+          site_navigation: siteNavigation,
+          has_avatar: this.hasAvatar(),
+          og_image_url: this.ogImageURLString,
+          has_podcast: publicPlanet.hasAudioContent(),
+          has_podcast_cover_art: hasPodcastCoverArt,
+          tag_key: key,
+          tag_value: this.tags[key] || key,
+          current_item_type: "tags",
+          articles: value,
+          page_title: `${this.name} - ${this.tags[key] || key}`,
+        };
+        const tagHTML = this.template.renderIndex(tagContext);
+        const tagPath = this.publicTagPath(key);
+        require("fs").writeFileSync(tagPath, tagHTML);
+      }
+      if (this.template.hasTagsHTML) {
+        const tagsContext = {
+          planet: publicPlanet,
+          my_planet: this,
+          site_navigation: siteNavigation,
+          has_avatar: this.hasAvatar(),
+          og_image_url: this.ogImageURLString,
+          has_podcast: publicPlanet.hasAudioContent(),
+          has_podcast_cover_art: hasPodcastCoverArt,
+          tags: tags,
+          tag_articles: tagArticles,
+        };
+        const tagsHTML = this.template.renderTags(tagsContext);
+        require("fs").writeFileSync(this.publicTagsPath, tagsHTML);
+      }
+    }
+
+    // MARK: - Render arthive.html
+    const generateArchive = this.template.generateArchive;
+    if (generateArchive) {
+      if (this.template.hasArchiveHTML) {
+        const archive = {};
+        const archiveSections = [];
+        const dateFormatter = "MM/YYYY";
+        for (let article of allArticles) {
+          const monthYear = moment(article.created).format(dateFormatter);
+          if (!archive[monthYear]) {
+            archive[monthYear] = [];
+            archiveSections.push(monthYear);
+          }
+          archive[monthYear].push(article);
+        }
+        const archiveContext = {
+          planet: publicPlanet,
+          my_planet: this,
+          site_navigation: siteNavigation,
+          has_avatar: this.hasAvatar(),
+          og_image_url: this.ogImageURLString,
+          has_podcast: publicPlanet.hasAudioContent(),
+          has_podcast_cover_art: hasPodcastCoverArt,
+          articles: allArticles,
+          archive: archive,
+          archive_sections: archiveSections,
+        };
+        const archiveHTML = this.template.renderArchive(archiveContext);
+        require("fs").writeFileSync(this.publicArchivePath, archiveHTML);
+      }
+    }
+
+    // MARK: - Render RSS and podcast RSS
+    this.renderRSS({ podcastOnly: false });
+
+    if (publicPlanet.hasAudioContent()) {
+      this.renderRSS({ podcastOnly: true });
+    }
+
+    const info = JSON.stringify(publicPlanet);
+    require("fs").writeFileSync(this.publicInfoPath, info);
+  }
+  async save() {
+    require("fs").writeFileSync(
+      this.infoPath,
+      JSON.stringify(
+        [
+          "id",
+          "name",
+          "about",
+          "domain",
+          "authorName",
+          "created",
+          "ipns",
+          "updated",
+          "templateName",
+          "lastPublished",
+          "lastPublishedCID",
+          "isPublishing",
+          "archived",
+          "archivedAt",
+          "plausibleEnabled",
+          "plausibleDomain",
+          "plausibleAPIKey",
+          "plausibleAPIServer",
+          "twitterUsername",
+          "githubUsername",
+          "telegramUsername",
+          "mastodonUsername",
+          "dWebServicesEnabled",
+          "dWebServicesDomain",
+          "dWebServicesAPIKey",
+
+          "pinnableEnabled",
+          "pinnableAPIEndpoint",
+          "pinnablePinCID",
+
+          "filebaseEnabled",
+          "filebasePinName",
+          "filebaseAPIToken",
+          "filebaseRequestID",
+          "filebasePinCID",
+
+          "customCodeHeadEnabled",
+          "customCodeHead",
+          "customCodeBodyStartEnabled",
+          "customCodeBodyStart",
+          "customCodeBodyEndEnabled",
+          "customCodeBodyEnd",
+          "podcastCategories",
+          "podcastLanguage",
+          "podcastExplicit",
+          "juiceboxEnabled",
+          "juiceboxProjectID",
+          "juiceboxProjectIDGoerli",
+          "avatar",
+          "podcastCoverArt",
+          "drafts",
+          "articles",
+
+          "tags",
+          "aggregation",
+        ].reduce((r, k) => {
+          r[k] = this[k];
+          return r;
+        }, {})
+      )
+    );
   }
 
   static async create(params) {

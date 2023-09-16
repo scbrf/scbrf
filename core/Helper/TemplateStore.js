@@ -1,8 +1,119 @@
 const URLUtils = require("./URLUtils");
-
+const S = require("../setting");
+const { createHash } = require("node:crypto");
 class Template {
-  async prepareTemporaryAssetsForPreview() {}
-  static from(path) {}
+  name = "";
+  description = "";
+  path = "";
+  author = "";
+  version = "";
+  idealItemsPerPage = 10;
+  generateIndexPagination = false;
+  generateTagPages = false;
+  generateArchive = false;
+  buildNumber = 1;
+  generateNFTMetadata = false;
+  settings = {};
+
+  get id() {
+    return this.name;
+  }
+
+  get hasSettings() {
+    return Object.keys(this.settings).length > 0;
+  }
+
+  get blogPath() {
+    return require("path").join(this.path, "templates", "blog.html");
+  }
+
+  // simple.html holds the basic minimal HTML structure for a quick preview.
+  // It is not required for a template to have this file
+  // TODO: A more detailed documentation about the template structure
+  get blogSimplePath() {
+    return require("path").join(this.path, "templates", "simple.html");
+  }
+
+  // tags.html for tag cloud, not all templates have this file
+  get tagsPath() {
+    return require("path").join(this.path, "templates", "tags.html");
+  }
+
+  // archive.html for a list of all items
+  get archivePath() {
+    return require("path").join(this.path, "templates", "archive.html");
+  }
+
+  get indexPath() {
+    return require("path").join(this.path, "templates", "index.html");
+  }
+
+  get assetsPath() {
+    return require("path").join(this.path, "assets");
+  }
+
+  get styleCSSPath() {
+    return require("path").join(this.path, "assets", "style.css");
+  }
+
+  get styleCSSHash() {
+    return createHash("sha256")
+      .update(require("fs").readFileSync(this.styleCSSPath))
+      .digest("hex");
+  }
+
+  get hasGitRepo() {
+    let gitPath = require("path").join(this.path, ".git");
+    return require("fs").existsSync(gitPath);
+  }
+
+  get hasSimpleHTML() {
+    return require("fs").existsSync(this.blogSimplePath);
+  }
+
+  get hasTagsHTML() {
+    return require("fs").existsSync(this.tagsPath);
+  }
+
+  get hasArchiveHTML() {
+    return require("fs").existsSync(this.archivePath);
+  }
+  constructor(json) {
+    Object.assign(this, json);
+  }
+  async prepareTemporaryAssetsForPreview() {
+    const tmproot = S.get(S.tmproot, require("os").tmpdir());
+    const templatePreviewDirectory = require("path").join(tmproot, this.name);
+    if (!require("fs").existsSync(templatePreviewDirectory)) {
+      require("fs").mkdirSync(templatePreviewDirectory);
+    }
+    const assetsPreviewPath = require("path").join(
+      templatePreviewDirectory,
+      "assets"
+    );
+    if (require("fs").existsSync(assetsPreviewPath)) {
+      require("fs").rmSync(assetsPreviewPath, { recursive: true, force: true });
+    }
+    require("fs").cpSync(this.assetsPath, assetsPreviewPath);
+  }
+  static from(path) {
+    log.info({ path }, "Loading template");
+    const templateInfoPath = require("path").join(path, "template.json");
+    if (!require("fs").existsSync(templateInfoPath)) {
+      log.error({ path }, "Template directory has no template.json");
+      return;
+    }
+    const template = new Template(require(templateInfoPath));
+    template.path = path;
+
+    if (!require("fs").existsSync(this.blogPath)) {
+      log.error({ path }, "Template directory has no blog.html");
+    }
+    if (!require("fs").existsSync(this.assetsPath)) {
+      log.error({ path }, "Template directory has no assets directory");
+    }
+    return template;
+  }
 }
 
 class TemplateStore {
@@ -29,7 +140,7 @@ class TemplateStore {
       }
     }
 
-    for (let builtInTemplate of require("./PlanetSiteTemplates")
+    for (let builtInTemplate of require("./PlanetSiteTemplates.js")
       .builtInTemplates) {
       let overwriteLocal = false;
       if (templatesMapping[builtInTemplate.name]) {
