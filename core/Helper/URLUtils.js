@@ -18,7 +18,7 @@ class URLUtils {
     }
     return url;
   }
-  static repoPath() {
+  repoPath() {
     const libraryLocation = S.get(
       S.settingsLibraryLocation,
       this.defaultRepoPath

@@ -1,8 +1,56 @@
 const moment = require("moment");
 const URLUtils = require("../Helper/URLUtils");
-
+const log = require("../log")("my planet model");
 const UUID = require("uuid").v4;
 const BLOG = 0;
+
+class PublicPlanetModel {
+  id = "";
+  name = "";
+  about = "";
+  ipns = "";
+  created = new Date();
+  updated = new Date();
+  articles = [];
+
+  plausibleEnabled = false;
+  plausibleDomain = "";
+  plausibleAPIServer = "";
+
+  juiceboxEnabled = false;
+  juiceboxProjectID = 0;
+  juiceboxProjectIDGoerli = 0;
+
+  twitterUsername = "";
+  githubUsername = "";
+  telegramUsername = "";
+  mastodonUsername = "";
+
+  podcastCategories = {};
+  podcastLanguage = "";
+  podcastExplicit = false;
+
+  tags = {};
+
+  hasAudioContent() {
+    for (let article of this.articles) {
+      if (article.audioFilename) return true;
+    }
+    return false;
+  }
+
+  hasVideoContent() {
+    for (let article of this.articles) {
+      if (article.videoFilename) return true;
+    }
+    return false;
+  }
+
+  constructor(json) {
+    Object.assign(this, json);
+  }
+}
+
 class MyPlanetModel {
   constructor(params) {
     const {
@@ -35,56 +83,60 @@ class MyPlanetModel {
     return url;
   }
   get basePath() {
-    return require("path").join(MyPlanetModel.myPlanetsPath, this.id);
+    return require("path").join(MyPlanetModel.myPlanetsPath(), this.id);
   }
   get infoPath() {
     return require("path").join(
-      MyPlanetModel.myPlanetsPath,
+      MyPlanetModel.myPlanetsPath(),
       this.id,
       "planet.json"
     );
   }
   get articlesPath() {
     return require("path").join(
-      MyPlanetModel.myPlanetsPath,
+      MyPlanetModel.myPlanetsPath(),
       this.id,
       "Articles"
     );
   }
   get avatarPath() {
     return require("path").join(
-      MyPlanetModel.myPlanetsPath,
+      MyPlanetModel.myPlanetsPath(),
       this.id,
       "avatar.png"
     );
   }
   get faviconPath() {
     return require("path").join(
-      MyPlanetModel.myPlanetsPath,
+      MyPlanetModel.myPlanetsPath(),
       this.id,
       "favicon.ico"
     );
   }
   get opsPath() {
     return require("path").join(
-      MyPlanetModel.myPlanetsPath,
+      MyPlanetModel.myPlanetsPath(),
       this.id,
       "ops.json"
     );
   }
   get podcastCoverArtPath() {
     return require("path").join(
-      MyPlanetModel.myPlanetsPath,
+      MyPlanetModel.myPlanetsPath(),
       this.id,
       "podcastCoverArt.png"
     );
   }
   get draftsPath() {
-    return require("path").join(MyPlanetModel.myPlanetsPath, this.id, "Drafts");
+    return require("path").join(
+      MyPlanetModel.myPlanetsPath(),
+      this.id,
+      "Drafts"
+    );
   }
   get articleDraftsPath() {
     return require("path").join(
-      MyPlanetModel.myPlanetsPath,
+      MyPlanetModel.myPlanetsPath(),
       this.id,
       "Articles",
       "Drafts"
@@ -200,6 +252,76 @@ class MyPlanetModel {
 
   get template() {
     return require("../Helper/TemplateStore").get(this.templateName);
+  }
+
+  hasAvatar() {
+    return require("fs").existsSync(this.publicAvatarPath);
+  }
+
+  renderRSS(podcastOnly) {
+    const templateStringRSS = this.templateStringRSS;
+    if (!templateStringRSS) return;
+    try {
+      const allArticles = this.articles.map((i) => i.publicArticle);
+      const publicArticles = allArticles.filter((item) =>
+        podcastOnly ? item.audioFilename : true
+      );
+      const publicPlanet = new PublicPlanetModel({
+        id: this.id,
+        name: this.name,
+        about: this.about,
+        ipns: this.ipns,
+        created: this.created,
+        updated: this.updated,
+        articles: publicArticles,
+        plausibleEnabled: this.plausibleEnabled,
+        plausibleDomain: this.plausibleDomain,
+        plausibleAPIServer: this.plausibleAPIServer,
+        juiceboxEnabled: this.juiceboxEnabled,
+        juiceboxProjectID: this.juiceboxProjectID,
+        juiceboxProjectIDGoerli: this.juiceboxProjectIDGoerli,
+        twitterUsername: this.twitterUsername,
+        githubUsername: this.githubUsername,
+        telegramUsername: this.telegramUsername,
+        mastodonUsername: this.mastodonUsername,
+        podcastCategories: this.podcastCategories,
+        podcastLanguage: this.podcastLanguage,
+        podcastExplicit: this.podcastExplicit,
+        tags: this.tags,
+      });
+      const environment = new require("../Helper/Environment");
+      let domain_prefix, root_prefix;
+      if (this.domainWithGateway) {
+        domain_prefix = `https://${this.domainWithGateway}`;
+        root_prefix = `https://${this.domainWithGateway}`;
+      } else {
+        domain_prefix = require("../ipfs").preferredGateway();
+        root_prefix = `${require("../ipfs").preferredGateway()}/ipfs/${
+          this.ipns
+        }`;
+      }
+      const hasDomain = this.domain && this.domain.indexOf(":") < 0;
+      const context = {
+        planet: publicPlanet,
+        has_domain: hasDomain,
+        domain: this.domainWithGateway || "",
+        domain_prefix: domain_prefix,
+        root_prefix: root_prefix,
+        ipfs_gateway: require("../ipfs").preferredGateway(),
+        podcast: podcastOnly,
+        has_podcast_cover_art: require("fs").existsSync(
+          this.publicPodcastCoverArtPath
+        ),
+      };
+      const rssXML = environment.renderTemplate(templateStringRSS, context);
+      if (podcastOnly) {
+        require("fs").writeFileSync(this.publicPodcastPath, rssXML);
+      } else {
+        require("fs").writeFileSync(this.publicRSSPath, rssXML);
+      }
+    } catch (ex) {
+      log.error(ex, "Error render RSS");
+    }
   }
 
   async savePublic() {
@@ -378,16 +500,16 @@ class MyPlanetModel {
     }
 
     // MARK: - Render RSS and podcast RSS
-    this.renderRSS({ podcastOnly: false });
+    this.renderRSS(false);
 
     if (publicPlanet.hasAudioContent()) {
-      this.renderRSS({ podcastOnly: true });
+      this.renderRSS(true);
     }
 
     const info = JSON.stringify(publicPlanet);
     require("fs").writeFileSync(this.publicInfoPath, info);
   }
-  async save() {
+  save() {
     require("fs").writeFileSync(
       this.infoPath,
       JSON.stringify(
@@ -454,7 +576,32 @@ class MyPlanetModel {
       )
     );
   }
-
+  siteNavigation() {
+    return this.articles
+      .map((article) =>
+        article.isIncludedInNavigation
+          ? {
+              id: article.id,
+              title: article.title,
+              slug: article.slug || article.id,
+              externalLink: article.externalLink,
+              weight: article.navigationWeight || 1,
+            }
+          : null
+      )
+      .filter((a) => a);
+  }
+  removeDSStore() {
+    const dsStorePath = require("path").join(this.publicBasePath, ".DS_Store");
+    if (require("fs").existsSync(dsStorePath)) {
+      try {
+        require("fs").rmSync(dsStorePath);
+        log.info({ name: this.name }, "Removed .DS_Store from planet");
+      } catch (err) {
+        log.error({ err, name: this.name }, "Failed to remove .DS_Store file");
+      }
+    }
+  }
   static async create(params) {
     const { name, about, templateName } = params;
     const id = UUID();
@@ -480,6 +627,7 @@ class MyPlanetModel {
     require("fs").mkdirSync(planet.articleDraftsPath);
     require("fs").mkdirSync(planet.publicBasePath);
     planet.copyTemplateAssets();
+    return planet;
   }
 
   copyTemplateAssets() {

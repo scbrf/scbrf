@@ -5,6 +5,7 @@ class Setting {
   documentRoot = "PlanetSettingsDocumentRootKey";
   settingsLibraryLocation = "PlanetSettingsLibraryLocationKey";
   myPlanetsOrderKey = "myPlanetsOrder";
+  prefs = {};
   async init(cfg = {}) {
     this.prefs = { ...cfg };
     const prefPath = this.get(
