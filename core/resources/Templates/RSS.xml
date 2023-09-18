@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+    xmlns:content="http://purl.org/rss/1.0/modules/content/"
+    xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+    xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+    xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+    >
+<channel>
+    <title>{{ planet.name|escape }}</title>
+    <atom:link href="{{ root_prefix }}/{% if podcast %}podcast{% else %}rss{% endif %}.xml" rel="self" type="application/rss+xml" />
+    <link>{{ root_prefix }}/</link>
+    <description><![CDATA[
+    {{ planet.about|md2html }}
+    ]]></description>
+    {% if podcast %}
+    {% if has_podcast_cover_art %}
+    <itunes:image href="{{ root_prefix }}/podcastCoverArt.png"/>
+    {% endif %}
+    <language>{{ planet.podcastLanguage|escape }}</language>
+    <itunes:explicit>{% if planet.podcastExplicit %}yes{% else %}no{% endif %}</itunes:explicit>
+    {% for category in planet.podcastCategories %}
+    <itunes:category text="{{ category|escape }}" />
+    {% endfor %}
+    {% endif %}
+    {% for article in planet.articles %}
+    <item>
+        <title>{{ article.title|escape }}</title>
+        <link>{{ root_prefix }}/{{ article.id }}/</link>
+        <guid>{{ root_prefix }}/{{ article.id }}/</guid>
+        <pubDate>{{ article.created|rfc822 }}</pubDate>
+        {% if article.heroImage %}
+        <itunes:image href="{{ article.heroImage }}" />    
+        {% endif %}
+        {% if podcast %}
+        <enclosure url="{{ root_prefix }}/{{ article.id }}/{{ article.audioFilename }}" length="{{ article.audioByteLength }}" type="audio/mpeg" />
+        <itunes:duration>{{ article.audioDuration|hhmmss }}</itunes:duration>
+        {% endif %}
+        <description><![CDATA[
+            {{ article.content|md2html|absoluteImageURL:root_prefix,article.id }}
+        ]]></description>
+    </item>
+    {% endfor %}
+</channel>
+</rss>

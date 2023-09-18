@@ -2,12 +2,14 @@ const log = require("../log")("planet templates");
 
 class BuiltInTemplate {
   name = "";
-  id = "";
   description = "";
   author = "";
   version = "";
   buildNumber = 0;
   base = "";
+  get id() {
+    return this.name;
+  }
   get blog() {
     return require("path").join(base, "templates", "blog.html");
   }
@@ -28,7 +30,7 @@ class BuiltInTemplate {
 class PlanetSiteTemplates {
   builtInTemplates = [];
   constructor() {
-    init();
+    this.init();
   }
   init() {
     const root = require("path").join(__dirname, "..", "templates");

@@ -17,8 +17,10 @@
   "dependencies": {
     "bunyan": "^1.8.15",
     "get-port": "^7.0.0",
+    "marked": "^9.0.2",
     "mobx": "^6.10.2",
     "moment": "^2.29.4",
+    "nunjucks": "^3.2.4",
     "uuid": "^9.0.1"
   }
 }

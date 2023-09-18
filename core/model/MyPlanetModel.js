@@ -4,6 +4,7 @@ const { timeToReferenceDate } = require("../utils");
 const log = require("../log")("my planet model");
 const UUID = require("uuid").v4;
 const BLOG = 0;
+const Environment = require("../Helper/Environment");
 
 class PublicPlanetModel {
   id = "";
@@ -55,6 +56,16 @@ class PublicPlanetModel {
 class MyPlanetModel {
   podcastLanguage = "en";
   tags = {};
+  templateStringRSS = (() => {
+    const rssURL = require("path").join(
+      __dirname,
+      "..",
+      "resources",
+      "Templates",
+      "RSS.xml"
+    );
+    return require("fs").readFileSync(rssURL).toString();
+  })();
   constructor(params) {
     const {
       id,
@@ -292,7 +303,7 @@ class MyPlanetModel {
         podcastExplicit: this.podcastExplicit,
         tags: this.tags,
       });
-      const environment = new require("../Helper/Environment");
+      const environment = new Environment();
       let domain_prefix, root_prefix;
       if (this.domainWithGateway) {
         domain_prefix = `https://${this.domainWithGateway}`;
@@ -316,7 +327,10 @@ class MyPlanetModel {
           this.publicPodcastCoverArtPath
         ),
       };
-      const rssXML = environment.renderTemplate(templateStringRSS, context);
+      const rssXML = environment.renderTemplate({
+        string: templateStringRSS,
+        context,
+      });
       if (podcastOnly) {
         require("fs").writeFileSync(this.publicPodcastPath, rssXML);
       } else {

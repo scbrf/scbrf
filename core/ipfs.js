@@ -4,14 +4,27 @@ const { spawn } = require("node:child_process");
 const log = require("./log")("ipfs");
 const { getPortRange } = require("./utils");
 const { observable } = require("mobx");
+const S = require("./setting");
 
 class IPFS {
+  publicGateways = [
+    "https://ipfs.io",
+    "https://dweb.link",
+    "https://cloudflare-ipfs.com",
+    "https://gateway.pinata.cloud",
+    "https://ipfs.fleek.co",
+    "https://cf-ipfs.com",
+  ];
   constructor() {
     this.state = observable({
       isBootstrapping: true,
       online: false,
       peers: 0,
     });
+  }
+  preferredGateway() {
+    const index = S.get(S.settingsPublicGatewayIndex, 0);
+    return this.publicGateways[index];
   }
   async init() {
     await this.IPFSRepoInit();
