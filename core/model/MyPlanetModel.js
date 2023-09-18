@@ -1,5 +1,6 @@
 const moment = require("moment");
 const URLUtils = require("../Helper/URLUtils");
+const { timeToReferenceDate } = require("../utils");
 const log = require("../log")("my planet model");
 const UUID = require("uuid").v4;
 const BLOG = 0;
@@ -52,6 +53,8 @@ class PublicPlanetModel {
 }
 
 class MyPlanetModel {
+  podcastLanguage = "en";
+  tags = {};
   constructor(params) {
     const {
       id,
@@ -510,71 +513,69 @@ class MyPlanetModel {
     require("fs").writeFileSync(this.publicInfoPath, info);
   }
   save() {
-    require("fs").writeFileSync(
-      this.infoPath,
-      JSON.stringify(
-        [
-          "id",
-          "name",
-          "about",
-          "domain",
-          "authorName",
-          "created",
-          "ipns",
-          "updated",
-          "templateName",
-          "lastPublished",
-          "lastPublishedCID",
-          "isPublishing",
-          "archived",
-          "archivedAt",
-          "plausibleEnabled",
-          "plausibleDomain",
-          "plausibleAPIKey",
-          "plausibleAPIServer",
-          "twitterUsername",
-          "githubUsername",
-          "telegramUsername",
-          "mastodonUsername",
-          "dWebServicesEnabled",
-          "dWebServicesDomain",
-          "dWebServicesAPIKey",
+    const saveObj = [
+      "id",
+      "name",
+      "about",
+      "domain",
+      "authorName",
+      "created",
+      "ipns",
+      "updated",
+      "templateName",
+      "lastPublished",
+      "lastPublishedCID",
+      "isPublishing",
+      "archived",
+      "archivedAt",
+      "plausibleEnabled",
+      "plausibleDomain",
+      "plausibleAPIKey",
+      "plausibleAPIServer",
+      "twitterUsername",
+      "githubUsername",
+      "telegramUsername",
+      "mastodonUsername",
+      "dWebServicesEnabled",
+      "dWebServicesDomain",
+      "dWebServicesAPIKey",
 
-          "pinnableEnabled",
-          "pinnableAPIEndpoint",
-          "pinnablePinCID",
+      "pinnableEnabled",
+      "pinnableAPIEndpoint",
+      "pinnablePinCID",
 
-          "filebaseEnabled",
-          "filebasePinName",
-          "filebaseAPIToken",
-          "filebaseRequestID",
-          "filebasePinCID",
+      "filebaseEnabled",
+      "filebasePinName",
+      "filebaseAPIToken",
+      "filebaseRequestID",
+      "filebasePinCID",
 
-          "customCodeHeadEnabled",
-          "customCodeHead",
-          "customCodeBodyStartEnabled",
-          "customCodeBodyStart",
-          "customCodeBodyEndEnabled",
-          "customCodeBodyEnd",
-          "podcastCategories",
-          "podcastLanguage",
-          "podcastExplicit",
-          "juiceboxEnabled",
-          "juiceboxProjectID",
-          "juiceboxProjectIDGoerli",
-          "avatar",
-          "podcastCoverArt",
-          "drafts",
-          "articles",
+      "customCodeHeadEnabled",
+      "customCodeHead",
+      "customCodeBodyStartEnabled",
+      "customCodeBodyStart",
+      "customCodeBodyEndEnabled",
+      "customCodeBodyEnd",
+      "podcastCategories",
+      "podcastLanguage",
+      "podcastExplicit",
+      "juiceboxEnabled",
+      "juiceboxProjectID",
+      "juiceboxProjectIDGoerli",
+      "avatar",
+      "podcastCoverArt",
+      "drafts",
+      "articles",
 
-          "tags",
-          "aggregation",
-        ].reduce((r, k) => {
-          r[k] = this[k];
-          return r;
-        }, {})
-      )
-    );
+      "tags",
+      "aggregation",
+    ].reduce((r, k) => {
+      r[k] = this[k];
+      return r;
+    }, {});
+    saveObj.created = timeToReferenceDate(saveObj.created);
+    saveObj.updated = timeToReferenceDate(saveObj.updated);
+    require("fs").writeFileSync(this.infoPath, JSON.stringify(saveObj));
   }
   siteNavigation() {
     return this.articles
@@ -604,7 +605,7 @@ class MyPlanetModel {
   }
   static async create(params) {
     const { name, about, templateName } = params;
-    const id = UUID();
+    const id = UUID().toUpperCase();
     const ipns = await require("../ipfs").generateKey(id);
     const now = new Date();
     const planet = new MyPlanetModel({

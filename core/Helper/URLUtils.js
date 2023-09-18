@@ -8,8 +8,7 @@ class URLUtils {
     return url;
   }
   get documentsPath() {
-    const url = S.get(S.documentRoot, this.root);
-    return url;
+    return S.get(S.documentRoot, this.root);
   }
   get defaultRepoPath() {
     const url = require("path").join(this.documentsPath, "Planet");
