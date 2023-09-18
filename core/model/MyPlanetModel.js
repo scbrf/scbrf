@@ -509,7 +509,11 @@ class MyPlanetModel {
       this.renderRSS(true);
     }
 
-    const info = JSON.stringify(publicPlanet);
+    const info = JSON.stringify({
+      ...publicPlanet,
+      created: timeToReferenceDate(publicPlanet.created),
+      updated: timeToReferenceDate(publicPlanet.updated),
+    });
     require("fs").writeFileSync(this.publicInfoPath, info);
   }
   save() {

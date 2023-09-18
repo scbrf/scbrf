@@ -31,6 +31,7 @@ test("create planet", async () => {
     templateName: "plain",
   });
   expect(planet.name).toBe("test");
+  expect(planet.template).toBeTruthy();
   planet.save();
   await planet.savePublic();
   const planetInfoJson = Object.keys(MockFS.fs).filter(
@@ -49,5 +50,15 @@ test("create planet", async () => {
   expect(
     Math.abs(infoJson.updated - utils.timeToReferenceDate(new Date()))
   ).toBeLessThan(1);
-  console.log(infoJson);
+
+  const planetPublicInfoJson = Object.keys(MockFS.fs).filter(
+    (a) => a.endsWith("planet.json") && a.indexOf("Public") >= 0
+  )[0];
+  const publicInfoJson = JSON.parse(MockFS.fs[planetPublicInfoJson]);
+  expect(
+    Math.abs(publicInfoJson.created - utils.timeToReferenceDate(new Date()))
+  ).toBeLessThan(1);
+  expect(
+    Math.abs(publicInfoJson.updated - utils.timeToReferenceDate(new Date()))
+  ).toBeLessThan(1);
 });

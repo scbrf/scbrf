@@ -122,7 +122,9 @@ class TemplateStore {
     await this.load();
   }
   get(templateID) {
-    return this.templates.filter((t) => t.id == templateID)[0];
+    const t = this.templates.filter((t) => t.id == templateID)[0];
+    if (!t) throw new Error(`Error: bad template name:${templateID}`);
+    return t;
   }
   async load() {
     const templatesPath = require("path").join(
