@@ -27,4 +27,8 @@ module.exports = {
     const ReferenceDate = new Date("2001-01-01").getTime();
     return (v.getTime() - ReferenceDate) / 1000.0;
   },
+  sha256(str) {
+    const { createHash } = require("node:crypto");
+    return createHash("sha256").update(str).digest("hex");
+  },
 };
