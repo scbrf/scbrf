@@ -104,6 +104,18 @@ class IPFS {
       }
     });
   }
+  async getFileCIDv0(path) {
+    log.info({ path }, "Checking file CIDv0");
+    const { stdout } = await this.IPFSCommand(
+      "add",
+      path,
+      "--quieter",
+      "--cid-version=0",
+      "--pin"
+    );
+    const cid = `${stdout}`.trim();
+    log.info({ cid, path }, "File CIDv0");
+  }
   async updateOnlineStatus() {
     log.info("Updating online status");
     let online = false,

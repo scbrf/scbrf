@@ -17,6 +17,7 @@
   "dependencies": {
     "bunyan": "^1.8.15",
     "get-port": "^7.0.0",
+    "jsdom": "^22.1.0",
     "marked": "^9.0.2",
     "mime": "^3.0.0",
     "mobx": "^6.10.2",

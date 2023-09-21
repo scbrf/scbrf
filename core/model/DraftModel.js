@@ -1,5 +1,9 @@
 const { timeToReferenceDate } = require("../utils");
 const sharp = require("sharp");
+const marked = require("marked");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+const MyArticleModel = require("./MyArticleModel");
 class AttachmentType {
   static image = new AttachmentType();
   static video = new AttachmentType();
@@ -123,6 +127,76 @@ class DraftModel {
   save() {
     require("fs").writeFileSync(this.infoPath, JSON.stringify(this));
   }
+  async saveToArticle() {
+    let article = this.target.planet ? this.target : null;
+    let planet = this.target.planet ? null : this.target;
+    if (planet) {
+      article = MyArticleModel.compose({
+        link: null,
+        date: this.date,
+        title: this.title,
+        content: this.content,
+        summary: null,
+        planet,
+      });
+      article.externalLink = this.externalLink || null;
+      const articles = [...planet.articles] || [];
+      articles.push(article);
+      articles.sort((a, b) => b.created.getTime() - a.created.getTime());
+      planet.articles = articles;
+    } else {
+      planet = article.planet;
+      article.link = article.slug ? `/${article.slug}/` : `/${article.id}/`;
+      article.created = this.date;
+      article.title = this.title;
+      article.content = this.content;
+      article.externalLink = this.externalLink || null;
+      const articles = [...planet.articles] || [];
+      articles.sort((a, b) => b.created.getTime() - a.created.getTime());
+      planet.articles = articles;
+    }
+    require("fs").rmSync(article.publicBasePath, {
+      recursive: true,
+      force: true,
+    });
+    require("fs").mkdirSync(article.publicBasePath);
+    let videoFilename = null;
+    let audioFilename = null;
+    const currentAttachments = [];
+    for (let attachment of this.attachments) {
+      if (attachment.type == AttachmentType.video) {
+        videoFilename = attachment.name;
+      }
+      if (attachment.type == AttachmentType.audio) {
+        audioFilename = attachment.name;
+      }
+      currentAttachments.push(name);
+      const targetPath = require("path").join(article.publicBasePath, name);
+      require("fs").cpSync(attachment.path, targetPath);
+    }
+    article.attachments = currentAttachments;
+    article.heroImage = this.heroImage;
+    article.tags = this.tags;
+    article.cids = article.getCIDs();
+    article.videoFilename = videoFilename;
+    article.audioFilename = audioFilename;
+    const contentHTML = marked.parse(article.content);
+    const { window } = new JSDOM(contentHTML);
+    let summary = window.document.body.textContent;
+    if (summary.length > 280) {
+      article.summary = `${summary.slice(0, 280)}...`;
+    } else {
+      article.summary = summary;
+    }
+    article.save();
+    article.savePublic();
+    this.delete();
+    planet.copyTemplateAssets();
+    planet.updated = new Date();
+    planet.save();
+    planet.savePublic();
+    planet.publish();
+  }
   static async create({ planet, article }) {
     let draft;
     if (planet) {
@@ -193,6 +267,18 @@ class DraftModel {
   }
   hasAttachment(name) {
     return this.attachments.filter((a) => a.name == name)[0];
+  }
+  delete() {
+    const planet = this.target.planet || this.target;
+    const article = this.target.planet ? this.target : null;
+    if (planet) {
+      planet.drafts = planet.drafts.filter((d) => d.id != this.id);
+    } else if (article) {
+      article.draft = null;
+    }
+    if (require("fs").existsSync(this.basePath)) {
+      require("fs").rmSync(this.basePath, { recursive: true, force: true });
+    }
   }
 }
 

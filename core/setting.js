@@ -6,6 +6,8 @@ class Setting {
   settingsLibraryLocation = "PlanetSettingsLibraryLocationKey";
   myPlanetsOrderKey = "myPlanetsOrder";
   settingsPublicGatewayIndex = "PlanetSettingsPublicGatewayIndexKey";
+  settingsAPIEnabled = "PlanetSettingsAPIEnabledKey";
+  settingsAPIPort = "PlanetSettingsAPIPortKey";
   prefs = {};
   async init(cfg = {}) {
     this.prefs = { ...cfg };

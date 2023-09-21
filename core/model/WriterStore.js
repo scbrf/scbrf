@@ -1,7 +1,7 @@
 class WriterStore {
   async newArticle(params) {
-    const { planetUUID } = params;
-    const planet = require("./PlanetStore").getPlanet(planetUUID);
+    const { planetID } = params;
+    const planet = require("./PlanetStore").getPlanet(planetID);
     let draft;
     if (!planet.drafts.length) {
       draft = await require("./DraftModel").create(planet);
