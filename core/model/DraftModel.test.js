@@ -10,7 +10,6 @@ jest.mock("fs", () => ({
   },
   rmSync() {},
 }));
-jest.mock("sharp");
 jest.mock("../ipfs");
 jest.mock("./MyArticleModel", () => MockArticle);
 class MockArticle {

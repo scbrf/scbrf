@@ -132,6 +132,55 @@ class MyArticleModel extends ArticleModel {
   save() {
     require("fs").writeFileSync(this.path, this);
   }
+  formatDuration(duration) {
+    if (duration > 3600) {
+      let hours = duration / 3600;
+      let minutes = (duration % 3600) / 60;
+      let seconds = duration % 60;
+      return require("printf")("%02d:%02d:%02d", hours, minutes, seconds);
+    } else {
+      let minutes = (duration % 3600) / 60;
+      let seconds = duration % 60;
+      return require("printf")("%02d:%02d", minutes, seconds);
+    }
+  }
+  async obtainCoverImageCID() {
+    const coverImageURL = this.getAttachmentURL("_cover.png");
+    if (require("fs").existsSync(coverImageURL)) {
+      const coverImageCID = await require("../ipfs").getFileCIDv0(
+        coverImageURL
+      );
+      return coverImageCID;
+    }
+    return null;
+  }
+  getVideoThumbnail() {
+    if (this.hasVideoContent()) {
+      const videoFilename = this.videoFilename;
+      //TODO get thumbnail from video file
+    }
+    return null;
+  }
+  async saveVideoThumbnail() {
+    const videoFilename = this.videoFilename;
+    if (!videoFilename) return;
+    const videoThumbnailFilename = "_videoThumbnail.png";
+    const videoThumbnailPath = require("path").join(
+      this.publicBasePath,
+      videoThumbnailFilename
+    );
+    const opKey = `${this.id}-video-thumbnail-${this.videoFilename}`;
+    const op = this.planet.ops[opKey];
+    if (require("fs").existsSync(videoThumbnailPath)) {
+      log.debug({ op, opKey }, "Video thumbnail operation is already done");
+      return;
+    }
+    const thumbnail = this.getVideoThumbnail();
+    if (thumbnail) {
+      await thumbnail.saveAsync(videoThumbnailPath);
+    }
+    this.planet.ops[opKey] = new Date();
+  }
   async hasHeroImage() {
     return await !!this.getHeroImage();
   }
@@ -194,6 +243,7 @@ class MyArticleModel extends ArticleModel {
       require("fs").existsSync(heroGridPNGPath)
     ) {
       log.debug({ op, opKey }, "Hero grid operation is already done");
+      return;
     }
 
     const heroImage = await Jimp.read(heroImagePath);
@@ -234,7 +284,7 @@ class MyArticleModel extends ArticleModel {
 
     let coverImageCID = null;
     if (needsCoverImageCID) {
-      coverImageCID = this.obtainCoverImageCID();
+      coverImageCID = await this.obtainCoverImageCID();
     }
 
     if (attachments.length) {
@@ -284,7 +334,7 @@ class MyArticleModel extends ArticleModel {
 
     // MARK: - Video
     if (this.hasVideoContent()) {
-      this.saveVideoThumbnail();
+      await this.saveVideoThumbnail();
     }
     const doneVideoThumbnail = new Date();
     log.debug(
