@@ -1,5 +1,5 @@
 const { timeToReferenceDate } = require("../utils");
-const sharp = require("sharp");
+const jimp = require("jimp");
 const marked = require("marked");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
@@ -59,9 +59,9 @@ class Attachment {
   }
   async loadThumbnail() {
     if (this.type == AttachmentType.image) {
-      this.thumbnail = await new sharp(this.path).resize(128);
+      this.thumbnail = await jimp.read(this.path).resize(128);
     } else {
-      this.thumbnail = new sharp(
+      this.thumbnail = await jimp.read(
         require("path").join(__dirname, "..", "resources", "attachment.png")
       );
     }

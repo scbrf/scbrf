@@ -1,4 +1,5 @@
-const { log } = require("console");
+const log = require("../log")("article model");
+const Jimp = require("jimp");
 const S = require("../setting");
 class ArticleType {
   static blog = new ArticleType();
@@ -100,7 +101,7 @@ class MyArticleModel extends ArticleModel {
     return this.localGatewayURL;
   }
   get browserURL() {
-    let urlPath = `/${id}/`;
+    let urlPath = `/${this.id}/`;
     if (this.slug) {
       urlPath = `/${this.slug}/`;
     }
@@ -119,7 +120,7 @@ class MyArticleModel extends ArticleModel {
   }
   get socialImageURL() {
     const heroImage = this.getHeroImage();
-    const baseURL = this.browserURL();
+    const baseURL = this.browserURL;
     if (heroImage && baseURL) {
       return require("path").join(`${baseURL}${heroImage}`);
     }
@@ -130,6 +131,89 @@ class MyArticleModel extends ArticleModel {
   }
   save() {
     require("fs").writeFileSync(this.path, this);
+  }
+  async hasHeroImage() {
+    return await !!this.getHeroImage();
+  }
+  async getHeroImage() {
+    if (this.heroImage) return this.heroImage;
+    if (this.hasVideoContent) return "_videoThumbnail.png";
+    log.debug({ title: this.title }, "HeroImage: finding from attachments");
+    const images = this.attachments
+      .map((a) => {
+        const imageNameLowercased = a.toLowerCase();
+        if (
+          imageNameLowercased.endsWith(".avif") ||
+          imageNameLowercased.endsWith(".jpg") ||
+          imageNameLowercased.endsWith(".jpeg") ||
+          imageNameLowercased.endsWith(".png") ||
+          imageNameLowercased.endsWith(".webp") ||
+          imageNameLowercased.endsWith(".gif") ||
+          imageNameLowercased.endsWith(".tiff") ||
+          imageNameLowercased.endsWith(".heic")
+        ) {
+          return a;
+        }
+      })
+      .filter((a) => a);
+    for (let item of images) {
+      const imagePath = require("path").join(this.publicBasePath, item);
+      log.debug({ item }, "check size of heroImage");
+      const image = await Jimp.read(imagePath);
+      if (image.getWidth() >= 600 && image.getHeight >= 400) {
+        log.debug({ item }, "find hero Image");
+        return item;
+      }
+    }
+    log.debug({ item: images[0] }, " heroImage return first anyway");
+    return images[0] || null;
+  }
+  async saveHeroGrid() {
+    const heroImageFilename = await this.getHeroImage();
+    if (!heroImageFilename) return;
+    const heroImagePath = require("path").join(
+      this.publicBasePath,
+      heroImageFilename
+    );
+    const heroGridPNGFilename = "_grid.png";
+    const heroGridPNGPath = require("path").join(
+      this.publicBasePath,
+      heroGridPNGFilename
+    );
+    const heroGridJPEGFilename = "_grid.jpg";
+    const heroGridJPEGPath = require("path").join(
+      this.publicBasePath,
+      heroGridJPEGFilename
+    );
+
+    const opKey = `${this.id}-hero-grid-${heroImageFilename}`;
+    const op = this.planet.ops[opKey];
+    if (
+      op &&
+      require("fs").existsSync(heroImagePath) &&
+      require("fs").existsSync(heroGridPNGPath)
+    ) {
+      log.debug({ op, opKey }, "Hero grid operation is already done");
+    }
+
+    const heroImage = await Jimp.read(heroImagePath);
+    const size = Math.min(heroImage.getWidth(), heroImage.getHeight(), 512);
+    const grid = heroImage.resize(size, size);
+    await grid.writeAsync(heroGridPNGPath);
+    await grid.writeAsync(heroGridJPEGPath);
+    this.planet.ops[opKey] = new Date();
+  }
+  hasVideoContent() {
+    return !!this.videoFilename;
+  }
+  getAudioDuration(path) {
+    const loader = require("deasync")(require("audio-loader"));
+    const audio = loader(path);
+    return Math.ceil(audio.duration);
+  }
+  getAttachmentByteLength(name) {
+    const path = this.getAttachmentURL(name);
+    return require("fs").statSync(path).size;
   }
   async savePublic() {
     const started = new Date();
@@ -280,7 +364,7 @@ class MyArticleModel extends ArticleModel {
         name: this.title,
         description: this.summary || firstKey,
         image: `https://ipfs.io/ipfs/${imageCID}`,
-        external_url: this.externalLink || self.browserURL || "",
+        external_url: this.externalLink || this.browserURL || "",
         mimeType: this.getAttachmentMimeType(firstKey),
         animation_url: animationCID
           ? `https://ipfs.io/ipfs/${animationCID}`
@@ -329,8 +413,8 @@ class MyArticleModel extends ArticleModel {
       "Article HTML duration"
     );
 
-    if (this.hasHeroImage() || this.hasVideoContent) {
-      this.saveHeroGrid();
+    if ((await this.hasHeroImage()) || this.hasVideoContent) {
+      await this.saveHeroGrid();
     }
 
     const doneHeroGrid = new Date();
@@ -383,6 +467,96 @@ class MyArticleModel extends ArticleModel {
       cids[attachment] = attachmentCID;
     }
     return cids;
+  }
+  removeDSStore() {
+    const dsStorePath = require("path").join(this.publicBasePath, ".DS_Store");
+    if (require("fs").existsSync(dsStorePath)) {
+      require("fs").rmSync(dsStorePath);
+    }
+    const attachments = this.attachments;
+    if (attachments) {
+      const newAttachments = [];
+      for (let attachment of attachments) {
+        if (attachment == ".DS_Store") {
+          const attachmentPath = require("path").join(
+            this.publicBasePath,
+            attachment
+          );
+          if (require("fs").existsSync(attachmentPath)) {
+            require("fs").rmSync(attachmentPath);
+          }
+        } else {
+          newAttachments.push(attachment);
+        }
+      }
+      if (newAttachments.length !== this.attachments.length) {
+        this.attachments = newAttachments.sort();
+        this.save();
+      }
+    }
+  }
+  saveMarkdown() {
+    const markdownPath = require("path").join(
+      this.publicBasePath,
+      "article.md"
+    );
+    if (require("fs").existsSync(markdownPath)) {
+      require("fs").rmSync(markdownPath);
+    }
+    const markdown = `${this.title}\n\n${this.content}`;
+    require("fs").writeFileSync(markdownPath, markdown);
+  }
+  getCoverImageTextForAudioPost() {
+    let text = "";
+    if (this.audioFilename) {
+      text = this.title;
+      const audioDuration = this.getAudioDuration(this.audioFilename);
+      if (audioDuration) {
+        text += `\n\n█▄▅ ${this.formatDuration(audioDuration)}`;
+      }
+      if (this.content) {
+        text += "\n\n" + this.content;
+      }
+      return text;
+    }
+    return this.getCoverImageTextForTextOnlyPost();
+  }
+  getCoverImageTextForTextOnlyPost() {
+    let text = this.title;
+    if (this.content) {
+      text = this.content;
+    }
+    return text;
+  }
+  getCoverImageTextForVideoPost() {
+    let text = "";
+    if (this.videoFilename) {
+      text = this.title;
+      const videoDuration = this.getAudioDuration(this.videoFilename);
+      if (videoDuration) {
+        text += "\n\n▶ " + this.formatDuration(videoDuration);
+      }
+      if (this.content) {
+        text += "\n\n" + this.content;
+      }
+      return text;
+    }
+    return this.getCoverImageTextForTextOnlyPost();
+  }
+  getCoverImageText() {
+    if (this.audioFilename) {
+      return this.getCoverImageTextForAudioPost();
+    } else if (this.videoFilename) {
+      return this.getCoverImageTextForVideoPost();
+    }
+    return this.getCoverImageTextForTextOnlyPost();
+  }
+  async saveCoverImage(text, path, options) {
+    const Jimp = require("jimp");
+    const image = new Jimp(options.width, options.height, "black");
+    const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+    await image.print(font, 0, 0, text);
+    await image.writeAsync(path);
   }
   static compose(json = {}) {
     const id = require("uuid").v4().toUpperCase();
