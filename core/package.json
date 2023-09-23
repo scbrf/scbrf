@@ -15,9 +15,9 @@
     "jest": "^29.7.0"
   },
   "dependencies": {
-    "audio-loader": "^1.0.3",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
     "bunyan": "^1.8.15",
-    "deasync": "^0.1.28",
     "get-port": "^7.0.0",
     "jimp": "^0.22.10",
     "jsdom": "^22.1.0",
@@ -27,6 +27,7 @@
     "moment": "^2.29.4",
     "nunjucks": "^3.2.4",
     "printf": "^0.6.1",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "which": "^4.0.0"
   }
 }

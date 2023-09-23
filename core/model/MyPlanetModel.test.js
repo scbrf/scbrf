@@ -1,6 +1,7 @@
 const mockfs = require("../__mocks__/fs");
 jest.mock("fs", () => mockfs);
 jest.mock("../ipfs");
+jest.mock("../log", () => () => ({ info: () => {}, error: () => {} }));
 jest.mock("../Helper/TemplateStore", () => ({
   get: () => ({
     assetsPath: "",
@@ -22,7 +23,6 @@ test("create planet", async () => {
   const planetInfoJson = Object.keys(mockfs.fs).filter(
     (a) => a.endsWith("planet.json") && a.indexOf("My") >= 0
   )[0];
-  console.log("*************", mockfs.fs);
   const infoJson = JSON.parse(mockfs.fs[planetInfoJson]);
   expect(infoJson.name).toBe("test");
   expect(infoJson.id).toBe(infoJson.id.toUpperCase());

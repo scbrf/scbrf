@@ -1,3 +1,31 @@
+const which = require("which");
+
+class Executables {
+  ipfs;
+  ffmpeg;
+  ffprobe;
+  constructor() {
+    this.init();
+  }
+  async init() {
+    let path = await which("ipfs", { nothrow: true });
+    if (!path) {
+      path = require("path").join(__dirname, "..", "executables", "ipfs");
+    }
+    if (require("fs").existsSync(path)) this.ipfs = path;
+    path = await which("ffmpeg", { nothrow: true });
+    if (!path) {
+      path = require("path").join(__dirname, "..", "executables", "ffmpeg");
+    }
+    if (require("fs").existsSync(path)) this.ffmpeg = path;
+    path = await which("ffprobe", { nothrow: true });
+    if (!path) {
+      path = require("path").join(__dirname, "..", "executables", "ffprobe");
+    }
+    if (require("fs").existsSync(path)) this.ffprobe = path;
+  }
+}
+
 function exportJS(base, path) {
   base = require("path").join(base, path);
   return require("fs")
@@ -31,4 +59,5 @@ module.exports = {
     const { createHash } = require("node:crypto");
     return createHash("sha256").update(str).digest("hex");
   },
+  exe: new Executables(),
 };

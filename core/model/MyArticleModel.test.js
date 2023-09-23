@@ -1,7 +1,8 @@
 const mockfs = require("../__mocks__/fs");
 jest.mock("fs", () => mockfs);
-jest.mock("deasync", () => () => () => ({ duration: 1 }));
 jest.mock("../ipfs");
+jest.mock("node:child_process");
+jest.mock("@ffmpeg-installer/ffmpeg", () => ({}));
 
 const MyArticleModel = require("./MyArticleModel");
 const planet = {

@@ -154,10 +154,26 @@ class MyArticleModel extends ArticleModel {
     }
     return null;
   }
-  getVideoThumbnail() {
+  getVideoThumbnail(outpath) {
     if (this.hasVideoContent()) {
       const videoFilename = this.videoFilename;
-      //TODO get thumbnail from video file
+      if (videoFilename) {
+        const url = require("path").join(this.publicBasePath, videoFilename);
+        const ffmpeg = require("@ffmpeg-installer/ffmpeg").path;
+        const args = [
+          "-y",
+          `-i`,
+          url,
+          "-vframes",
+          "1",
+          "-ss",
+          "00:00:05",
+          `-vf`,
+          "scale=600:-1",
+          outpath,
+        ];
+        require("node:child_process").execFileSync(ffmpeg, args);
+      }
     }
     return null;
   }
@@ -175,10 +191,7 @@ class MyArticleModel extends ArticleModel {
       log.debug({ op, opKey }, "Video thumbnail operation is already done");
       return;
     }
-    const thumbnail = this.getVideoThumbnail();
-    if (thumbnail) {
-      await thumbnail.saveAsync(videoThumbnailPath);
-    }
+    this.getVideoThumbnail(videoThumbnailPath);
     this.planet.ops[opKey] = new Date();
   }
   async hasHeroImage() {
@@ -256,10 +269,22 @@ class MyArticleModel extends ArticleModel {
   hasVideoContent() {
     return !!this.videoFilename;
   }
-  getAudioDuration(path) {
-    const loader = require("deasync")(require("audio-loader"));
-    const audio = loader(path);
-    return Math.ceil(audio.duration);
+  getAudioDuration(name) {
+    const url = this.getAttachmentURL(name);
+    const ffprobe = require("@ffprobe-installer/ffprobe").path;
+    const args = [
+      "-v",
+      "error",
+      "-select_streams",
+      "a:0",
+      "-show_format",
+      "-show_streams",
+      url,
+    ];
+    const output = require("node:child_process").execFileSync(ffprobe, args);
+    const matched = `${output}`.match(/duration="?(\d*\.\d*)"?/);
+    if (matched && matched[1]) return parseFloat(matched[1]);
+    return null;
   }
   getAttachmentByteLength(name) {
     const path = this.getAttachmentURL(name);
