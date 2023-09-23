@@ -2,7 +2,14 @@ const log = require("../log")("article model");
 const Jimp = require("jimp");
 const S = require("../setting");
 class ArticleType {
-  static blog = new ArticleType();
+  value = -1;
+  constructor(value) {
+    this.value = value;
+  }
+  static blog = new ArticleType(0);
+  toJSON() {
+    return this.value;
+  }
 }
 
 class ArticleStarType {
@@ -71,12 +78,12 @@ class MyArticleModel extends ArticleModel {
     return {
       articleType: this.articleType || ArticleType.blog,
       id: this.id,
-      link: this.slug ? `/${this.slug}/` : `/${this.link}/`,
+      link: this.slug ? `/${this.slug}/` : this.link,
       slug: this.slug || "",
       externalLink: this.externalLink || "",
       title: this.title || "",
       content: this.content || "",
-      created: this.created,
+      created: require("../utils").timeToReferenceDate(this.created),
       hasVideo: this.hasVideo,
       videoFilename: this.videoFilename,
       hasAudio: this.hasAudio,
@@ -129,8 +136,36 @@ class MyArticleModel extends ArticleModel {
     super(json);
     Object.assign(this, json);
   }
+  toJSON() {
+    const json = [
+      "id",
+      "articleType",
+      "link",
+      "slug",
+      "heroImage",
+      "externalLink",
+      "title",
+      "content",
+      "summary",
+      "created",
+      "starred",
+      "starType",
+      "videoFilename",
+      "audioFilename",
+      "attachments",
+      "cids",
+      "tags",
+      "isIncludedInNavigation",
+      "navigationWeight",
+    ].reduce((r, k) => {
+      r[k] = this[k];
+      return r;
+    }, {});
+    json.created = require("../utils").timeToReferenceDate(json.created);
+    return json;
+  }
   save() {
-    require("fs").writeFileSync(this.path, this);
+    require("fs").writeFileSync(this.path, JSON.stringify(this));
   }
   formatDuration(duration) {
     if (duration > 3600) {
@@ -195,11 +230,11 @@ class MyArticleModel extends ArticleModel {
     this.planet.ops[opKey] = new Date();
   }
   async hasHeroImage() {
-    return await !!this.getHeroImage();
+    return !!this.getHeroImage();
   }
-  async getHeroImage() {
+  getHeroImage() {
     if (this.heroImage) return this.heroImage;
-    if (this.hasVideoContent) return "_videoThumbnail.png";
+    if (this.hasVideoContent()) return "_videoThumbnail.png";
     log.debug({ title: this.title }, "HeroImage: finding from attachments");
     const images = this.attachments
       .map((a) => {
@@ -221,8 +256,9 @@ class MyArticleModel extends ArticleModel {
     for (let item of images) {
       const imagePath = require("path").join(this.publicBasePath, item);
       log.debug({ item }, "check size of heroImage");
-      const image = await Jimp.read(imagePath);
-      if (image.getWidth() >= 600 && image.getHeight >= 400) {
+      const sizeOf = require("image-size");
+      const dimensions = sizeOf(imagePath);
+      if (dimensions.width >= 600 && dimensions.height >= 400) {
         log.debug({ item }, "find hero Image");
         return item;
       }
@@ -231,7 +267,7 @@ class MyArticleModel extends ArticleModel {
     return images[0] || null;
   }
   async saveHeroGrid() {
-    const heroImageFilename = await this.getHeroImage();
+    const heroImageFilename = this.getHeroImage();
     if (!heroImageFilename) return;
     const heroImagePath = require("path").join(
       this.publicBasePath,
@@ -300,7 +336,7 @@ class MyArticleModel extends ArticleModel {
     this.saveMarkdown();
     // MARK: Cover Image
     const coverImageText = this.getCoverImageText();
-    this.saveCoverImage(coverImageText, this.publicCoverImagePath, {
+    await this.saveCoverImage(coverImageText, this.publicCoverImagePath, {
       width: 512,
       height: 512,
     });
@@ -501,7 +537,10 @@ class MyArticleModel extends ArticleModel {
       "Hero grid duration"
     );
 
-    require("fs").writeFileSync(this.publicInfoPath, this.publicArticle);
+    require("fs").writeFileSync(
+      this.publicInfoPath,
+      JSON.stringify(this.publicArticle)
+    );
     if (this.slug) {
       const publicSlugBasePath = require("path").join(
         this.planet.publicBasePath,

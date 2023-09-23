@@ -4,7 +4,9 @@ class MockJimp {
     return new MockJimp();
   }
   print() {}
-  writeAsync() {}
+  writeAsync(path) {
+    require("fs").writeFileSync(path, "__mock_cover__");
+  }
   getWidth() {
     return 1;
   }

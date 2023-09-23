@@ -19,6 +19,7 @@
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "bunyan": "^1.8.15",
     "get-port": "^7.0.0",
+    "image-size": "^1.0.2",
     "jimp": "^0.22.10",
     "jsdom": "^22.1.0",
     "marked": "^9.0.2",
