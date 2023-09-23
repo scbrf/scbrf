@@ -1,6 +1,13 @@
 const mockfs = require("../__mocks__/fs");
 jest.mock("fs", () => mockfs);
-jest.mock("../ipfs");
+jest.mock("../ipfs", () => ({
+  getFileCIDv0() {
+    return "__cid__";
+  },
+  preferredGateway() {
+    return "/gateway";
+  },
+}));
 jest.mock("node:child_process");
 jest.mock("@ffmpeg-installer/ffmpeg", () => ({}));
 
@@ -51,23 +58,44 @@ test("compose basic", async () => {
 });
 
 test("compose audio", async () => {
+  mockfs.fs = {};
   const article = MyArticleModel.compose({
     title: "test",
     content: "this is a test",
+    created: new Date(),
     planet,
   });
   article.attachments = ["a.mp3"];
   article.audioFilename = "a.mp3";
   await article.savePublic();
+
+  const pubinfojsonPath = Object.keys(mockfs.fs).filter((a) =>
+    a.endsWith("article.json")
+  )[0];
+  const pubinfojson = JSON.parse(mockfs.fs[pubinfojsonPath]);
+  expect(pubinfojson.audioFilename).toBe("a.mp3");
+  expect(pubinfojson.attachments.length).toBe(1);
+  expect(pubinfojson.attachments[0]).toBe("a.mp3");
+  expect(Object.keys(pubinfojson.cids).length).toBe(1);
 });
 
 test("compose video", async () => {
+  mockfs.fs = {};
   const article = MyArticleModel.compose({
     title: "test",
     content: "this is a test",
+    created: new Date(),
     planet,
   });
   article.attachments = ["a.mp4"];
   article.videoFilename = "a.mp4";
   await article.savePublic();
+  const pubinfojsonPath = Object.keys(mockfs.fs).filter((a) =>
+    a.endsWith("article.json")
+  )[0];
+  const pubinfojson = JSON.parse(mockfs.fs[pubinfojsonPath]);
+  expect(pubinfojson.videoFilename).toBe("a.mp4");
+  expect(pubinfojson.attachments.length).toBe(1);
+  expect(pubinfojson.attachments[0]).toBe("a.mp4");
+  expect(Object.keys(pubinfojson.cids).length).toBe(1);
 });

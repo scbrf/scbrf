@@ -378,7 +378,7 @@ class MyArticleModel extends ArticleModel {
       }
     })();
     if (needsToUpdateCIDs) {
-      this.cids = this.getCIDs();
+      this.cids = await this.getCIDs();
       this.save();
     } else {
       log.debug({ title: this.title }, "CID Update  NOT NEEDED");
