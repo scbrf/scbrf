@@ -6,6 +6,7 @@ class ScbrfCore {
     this.ipfs = require("./ipfs");
     this.planetStore = require("./model/PlanetStore");
     this.commands = require("./cmds");
+    require("./Helper/TemplateStore").init();
     await this.ipfs.init(cfg);
   }
   async shutdown() {

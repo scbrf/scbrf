@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@scbrf/core": "../core"
+    "@scbrf/core": "../core",
+    "expect": "^29.7.0"
   }
 }

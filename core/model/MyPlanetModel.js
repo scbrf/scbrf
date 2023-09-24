@@ -45,7 +45,7 @@ class MyPlanetModel {
       require("../Helper/URLUtils").repoPath(),
       "My"
     );
-    if (require("fs").existsSync(url)) {
+    if (!require("fs").existsSync(url)) {
       require("fs").mkdirSync(url);
     }
     return url;
@@ -430,7 +430,7 @@ class MyPlanetModel {
           og_image_url: this.ogImageURLString,
           has_podcast: publicPlanet.hasAudioContent(),
           has_podcast_cover_art: hasPodcastCoverArt,
-          tags: tags,
+          tags: this.tags,
           tag_articles: tagArticles,
         };
         const tagsHTML = this.template.renderTags(tagsContext);

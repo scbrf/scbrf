@@ -8,7 +8,7 @@ class PlanetStore {
     });
   }
   async saveMyPlanetsOrder() {
-    const ids = this.myPlanets.map((p) => p.id);
+    const ids = this.state.myPlanets.map((p) => p.id);
     await S.set(S.myPlanetsOrderKey, ids);
   }
   getPlanet(uuid) {

@@ -1,4 +1,5 @@
 const core = require("@scbrf/core");
+const { expect } = require("expect");
 const log = console.log;
 async function run() {
   const dataRoot = require("path").join(__dirname, "data");
@@ -17,6 +18,14 @@ async function run() {
       if (core.ipfs.state.peers > 0) r();
     });
   });
-  console.log("******** IPFS Online");
+  log("******** IPFS Online");
+  const planet = await core.commands.planetCreate({
+    name: "test",
+    about: "a test site",
+    templateName: "Plain",
+  });
+  expect(planet.id).toBe(planet.id.toUpperCase());
+  log("Done");
+  process.exit();
 }
 run();

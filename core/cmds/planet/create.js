@@ -5,4 +5,5 @@ module.exports = async (params) => {
   await store.saveMyPlanetsOrder();
   planet.save();
   await planet.savePublic();
+  return planet;
 };
