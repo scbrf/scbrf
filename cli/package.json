@@ -1,5 +1,8 @@
 {
+  "name": "@scbrf/cli",
+  "verson": "1.0.0",
   "dependencies": {
-    "@scbrf/core": "../core"
+    "@scbrf/core": "../core",
+    "@scbrf/fe": "../fe"
   }
 }

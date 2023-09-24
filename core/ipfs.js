@@ -5,6 +5,7 @@ const log = require("./log")("ipfs");
 const { getPortRange } = require("./utils");
 const { observable } = require("mobx");
 const S = require("./setting");
+const URLUtils = require("./Helper/URLUtils");
 
 class IPFS {
   publicGateways = [
@@ -191,7 +192,7 @@ class IPFS {
     if (!require("fs").existsSync(this.IPFSExecutablePath)) {
       throw new Error("ipfs executable error");
     }
-    const defaultRoot = require("path").join(__dirname, "data", "ipfs");
+    const defaultRoot = require("path").join(URLUtils.documentsPath, "ipfs");
     this.IPFSRepositoryPath = require("./setting").get("ipfsroot", defaultRoot);
     if (!require("fs").existsSync(defaultRoot)) {
       log.info(

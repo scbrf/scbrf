@@ -1,12 +1,11 @@
 class ScbrfCore {
-  constructor() {
+  async init(cfg) {
+    this.setting = require("./setting");
+    this.setting.init(cfg);
     this.observe = require("mobx").observe;
     this.ipfs = require("./ipfs");
-    this.setting = require("./setting");
     this.planetStore = require("./model/PlanetStore");
-  }
-  async init(cfg) {
-    await this.setting.init(cfg);
+    this.commands = require("./cmds");
     await this.ipfs.init(cfg);
   }
   async shutdown() {
@@ -15,8 +14,8 @@ class ScbrfCore {
   }
 }
 
-Object.keys(require("./cmds")).forEach((cmd) => {
-  ScbrfCore.prototype[cmd] = require("./cmds")[cmd];
-});
+// Object.keys(require("./cmds")).forEach((cmd) => {
+//   ScbrfCore.prototype[cmd] = require("./cmds")[cmd];
+// });
 
 module.exports = new ScbrfCore();

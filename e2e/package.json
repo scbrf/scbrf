@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@scbrf/core": "../core"
+  }
+}

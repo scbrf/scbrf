@@ -1,5 +1,3 @@
-const log = require("./log")("setting");
-
 class Setting {
   tmproot = "PlanetSettingsTempRootKey";
   documentRoot = "PlanetSettingsDocumentRootKey";
@@ -8,8 +6,9 @@ class Setting {
   settingsPublicGatewayIndex = "PlanetSettingsPublicGatewayIndexKey";
   settingsAPIEnabled = "PlanetSettingsAPIEnabledKey";
   settingsAPIPort = "PlanetSettingsAPIPortKey";
+  defaultLogLevel = "PlanetDefaultLogLevelKey";
   prefs = {};
-  async init(cfg = {}) {
+  init(cfg = {}) {
     this.prefs = { ...cfg };
     const prefPath = this.get(
       "prefPath",
@@ -20,9 +19,7 @@ class Setting {
       if (json) {
         this.prefs = { ...JSON.parse(json.toString()), prefPath };
       }
-    } catch (ex) {
-      log.error(ex, "init prefs error");
-    }
+    } catch (ex) {}
   }
   async set(key, value) {
     this.prefs[key] = value;
