@@ -57,6 +57,9 @@ class MockFS {
   writeFileSync(path, cnt) {
     this.fs[path] = cnt;
   }
+  createWriteStream(path) {
+    this.fs[path] = "stream";
+  }
 }
 
 module.exports = new MockFS();

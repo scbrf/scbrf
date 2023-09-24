@@ -4,6 +4,7 @@ class PlanetStore {
   constructor() {
     this.state = observable({
       myPlanets: [],
+      followingPlanets: [],
     });
   }
   async saveMyPlanetsOrder() {

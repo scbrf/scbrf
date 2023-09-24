@@ -116,6 +116,23 @@ class IPFS {
     const cid = `${stdout}`.trim();
     log.info({ cid, path }, "File CIDv0");
   }
+  async pin(cid) {
+    log.info({ cid }, "Pinning");
+    await this.api("pin/add", { arg: cid }, { timeout: 120 });
+  }
+  async resolveIPNSorDNSLink(name) {
+    log.info({ name }, "Resolving IPNS or DNSLink");
+    const resolved = await this.api("name/resolve", { arg: name });
+    const cidWithPrefix = resolved.path;
+    if (cidWithPrefix.startsWith("/ipfs/")) {
+      return cidWithPrefix.substring("/ipfs/".length);
+    } else {
+      log.error(
+        { name, resolved },
+        "Failed to resolve IPNS or DNSLink: unknown result from API call"
+      );
+    }
+  }
   async updateOnlineStatus() {
     log.info("Updating online status");
     let online = false,
@@ -141,16 +158,20 @@ class IPFS {
     this.state.online = online;
     this.state.peers = peers;
   }
-  async api(path, body) {
+  async api(path, body, options = {}) {
     const url = `http://127.0.0.1:${this.APIPort}/api/v0/${path}`;
-    const rsp = await fetch(url, {
+    const fetchOption = {
       method: "POST",
       headers: {
         cache: "no-cache",
         "Content-Type": "application/json",
       },
       body: body ? JSON.stringify(body) : "",
-    });
+    };
+    if (options.timeout) {
+      fetchOption.signal = AbortSignal.timeout(options.timeout * 1000);
+    }
+    const rsp = await fetch(url, fetchOption);
     const json = await rsp.json();
     log.info({ path, body, json }, "IPFS API Request");
     return json;
