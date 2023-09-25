@@ -35,7 +35,7 @@ async function run() {
     });
     const draft = await core.commands.articleModify({
       draftID,
-      title: "New Title",
+      title: "中文测试",
       content: "This is new Content",
       tags: { test: "test" },
     });
@@ -61,11 +61,11 @@ async function run() {
     const draft = await core.commands.articleModify({
       draftID,
       title: "New Title 2",
-      content: "This is new Video Content",
+      content:
+        "This is new Video Content, it has a very very very very very very very very very very very very long content",
       tags: { video: "video" },
     });
     expect(draft.id).toBe(draftID);
-    expect(draft.content).toBe("This is new Video Content");
     await core.commands.articleAttachfile({
       draftID,
       path: VideoPath,

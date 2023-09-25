@@ -613,7 +613,7 @@ class MyArticleModel extends ArticleModel {
       text = this.title;
       const audioDuration = this.getAudioDuration(this.audioFilename);
       if (audioDuration) {
-        text += `\n\n█▄▅ ${this.formatDuration(audioDuration)}`;
+        text += `\n\nd: ${this.formatDuration(audioDuration)}`;
       }
       if (this.content) {
         text += "\n\n" + this.content;
@@ -635,7 +635,7 @@ class MyArticleModel extends ArticleModel {
       text = this.title;
       const videoDuration = this.getAudioDuration(this.videoFilename);
       if (videoDuration) {
-        text += "\n\n▶ " + this.formatDuration(videoDuration);
+        text += "\n\nd: " + this.formatDuration(videoDuration);
       }
       if (this.content) {
         text += "\n\n" + this.content;
@@ -654,9 +654,69 @@ class MyArticleModel extends ArticleModel {
   }
   async saveCoverImage(text, path, options) {
     const Jimp = require("jimp");
-    const image = new Jimp(options.width, options.height, "black");
-    const font = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
-    await image.print(font, 0, 0, text);
+    const image = new Jimp(options.width, options.height, "white");
+    const font = await Jimp.loadFont(
+      require("path").join(
+        __dirname,
+        "..",
+        "resources",
+        "fonts",
+        "PingFang",
+        "PingFang_24_BLACK.fnt"
+      )
+    );
+    // console.log("default delta:", Object.entries(font.chars)[0][1].xadvance);
+    const defaultCharWidth = Object.entries(font.chars)[0][1].xadvance;
+    //fix the measureText lib function error
+    const measureText = (text) => {
+      let x = 0;
+      for (let i = 0; i < text.length; i++) {
+        let char;
+
+        if (font.chars[text[i]]) {
+          char = text[i];
+        } else if (/\s/.test(text[i])) {
+          char = "";
+        } else {
+          char = "?";
+        }
+
+        const fontChar = font.chars[char] || {};
+        const fontKerning = font.kernings[char];
+
+        const kerning =
+          fontKerning && fontKerning[text[i + 1]]
+            ? fontKerning[text[i + 1]]
+            : 0;
+
+        x += kerning + (fontChar.xadvance || defaultCharWidth);
+      }
+      return x;
+    };
+    const lines = text.split("\n");
+    let idx = 0;
+    const MARGIN = 10;
+    const widthLimit = options.width - MARGIN * 2;
+    for (let line of lines) {
+      let piece = "";
+      line = line.trim();
+      for (let ch of line) {
+        const test = `${piece}${ch}`;
+        const w = measureText(test);
+        if (w > widthLimit) {
+          await image.print(font, MARGIN, MARGIN + 30 * idx++, piece);
+          piece = ch;
+        } else {
+          piece = `${piece}${ch}`;
+        }
+      }
+      if (piece.length) {
+        await image.print(font, MARGIN, MARGIN + 30 * idx++, piece);
+        piece = "";
+        idx++;
+      }
+    }
+    image.color([{ apply: "xor", params: ["#FFFFFF"] }]);
     await image.writeAsync(path);
   }
   static compose(json = {}) {
