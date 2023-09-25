@@ -33,13 +33,18 @@ async function run() {
     draftID,
     title: "New Title",
     content: "This is new Content",
-    tags: ["test"],
+    tags: { test: "test" },
   });
   expect(draft.id).toBe(draftID);
   expect(draft.content).toBe("This is new Content");
   const article = await core.commands.articlePublish({ draftID });
-
+  expect(
+    require("fs").existsSync(
+      require("path").join(article.publicBasePath, `${this.name}.html`)
+    )
+  );
+  await new Promise((r) => setTimeout(r, 1000));
+  await core.shutdown();
   log("Done");
-  process.exit();
 }
 run();

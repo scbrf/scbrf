@@ -3,10 +3,10 @@ const URLUtils = require("../Helper/URLUtils");
 const { timeToReferenceDate } = require("../utils");
 const log = require("../log")("my planet model");
 const UUID = require("uuid").v4;
-const BLOG = 0;
 const Environment = require("../Helper/Environment");
 const PublicPlanetModel = require("./PublicPlanetModel");
 const Pinnable = require("../integrations/Pinnable");
+const ArticleType = require("./ArticleType");
 
 class MyPlanetModel {
   static RESERVED_KEYWORDS_FOR_TAGS = ["index", "tags", "archive", "archives"];
@@ -231,6 +231,19 @@ class MyPlanetModel {
     return require("fs").existsSync(this.publicAvatarPath);
   }
 
+  consolidateTags() {
+    const tags = {};
+    for (let article of this.articles) {
+      let articleTags = article.tags;
+      if (articleTags) {
+        for (let key in articleTags) {
+          tags[key] = articleTags[key];
+        }
+      }
+    }
+    return tags;
+  }
+
   renderRSS(podcastOnly) {
     const templateStringRSS = this.templateStringRSS;
     if (!templateStringRSS) return;
@@ -306,7 +319,7 @@ class MyPlanetModel {
     const siteNavigation = this.siteNavigation();
     const allArticles = this.articles.map((item) => item.publicArticle);
     const publicArticles = this.articles
-      .filter((item) => item.articleType == BLOG)
+      .filter((item) => item.articleType == ArticleType.blog)
       .map((item) => item.publicArticle);
     const publicPlanet = new PublicPlanetModel({
       id: this.id,
@@ -427,6 +440,7 @@ class MyPlanetModel {
         require("fs").writeFileSync(tagPath, tagHTML);
       }
       if (this.template.hasTagsHTML) {
+        this.tags = this.consolidateTags();
         const tagsContext = {
           planet: publicPlanet,
           my_planet: this,
@@ -435,7 +449,8 @@ class MyPlanetModel {
           og_image_url: this.ogImageURLString,
           has_podcast: publicPlanet.hasAudioContent(),
           has_podcast_cover_art: hasPodcastCoverArt,
-          tags: this.tags,
+          tags: Object.keys(this.tags),
+          tag_names: this.tags,
           tag_articles: tagArticles,
         };
         const tagsHTML = this.template.renderTags(tagsContext);

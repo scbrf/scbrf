@@ -3,6 +3,7 @@ const S = require("../setting");
 const { createHash } = require("node:crypto");
 const { marked } = require("marked");
 const Environment = require("../Helper/Environment");
+const PublicPlanetModel = require("../model/PublicPlanetModel");
 const log = require("../log")("Template Store");
 class Template {
   name = "";
@@ -244,6 +245,71 @@ class Template {
     return new Environment(path).renderTemplate({
       name,
       context: contextForRendering,
+    });
+  }
+  render(article, simple = false) {
+    const content_html = marked.parse(article.content);
+    const planet = article.planet;
+    const hasPodcast = planet.articles.filter((a) =>
+      a.hasAudioContent()
+    ).length;
+    const publicPlanet = new PublicPlanetModel({
+      id: planet.id,
+      name: planet.name,
+      about: planet.about,
+      ipns: planet.ipns,
+      created: planet.created,
+      updated: planet.updated,
+      articles: [],
+      plausibleEnabled: planet.plausibleEnabled || false,
+      plausibleDomain: planet.plausibleDomain || null,
+      plausibleAPIServer: planet.plausibleAPIServer || "plausible.io",
+      juiceboxEnabled: planet.juiceboxEnabled || false,
+      juiceboxProjectID: planet.juiceboxProjectID,
+      juiceboxProjectIDGoerli: planet.juiceboxProjectIDGoerli,
+      twitterUsername: planet.twitterUsername || null,
+      githubUsername: planet.githubUsername || null,
+      telegramUsername: planet.telegramUsername || null,
+      mastodonUsername: planet.mastodonUsername || null,
+      podcastCategories: planet.podcastCategories || {},
+      podcastLanguage: planet.podcastLanguage || "en",
+      podcastExplicit: planet.podcastExplicit || false,
+      tags: planet.tags || {},
+    });
+    const pageAboutHTML = marked.parse(planet.about);
+    let context = {
+      page_description_html: pageAboutHTML,
+      planet: publicPlanet,
+      site_navigation: planet.siteNavigation(),
+      has_avatar: planet.hasAvatar(),
+      has_podcast: hasPodcast,
+      planet_ipns: article.planet.ipns,
+      assets_prefix: "../",
+      article_id: article.id,
+      article: article.publicArticle,
+      article_type: article.articleType,
+      article_title: article.title,
+      article_summary: article.summary || "",
+      page_title: article.title,
+      content_html: content_html,
+      build_timestamp: Math.round(new Date().getTime() / 1000),
+      style_css_sha256: this.styleCSSHash || "",
+      current_item_type: "blog",
+      social_image_url:
+        article.socialImageURL || article.planet.ogImageURLString,
+    };
+    context = { ...context, ...this.renderCustomCode(planet, context) };
+    let target;
+    if (simple) {
+      target = this.blogSimplePath;
+    } else {
+      target = this.blogPath;
+    }
+    const path = require("path").dirname(target);
+    const name = require("path").basename(target);
+    return new Environment(path).renderTemplate({
+      name,
+      context,
     });
   }
 }

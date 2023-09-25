@@ -1,16 +1,7 @@
 const log = require("../log")("article model");
 const Jimp = require("jimp");
 const S = require("../setting");
-class ArticleType {
-  value = -1;
-  constructor(value) {
-    this.value = value;
-  }
-  static blog = new ArticleType(0);
-  toJSON() {
-    return this.value;
-  }
-}
+const ArticleType = require("./ArticleType");
 
 class ArticleStarType {
   star = new ArticleStarType();
@@ -84,7 +75,7 @@ class MyArticleModel extends ArticleModel {
       externalLink: this.externalLink || "",
       title: this.title || "",
       content: this.content || "",
-      created: require("../utils").timeToReferenceDate(this.created),
+      created: this.created,
       hasVideo: this.hasVideo,
       videoFilename: this.videoFilename,
       hasAudio: this.hasAudio,
@@ -333,6 +324,9 @@ class MyArticleModel extends ArticleModel {
     const path = this.getAttachmentURL(name);
     return require("fs").statSync(path).size;
   }
+  hasAudioContent() {
+    return !!this.audioFilename;
+  }
   async savePublic() {
     const started = new Date();
     const template = this.planet.template;
@@ -341,12 +335,14 @@ class MyArticleModel extends ArticleModel {
     }
     this.removeDSStore();
     this.saveMarkdown();
+
     // MARK: Cover Image
     const coverImageText = this.getCoverImageText();
     await this.saveCoverImage(coverImageText, this.publicCoverImagePath, {
       width: 512,
       height: 512,
     });
+
     const attachments = this.attachments;
     let needsCoverImageCID = !!attachments.length || !!this.audioFilename;
 

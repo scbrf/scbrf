@@ -77,7 +77,7 @@ class DraftModel {
   attachments = [];
   heroImage = "";
   externalLink = "";
-  tags = [];
+  tags = {};
   target;
   initialContentSHA256 = "";
   get planetUUIDString() {
@@ -102,7 +102,7 @@ class DraftModel {
   }
   contentRaw() {
     this.attachments.sort((a, b) => a.name.localeCompare(b.name));
-    const tags = this.tags.map((t) => t.key).join(",");
+    const tags = Object.keys(this.tags).join(",");
     const attachmentNames = this.attachments.map((a) => a.name).join(",");
     const heroImageFilename = this.heroImage || "";
     const currentContent = `${this.date}${this.title}${this.content}${attachmentNames}${tags}${heroImageFilename}`;
@@ -197,13 +197,13 @@ class DraftModel {
       article.summary = summary;
     }
     article.save();
-    article.savePublic();
+    await article.savePublic();
     this.delete();
     planet.copyTemplateAssets();
     planet.updated = new Date();
     planet.save();
-    planet.savePublic();
-    planet.publish();
+    await planet.savePublic();
+    await planet.publish();
     return article;
   }
   static async create({ planet, article }) {

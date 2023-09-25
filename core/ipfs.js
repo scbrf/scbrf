@@ -159,22 +159,24 @@ class IPFS {
     this.state.online = online;
     this.state.peers = peers;
   }
-  async api(path, body, options = {}) {
-    const url = `http://127.0.0.1:${this.APIPort}/api/v0/${path}`;
+  async api(path, args, options = {}) {
+    let url = `http://127.0.0.1:${this.APIPort}/api/v0/${path}`;
+    if (args) {
+      url += "?" + require("querystring").encode(args);
+    }
     const fetchOption = {
       method: "POST",
       headers: {
         cache: "no-cache",
         "Content-Type": "application/json",
       },
-      body: body ? JSON.stringify(body) : "",
     };
     if (options.timeout) {
       fetchOption.signal = AbortSignal.timeout(options.timeout * 1000);
     }
     const rsp = await fetch(url, fetchOption);
     const json = await rsp.json();
-    log.info({ path, body, json }, "IPFS API Request");
+    log.info({ path, args, json }, "IPFS API Request");
     return json;
   }
   async shutdownDaemon() {
