@@ -38,6 +38,7 @@ class ArticleModel {
 }
 
 class MyArticleModel extends ArticleModel {
+  static articles = {};
   articleType = ArticleType.blog;
   link = "";
   slug = "";
@@ -135,6 +136,7 @@ class MyArticleModel extends ArticleModel {
   constructor(json) {
     super(json);
     Object.assign(this, json);
+    MyArticleModel.articles[json.id] = this;
   }
   toJSON() {
     const json = [
@@ -163,6 +165,9 @@ class MyArticleModel extends ArticleModel {
     }, {});
     json.created = require("../utils").timeToReferenceDate(json.created);
     return json;
+  }
+  static fromID(articleId) {
+    return MyArticleModel.articles[articleId];
   }
   save() {
     require("fs").writeFileSync(this.path, JSON.stringify(this));
@@ -306,6 +311,7 @@ class MyArticleModel extends ArticleModel {
     return !!this.videoFilename;
   }
   getAudioDuration(name) {
+    if (!name) return null;
     const url = this.getAttachmentURL(name);
     const ffprobe = require("@ffprobe-installer/ffprobe").path;
     const args = [
@@ -323,6 +329,7 @@ class MyArticleModel extends ArticleModel {
     return null;
   }
   getAttachmentByteLength(name) {
+    if (!name) return null;
     const path = this.getAttachmentURL(name);
     return require("fs").statSync(path).size;
   }
@@ -680,7 +687,7 @@ class MyArticleModel extends ArticleModel {
       title: json.title,
       content: json.content,
       summary: json.summary,
-      created: json.created,
+      created: json.date,
       starType: ArticleStarType.star,
     });
     article.planet = json.planet;

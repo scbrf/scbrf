@@ -6,8 +6,10 @@ const UUID = require("uuid").v4;
 const BLOG = 0;
 const Environment = require("../Helper/Environment");
 const PublicPlanetModel = require("./PublicPlanetModel");
+const Pinnable = require("../integrations/Pinnable");
 
 class MyPlanetModel {
+  static RESERVED_KEYWORDS_FOR_TAGS = ["index", "tags", "archive", "archives"];
   podcastLanguage = "en";
   tags = {};
   templateStringRSS = (() => {
@@ -39,6 +41,9 @@ class MyPlanetModel {
     this.updated = updated;
     this.lastPublished = lastPublished;
     this.templateName = templateName;
+  }
+  static isReservedTag(tag) {
+    return MyPlanetModel.RESERVED_KEYWORDS_FOR_TAGS.indexOf(tag) >= 0;
   }
   static myPlanetsPath() {
     const url = require("path").join(
@@ -394,11 +399,11 @@ class MyPlanetModel {
             if (MyPlanetModel.isReservedTag(key)) {
               continue;
             }
+            if (!tagArticles[key]) {
+              tagArticles[key] = [];
+            }
+            tagArticles[key].push(article);
           }
-          if (!tagArticles[key]) {
-            tagArticles[key] = [];
-          }
-          tagArticles[key].push(article);
         }
       }
       for (let key in tagArticles) {
@@ -613,6 +618,63 @@ class MyPlanetModel {
     require("fs").cpSync(this.template.assetsPath, this.publicAssetsPath, {
       recursive: true,
     });
+  }
+  async publish() {
+    const cid = require("../ipfs").addDirectory(this.publicBasePath);
+    if (this.dWebServicesEnabled) {
+      const dWebServicesDomain = this.dWebServicesDomain;
+      const dWebServicesAPIKey = this.dWebServicesAPIKey;
+      const dWebRecord = dWebServices({
+        domain: dWebServicesDomain,
+        apiKey: dWebServicesAPIKey,
+      });
+      await dWebRecord.publish(cid);
+    }
+    if (this.filebaseEnabled) {
+      const filebasePinName = this.filebasePinName;
+      const filebaseAPIToken = this.filebaseAPIToken;
+      if (this.filebasePinCID !== cid) {
+        const filebase = new FileBase({
+          pinName: filebasePinName,
+          apiToken: filebaseAPIToken,
+        });
+        const requestID = await filebase.pin(cid);
+        if (requestID) {
+          this.filebaseRequestID = requestID;
+          this.filebasePinCID = cid;
+          this.save();
+        }
+      }
+    }
+    const result = await require("../ipfs").api(
+      "name/publish",
+      {
+        arg: cid,
+        "allow-offline": "1",
+        key: this.id,
+        quieter: "1",
+        lifetime: "7200h",
+      },
+      { timeout: 600 }
+    );
+    log.info({ id: this.id, name: result.name }, "Published planet");
+    this.lastPublished = new Date();
+    this.lastPublishedCID = cid;
+    this.save();
+    this.prewarm();
+    this.callPinnable();
+  }
+  async prewarm() {
+    const rootURL = this.browserURL;
+    if (!rootURL) return;
+    const planetJSONURL = require("path").join(rootURL, `planet.json`);
+    await fetch(planetJSONURL);
+  }
+  async callPinnable() {
+    if (!this.pinnableEnabled) return;
+    if (!this.pinnableAPIEndpoint) return;
+    const pinnable = new Pinnable(pinnableAPIEndpoint);
+    await pinnable.pin();
   }
 }
 

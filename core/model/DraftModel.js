@@ -3,6 +3,7 @@ const jimp = require("jimp");
 const marked = require("marked");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
+const log = require("../log")("DraftModel");
 const MyArticleModel = require("./MyArticleModel");
 class AttachmentType {
   static image = new AttachmentType();
@@ -68,6 +69,7 @@ class Attachment {
   }
 }
 class DraftModel {
+  static drafts = {};
   id = "";
   date = new Date();
   title = "";
@@ -107,10 +109,13 @@ class DraftModel {
     return currentContent;
   }
   contentSHA256() {
-    return require("../utils").sha256(this.contentRaw);
+    return require("../utils").sha256(this.contentRaw());
   }
   constructor(json) {
     Object.assign(this, json);
+    if (json.id) {
+      DraftModel.drafts[json.id] = this;
+    }
   }
   toJSON() {
     return {
@@ -126,6 +131,9 @@ class DraftModel {
   }
   save() {
     require("fs").writeFileSync(this.infoPath, JSON.stringify(this));
+  }
+  static fromID(draftid) {
+    return DraftModel.drafts[draftid];
   }
   async saveToArticle() {
     let article = this.target.planet ? this.target : null;
@@ -196,8 +204,13 @@ class DraftModel {
     planet.save();
     planet.savePublic();
     planet.publish();
+    return article;
   }
   static async create({ planet, article }) {
+    if (!planet && !article) {
+      log.error("create draft without planet or article");
+      return;
+    }
     let draft;
     if (planet) {
       draft = new DraftModel({
@@ -269,6 +282,7 @@ class DraftModel {
     return this.attachments.filter((a) => a.name == name)[0];
   }
   delete() {
+    delete DraftModel.drafts[this.id];
     const planet = this.target.planet || this.target;
     const article = this.target.planet ? this.target : null;
     if (planet) {

@@ -34,6 +34,9 @@ class Environment {
       //TODO
       return str;
     });
+    this.env.addFilter("ymd", function (value) {
+      return moment(value).format("YYYY-MM-DD");
+    });
   }
   preCompile(cnt) {
     return cnt.replaceAll(

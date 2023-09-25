@@ -25,6 +25,20 @@ async function run() {
     templateName: "Plain",
   });
   expect(planet.id).toBe(planet.id.toUpperCase());
+
+  const { id: draftID } = await core.commands.articleCreate({
+    planetID: planet.id,
+  });
+  const draft = await core.commands.articleModify({
+    draftID,
+    title: "New Title",
+    content: "This is new Content",
+    tags: ["test"],
+  });
+  expect(draft.id).toBe(draftID);
+  expect(draft.content).toBe("This is new Content");
+  const article = await core.commands.articlePublish({ draftID });
+
   log("Done");
   process.exit();
 }

@@ -15,8 +15,4 @@ class ScbrfCore {
   }
 }
 
-// Object.keys(require("./cmds")).forEach((cmd) => {
-//   ScbrfCore.prototype[cmd] = require("./cmds")[cmd];
-// });
-
 module.exports = new ScbrfCore();

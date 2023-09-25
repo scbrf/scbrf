@@ -378,6 +378,18 @@ class IPFS {
       "--json"
     );
   }
+  async addDirectory(path) {
+    log.info({ path }, "Adding directory to IPFS");
+    const { stdout } = await this.IPFSCommand(
+      "add",
+      "-r",
+      path,
+      "--cid-version=1",
+      "--quieter"
+    );
+    const cid = `${stdout}`.trim();
+    return cid;
+  }
 }
 
 module.exports = new IPFS();
