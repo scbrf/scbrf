@@ -3,6 +3,7 @@ const core = require("../core");
 const { expect } = require("expect");
 const log = console.log;
 const AudioPath = "/Users/wwq/Music/网易云音乐/热河.mp3";
+const VideoPath = "/Users/wwq/Movies/么么弹吉他.m4v";
 async function run() {
   const dataRoot = require("path").join(__dirname, "data");
   if (require("fs").existsSync(dataRoot)) {
@@ -28,28 +29,56 @@ async function run() {
   });
   expect(planet.id).toBe(planet.id.toUpperCase());
 
-  const { id: draftID } = await core.commands.articleCreate({
-    planetID: planet.id,
-  });
-  const draft = await core.commands.articleModify({
-    draftID,
-    title: "New Title",
-    content: "This is new Content",
-    tags: { test: "test" },
-  });
-  expect(draft.id).toBe(draftID);
-  expect(draft.content).toBe("This is new Content");
-  await core.commands.articleAttachfile({
-    draftID,
-    path: AudioPath,
-    type: ".audio",
-  });
-  const article = await core.commands.articlePublish({ draftID });
-  expect(
-    require("fs").existsSync(
-      require("path").join(article.publicBasePath, `${this.name}.html`)
-    )
-  );
+  await (async () => {
+    const { id: draftID } = await core.commands.articleCreate({
+      planetID: planet.id,
+    });
+    const draft = await core.commands.articleModify({
+      draftID,
+      title: "New Title",
+      content: "This is new Content",
+      tags: { test: "test" },
+    });
+    expect(draft.id).toBe(draftID);
+    expect(draft.content).toBe("This is new Content");
+    await core.commands.articleAttachfile({
+      draftID,
+      path: AudioPath,
+      type: ".audio",
+    });
+    const article = await core.commands.articlePublish({ draftID });
+    expect(
+      require("fs").existsSync(
+        require("path").join(article.publicBasePath, `${this.name}.html`)
+      )
+    );
+  })();
+
+  await (async () => {
+    const { id: draftID } = await core.commands.articleCreate({
+      planetID: planet.id,
+    });
+    const draft = await core.commands.articleModify({
+      draftID,
+      title: "New Title 2",
+      content: "This is new Video Content",
+      tags: { video: "video" },
+    });
+    expect(draft.id).toBe(draftID);
+    expect(draft.content).toBe("This is new Video Content");
+    await core.commands.articleAttachfile({
+      draftID,
+      path: VideoPath,
+      type: ".video",
+    });
+    const article = await core.commands.articlePublish({ draftID });
+    expect(
+      require("fs").existsSync(
+        require("path").join(article.publicBasePath, `${this.name}.html`)
+      )
+    );
+  })();
+
   log("Done");
 }
 run();
