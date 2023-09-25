@@ -1,6 +1,8 @@
-const core = require("@scbrf/core");
+// const core = require("@scbrf/core");
+const core = require("../core");
 const { expect } = require("expect");
 const log = console.log;
+const AudioPath = "/Users/wwq/Music/网易云音乐/热河.mp3";
 async function run() {
   const dataRoot = require("path").join(__dirname, "data");
   if (require("fs").existsSync(dataRoot)) {
@@ -37,14 +39,17 @@ async function run() {
   });
   expect(draft.id).toBe(draftID);
   expect(draft.content).toBe("This is new Content");
+  await core.commands.articleAttachfile({
+    draftID,
+    path: AudioPath,
+    type: ".audio",
+  });
   const article = await core.commands.articlePublish({ draftID });
   expect(
     require("fs").existsSync(
       require("path").join(article.publicBasePath, `${this.name}.html`)
     )
   );
-  await new Promise((r) => setTimeout(r, 1000));
-  await core.shutdown();
   log("Done");
 }
 run();

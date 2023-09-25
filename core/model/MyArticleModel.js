@@ -216,14 +216,10 @@ class MyArticleModel extends ArticleModel {
       this.publicBasePath,
       videoThumbnailFilename
     );
-    const opKey = `${this.id}-video-thumbnail-${this.videoFilename}`;
-    const op = this.planet.ops[opKey];
     if (require("fs").existsSync(videoThumbnailPath)) {
-      log.debug({ op, opKey }, "Video thumbnail operation is already done");
       return;
     }
     this.getVideoThumbnail(videoThumbnailPath);
-    this.planet.ops[opKey] = new Date();
   }
   async hasHeroImage() {
     return !!this.getHeroImage();
@@ -280,23 +276,11 @@ class MyArticleModel extends ArticleModel {
       heroGridJPEGFilename
     );
 
-    const opKey = `${this.id}-hero-grid-${heroImageFilename}`;
-    const op = this.planet.ops[opKey];
-    if (
-      op &&
-      require("fs").existsSync(heroImagePath) &&
-      require("fs").existsSync(heroGridPNGPath)
-    ) {
-      log.debug({ op, opKey }, "Hero grid operation is already done");
-      return;
-    }
-
     const heroImage = await Jimp.read(heroImagePath);
     const size = Math.min(heroImage.getWidth(), heroImage.getHeight(), 512);
     const grid = heroImage.resize(size, size);
     await grid.writeAsync(heroGridPNGPath);
     await grid.writeAsync(heroGridJPEGPath);
-    this.planet.ops[opKey] = new Date();
   }
   hasVideoContent() {
     return !!this.videoFilename;

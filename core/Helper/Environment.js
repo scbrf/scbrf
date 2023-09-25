@@ -17,9 +17,10 @@ class PlanetLoader {
     this.options = opts;
   }
   getSource(name) {
-    let src = require("fs")
-      .readFileSync(require("path").join(this.options.base, name))
-      .toString();
+    const target = this.options.base
+      ? require("path").join(this.options.base, name)
+      : name;
+    let src = require("fs").readFileSync(target).toString();
     src = preCompile(src);
     return {
       src,
@@ -53,6 +54,9 @@ class Environment {
     });
     this.env.addFilter("formatDate", function (value) {
       return moment(value).format("YYYY-MM-DD");
+    });
+    this.env.addFilter("hhmmss", function (value) {
+      return moment(value).format("hhmmss");
     });
   }
   renderTemplate({ name, string, context }) {

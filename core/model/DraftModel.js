@@ -5,47 +5,8 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const log = require("../log")("DraftModel");
 const MyArticleModel = require("./MyArticleModel");
-class AttachmentType {
-  static image = new AttachmentType();
-  static video = new AttachmentType();
-  static audio = new AttachmentType();
-  static file = new AttachmentType();
-  static supportedImageContentTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/tiff",
-    "image/gif",
-  ];
-  static supportedAudioContentTypes = [
-    "audio/aac",
-    "audio/mpeg",
-    "audio/ogg",
-    "audio/wav",
-    "audio/webm",
-  ];
-  static supportedVideoContentTypes = [
-    "video/mp4",
-    "video/mpeg",
-    "video/ogg",
-    "video/webm",
-    "video/x-msvideo",
-    "application/octet-stream",
-  ];
-  static from(path) {
-    const mime = require("mime");
-    const mime_type = mime.getType(path);
-    return AttachmentType.fromContentType(mime_type);
-  }
-  static fromContentType(mime) {
-    if (supportedImageContentTypes.indexOf(mime) >= 0)
-      return AttachmentType.image;
-    if (supportedAudioContentTypes.indexOf(mime) >= 0)
-      return AttachmentType.audio;
-    if (supportedVideoContentTypes.indexOf(mime) >= 0)
-      return AttachmentType.video;
-    return AttachmentType.file;
-  }
-}
+const AttachmentType = require("./AttachmentType");
+const Environment = require("../Helper/Environment");
 
 class Attachment {
   name = "";
@@ -54,8 +15,16 @@ class Attachment {
   get path() {
     return require("path").join(this.draft.attachmentsPath, this.name);
   }
+  toJSON() {
+    return {
+      name: this.name,
+      type: this.type,
+      created: this.created,
+      path: this.path,
+    };
+  }
   constructor(json) {
-    object.assign(this, json);
+    Object.assign(this, json);
     this.created = timeToReferenceDate(new Date());
   }
   async loadThumbnail() {
@@ -80,6 +49,15 @@ class DraftModel {
   tags = {};
   target;
   initialContentSHA256 = "";
+  get previewTemplatePath() {
+    return require("path").join(
+      __dirname,
+      "..",
+      "resources",
+      "Templates",
+      "WriterBasic.html"
+    );
+  }
   get planetUUIDString() {
     return this.target.planet ? this.target.planet.id : this.target.id;
   }
@@ -178,8 +156,11 @@ class DraftModel {
       if (attachment.type == AttachmentType.audio) {
         audioFilename = attachment.name;
       }
-      currentAttachments.push(name);
-      const targetPath = require("path").join(article.publicBasePath, name);
+      currentAttachments.push(attachment.name);
+      const targetPath = require("path").join(
+        article.publicBasePath,
+        attachment.name
+      );
       require("fs").cpSync(attachment.path, targetPath);
     }
     article.attachments = currentAttachments;
@@ -293,6 +274,63 @@ class DraftModel {
     if (require("fs").existsSync(this.basePath)) {
       require("fs").rmSync(this.basePath, { recursive: true, force: true });
     }
+  }
+  async addAttachment(path, type) {
+    const name = require("path").basename(path);
+    const targetPath = require("path").join(this.attachmentsPath, name);
+    if (require("fs").existsSync(targetPath)) {
+      require("fs").rmSync(targetPath);
+    }
+    require("fs").cpSync(path, targetPath);
+    if (type == AttachmentType.video) {
+      this.attachments = this.attachments.filter(
+        (a) => a.type !== AttachmentType.video && a.name != name
+      );
+    } else {
+      this.attachments = this.attachments.filter((a) => a.name != name);
+    }
+
+    if (type == AttachmentType.image) {
+      if (this.attachments.length == 0) {
+        this.heroImage = name;
+      }
+    }
+
+    return await this.processAttachment(name, targetPath, type);
+  }
+  async processAttachment(name, path, type) {
+    let attachment;
+    if (path.endsWith("tiff")) {
+      const convertedPath = path.slice(0, -4) + "png";
+      const img = await jimp.read(path);
+      await img.writeAsync(convertedPath);
+      attachment = new Attachment({
+        name: require("path").basename(convertedPath),
+        type,
+      });
+    } else {
+      attachment = new Attachment({ name, type });
+    }
+    attachment.draft = this;
+    this.attachments.push(attachment);
+    await attachment.loadThumbnail();
+    return attachment;
+  }
+  preprocessContentForMarkdown() {
+    return this.content;
+  }
+  renderPreview() {
+    log.info({ id: this.id }, "Rendering preview for draft");
+    const html = marked.parse(this.preprocessContentForMarkdown());
+    const output = new Environment().renderTemplate({
+      name: this.previewTemplatePath,
+      context: { content_html: html },
+    });
+    require("fs").writeFileSync(this.previewPath, output);
+    log.info(
+      { id: this.id, path: this.previewPath },
+      "Rendered preview for draft done"
+    );
   }
 }
 

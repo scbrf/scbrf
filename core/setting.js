@@ -12,7 +12,10 @@ class Setting {
     this.prefs = { ...cfg };
     const prefPath = this.get(
       "prefPath",
-      require("path").join(__dirname, "pref.json")
+      require("path").join(
+        cfg.PlanetSettingsDocumentRootKey || __dirname,
+        "pref.json"
+      )
     );
     try {
       const json = require("fs").readFileSync(prefPath);

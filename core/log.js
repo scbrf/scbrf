@@ -1,12 +1,15 @@
 const S = require("./setting");
 module.exports = function getLog(name) {
   var bunyan = require("bunyan");
+  let level;
+  if (process.env["NODE_ENV"] == "test") {
+    level = "error";
+  } else {
+    level = S.get(S.defaultLogLevel, "error");
+  }
   var log = bunyan.createLogger({
     name,
-    level:
-      process.env["NODE_ENV"] == "test"
-        ? "error"
-        : S.get(S.defaultLogLevel, "info"),
+    level,
   });
   return log;
 };
