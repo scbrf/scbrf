@@ -23,6 +23,9 @@ class IPFS {
       peers: 0,
     });
   }
+  get gateway() {
+    return `http://127.0.0.1:${this.gatewayPort}`;
+  }
   preferredGateway() {
     const index = S.get(S.settingsPublicGatewayIndex, 0);
     return this.publicGateways[index];
@@ -123,8 +126,10 @@ class IPFS {
   }
   async resolveIPNSorDNSLink(name) {
     log.info({ name }, "Resolving IPNS or DNSLink");
-    const resolved = await this.api("name/resolve", { arg: name });
-    const cidWithPrefix = resolved.path;
+    const resolved = await this.api("name/resolve", {
+      arg: name,
+    });
+    const cidWithPrefix = resolved.Path;
     if (cidWithPrefix.startsWith("/ipfs/")) {
       return cidWithPrefix.substring("/ipfs/".length);
     } else {
@@ -159,7 +164,7 @@ class IPFS {
     this.state.online = online;
     this.state.peers = peers;
   }
-  async api(path, args, options = {}) {
+  async api(path, args, options = { timeout: 30 }) {
     let url = `http://127.0.0.1:${this.APIPort}/api/v0/${path}`;
     if (args) {
       url += "?" + require("querystring").encode(args);

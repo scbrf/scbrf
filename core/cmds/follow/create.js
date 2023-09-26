@@ -1,3 +1,4 @@
+const FollowingPlanetModel = require("../../model/FollowingPlanetModel");
 // 关注一个新的站点
 module.exports = async (params) => {
   const { link } = params;
@@ -7,4 +8,5 @@ module.exports = async (params) => {
     0,
     planet
   );
+  return planet;
 };

@@ -1,13 +1,110 @@
 const log = require("../log")("FollowingPlanetModel");
 const PublicPlanetModel = require("./PublicPlanetModel");
-class PlanetType {
-  static planet = new PlanetType(0);
-  static ens = new PlanetType(1);
-  static dnslink = new PlanetType(2);
-  static dns = new PlanetType(3);
-  static dotbit = new PlanetType(4);
-}
+const FollowingArticleModel = require("./FollowingArticleModel");
+const PlanetType = require("./PlanetType");
+
 class FollowingPlanetModel {
+  id = "";
+  name = "";
+  about = "";
+  created = null;
+  planetType = null;
+  link = "";
+  cid = "";
+  updated = null;
+  lastRetrieved = null;
+  archived = false;
+  archivedAt = null;
+  walletAddress = "";
+  walletAddressResolvedAt = null;
+  isUpdating = false;
+  articles = [];
+  avatar = null;
+  juiceboxEnabled = false;
+  juiceboxProjectID = 0;
+  juiceboxProjectIDGoerli = 0;
+  twitterUsername = "";
+  githubUsername = "";
+  telegramUsername = "";
+  mastodonUsername = "";
+  static followingPlanetsPath() {
+    const url = require("path").join(
+      require("../Helper/URLUtils").repoPath(),
+      "Following"
+    );
+    if (!require("fs").existsSync(url)) {
+      require("fs").mkdirSync(url);
+    }
+    return url;
+  }
+  get basePath() {
+    return require("path").join(
+      FollowingPlanetModel.followingPlanetsPath(),
+      this.id
+    );
+  }
+  get infoPath() {
+    return require("path").join(this.basePath, "planet.json");
+  }
+  get articlesPath() {
+    return require("path").join(this.basePath, "Articles");
+  }
+  get avatarPath() {
+    return require("path").join(this.basePath, "avatar.png");
+  }
+  get nameInitials() {
+    return this.name
+      .split(" ")
+      .filter((a) => a)
+      .map((a) => `${a[0].toUpperCase()}${a.slice(1)}`)
+      .join(" ");
+  }
+  get webviewURL() {
+    return `${require("../ipfs").gateway}/ipfs/${this.cid}/`;
+  }
+  get browserURL() {
+    if (this.planetType == PlanetType.ens) {
+      return `https://${link}.limo`;
+    }
+    if (this.cid) {
+      return `${require("../ipfs").preferredGateway()}/ipfs/${this.cid}/`;
+    }
+    return this.link;
+  }
+  get shareLink() {
+    if (this.link.startsWith("https://")) return this.link;
+    return `planet://${this.link}`;
+  }
+  toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      about: this.about,
+      created: this.created,
+      planetType: this.planetType,
+      link: this.link,
+      cid: this.cid,
+      updated: this.updated,
+      lastRetrieved: this.lastRetrieved,
+      archived: this.archived,
+      archivedAt: this.archivedAt,
+      walletAddress: this.walletAddress,
+      walletAddressResolvedAt: this.walletAddressResolvedAt,
+      isUpdating: this.isUpdating,
+      articles: this.articles,
+      avatar: this.avatar,
+      twitterUsername: this.twitterUsername,
+      githubUsername: this.githubUsername,
+      telegramUsername: this.telegramUsername,
+      mastodonUsername: this.mastodonUsername,
+      juiceboxEnabled: this.juiceboxEnabled,
+      juiceboxProjectID: this.juiceboxProjectID,
+      juiceboxProjectIDGoerli: this.juiceboxProjectIDGoerli,
+    };
+  }
+  constructor(json) {
+    Object.assign(this, json);
+  }
   static async followENS(ens) {
     const resolver = await require("ethers")
       .getDefaultProvider()
@@ -15,13 +112,7 @@ class FollowingPlanetModel {
     if (!resolver) {
       throw require("./PlanetError").InvalidPlanetURLError;
     }
-    const result = await resolver.getContentHash();
-    if (!result) {
-      throw require("./PlanetError").EthereumError;
-    }
-    log.info({ ens, result }, "Get contenthash");
-    const contenthash = result;
-    const cid = await require("../ENSUtils").getCID(contenthash);
+    const cid = await require("../ipfs").resolveIPNSorDNSLink(ens);
     if (!cid) {
       throw require("./PlanetError").ENSNoContentHashError;
     }
@@ -50,8 +141,8 @@ class FollowingPlanetModel {
     });
     require("fs").mkdirSync(planet.basePath);
     require("fs").mkdirSync(planet.articlesPath);
-    planet.articles = publicPlanet.articles.map(
-      (a) => new FollowingArticleModel.from(a, { planet: planet })
+    planet.articles = publicPlanet.articles.map((a) =>
+      FollowingArticleModel.from(a, planet)
     );
     planet.articles.sort((a, b) => b.created - a.created);
     let url = await resolver.getAvatar();
@@ -75,7 +166,7 @@ class FollowingPlanetModel {
 
     const walletAddress = await resolver.getAddress();
     if (walletAddress) {
-      planet.walletAddress = "0x" + walletAddress;
+      planet.walletAddress = walletAddress;
       planet.walletAddressResolvedAt = new Date();
     }
     planet.save();
@@ -118,7 +209,28 @@ class FollowingPlanetModel {
     return await FollowingPlanetModel.followIPNSorDNSLink(link);
   }
   toJSON() {
-    //TODO
+    return {
+      id: this.id,
+      planetType: this.planetType,
+      name: this.name,
+      about: this.about,
+      link: this.link,
+      cid: this.cid,
+      created: this.created,
+      updated: this.updated,
+      lastRetrieved: this.lastRetrieved,
+      archived: this.archived,
+      archivedAt: this.archivedAt,
+      walletAddress: this.walletAddress,
+      walletAddressResolvedAt: this.walletAddressResolvedAt,
+      twitterUsername: this.twitterUsername,
+      githubUsername: this.githubUsername,
+      telegramUsername: this.telegramUsername,
+      mastodonUsername: this.mastodonUsername,
+      juiceboxEnabled: this.juiceboxEnabled,
+      juiceboxProjectID: this.juiceboxProjectID,
+      juiceboxProjectIDGoerli: this.juiceboxProjectIDGoerli,
+    };
   }
   save() {
     require("fs").writeFileSync(this.infoPath, JSON.stringify(this));

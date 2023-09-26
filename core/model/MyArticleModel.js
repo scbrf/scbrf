@@ -2,31 +2,8 @@ const log = require("../log")("article model");
 const Jimp = require("jimp");
 const S = require("../setting");
 const ArticleType = require("./ArticleType");
-
-class ArticleStarType {
-  star = new ArticleStarType();
-}
-
-class ArticleModel {
-  id = "";
-  title = "";
-  content = "";
-  created = null;
-  starred = null;
-  starType = ArticleStarType.star;
-  videoFilename = "";
-  audioFilename = "";
-  attachments = [];
-  get hasVideo() {
-    return !!this.videoFilename;
-  }
-  get hasAudio() {
-    return !!this.audioFilename;
-  }
-  constructor(json) {
-    Object.assign(this, json);
-  }
-}
+const ArticleModel = require("./ArticleModel");
+const ArticleStarType = require("./ArticleStarType");
 
 class MyArticleModel extends ArticleModel {
   static articles = {};

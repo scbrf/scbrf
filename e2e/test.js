@@ -4,7 +4,9 @@ const { expect } = require("expect");
 const log = console.log;
 const AudioPath = "/Users/wwq/Music/网易云音乐/热河.mp3";
 const VideoPath = "/Users/wwq/Movies/么么弹吉他.m4v";
-async function run() {
+
+async function init() {
+  // ****************** init *****************************
   const dataRoot = require("path").join(__dirname, "data");
   if (require("fs").existsSync(dataRoot)) {
     require("fs").rmSync(dataRoot, { recursive: true, force: true });
@@ -22,6 +24,10 @@ async function run() {
     });
   });
   log("******** IPFS Online");
+}
+
+async function myplanet() {
+  // ************************  create planet and article **********************
   const planet = await core.commands.planetCreate({
     name: "test",
     about: "a test site",
@@ -78,6 +84,20 @@ async function run() {
       )
     );
   })();
+}
+
+async function follow() {
+  // ******************************  following  ******************************
+  await (async () => {
+    const site = await core.commands.followCreate({ link: "olivida.eth" });
+    expect(site.name).toBe("olivida.eth");
+  })();
+}
+
+async function run() {
+  await init();
+  // await myplanet();
+  await follow();
 
   log("Done");
 }
