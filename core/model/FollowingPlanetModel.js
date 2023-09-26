@@ -2,6 +2,7 @@ const log = require("../log")("FollowingPlanetModel");
 const PublicPlanetModel = require("./PublicPlanetModel");
 const FollowingArticleModel = require("./FollowingArticleModel");
 const PlanetType = require("./PlanetType");
+const { timeFromReferenceDate, timeToReferenceDate } = require("../utils");
 
 class FollowingPlanetModel {
   id = "";
@@ -177,6 +178,11 @@ class FollowingPlanetModel {
     const planetURL = `${require("../ipfs").gateway}/ipfs/${cid}/planet.json`;
     const rsp = await fetch(planetURL);
     const json = await rsp.json();
+    json.created = json.created && timeFromReferenceDate(json.created);
+    json.updated = json.updated && timeFromReferenceDate(json.updated);
+    json.articles.forEach((a) => {
+      a.created = a.created && timeFromReferenceDate(a.created);
+    });
     return new PublicPlanetModel(json);
   }
   static async followDotBit(link) {}
@@ -233,7 +239,15 @@ class FollowingPlanetModel {
     };
   }
   save() {
-    require("fs").writeFileSync(this.infoPath, JSON.stringify(this));
+    const json = this.toJSON();
+    json.created = json.created && timeToReferenceDate(json.created);
+    json.updated = json.updated && timeToReferenceDate(json.updated);
+    json.lastRetrieved =
+      json.lastRetrieved && timeToReferenceDate(json.lastRetrieved);
+    json.walletAddressResolvedAt =
+      json.walletAddressResolvedAt &&
+      timeToReferenceDate(json.walletAddressResolvedAt);
+    require("fs").writeFileSync(this.infoPath, JSON.stringify(json));
   }
 }
 

@@ -2,6 +2,7 @@ jest.mock("fs");
 jest.mock("../ipfs");
 
 const FollowingArticleModel = require("./FollowingArticleModel");
+const PlanetType = require("./PlanetType");
 test("follow article", async () => {
   const article = await FollowingArticleModel.from(
     {
@@ -9,6 +10,7 @@ test("follow article", async () => {
       content: "this is a test",
       link: "/a",
     },
-    {}
+    { planetType: PlanetType.ens }
   );
+  expect(article.summary).toBeTruthy();
 });

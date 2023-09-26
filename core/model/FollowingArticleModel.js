@@ -2,6 +2,9 @@ const { marked } = require("marked");
 const ArticleModel = require("./ArticleModel");
 const PlanetType = require("./PlanetType");
 const ArticleStarType = require("./ArticleStarType");
+const { timeToReferenceDate } = require("../utils");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 class FollowingArticleModel extends ArticleModel {
   link = "";
@@ -101,7 +104,7 @@ class FollowingArticleModel extends ArticleModel {
         return new URL(this.link, this.planet.link).toString();
     }
   }
-  static extractSummary(content) {
+  static extractSummaryRaw(content) {
     const { window } = new JSDOM(content);
     let summary = window.document.body.textContent;
     if (summary.length > 280) {
@@ -116,21 +119,21 @@ class FollowingArticleModel extends ArticleModel {
         planet.planetType == PlanetType.ens ||
         planet.planetType == PlanetType.dotbit
       ) {
-        return FollowingArticleModel.extractSummary(
+        return FollowingArticleModel.extractSummaryRaw(
           marked.parse(article.content)
         );
       } else if (
         planet.planetType == PlanetType.dnslink ||
         planet.planetType == PlanetType.dns
       ) {
-        return FollowingArticleModel.extractSummary(article.content);
+        return FollowingArticleModel.extractSummaryRaw(article.content);
       }
     }
   }
   constructor(json) {
     super(json);
     Object.assign(this, json);
-    this.summary = FollowingArticleModel.extractSummary(json.content);
+    this.summary = FollowingArticleModel.extractSummaryRaw(json.content);
   }
   static linkStartsWithInternalGateway(link) {
     return link.match(/^http:\/\/127\.0\.0\.1:181[0-9]{2}\//);
@@ -200,7 +203,9 @@ class FollowingArticleModel extends ArticleModel {
     };
   }
   save() {
-    require("fs").writeFileSync(this.path, JSON.stringify(this));
+    const json = this.toJSON();
+    json.created = json.created && timeToReferenceDate(json.created);
+    require("fs").writeFileSync(this.path, JSON.stringify(json));
   }
   delete() {
     require("fs").rmSync(this.path);
