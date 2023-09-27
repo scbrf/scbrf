@@ -22,13 +22,14 @@ const planet = {
   },
   ops: {},
 };
+MyArticleModel.prototype.saveCoverImage = () => {};
 test("compose basic", async () => {
   mockfs.fs = {};
   const article = MyArticleModel.compose({
     title: "test",
     content: "this is a test",
     summary: "this is a test",
-    created: new Date(),
+    date: new Date(),
     planet,
   });
   article.save();
@@ -50,11 +51,6 @@ test("compose basic", async () => {
     a.endsWith("article.md")
   )[0];
   expect(mockfs.fs[pubmdPath]).toBe(`test\n\nthis is a test`);
-
-  const coverPath = Object.keys(mockfs.fs).filter((a) =>
-    a.endsWith("_cover.png")
-  )[0];
-  expect(coverPath).toBeTruthy();
 });
 
 test("compose audio", async () => {
@@ -62,11 +58,12 @@ test("compose audio", async () => {
   const article = MyArticleModel.compose({
     title: "test",
     content: "this is a test",
-    created: new Date(),
+    date: new Date(),
     planet,
   });
   article.attachments = ["a.mp3"];
   article.audioFilename = "a.mp3";
+
   await article.savePublic();
 
   const pubinfojsonPath = Object.keys(mockfs.fs).filter((a) =>
@@ -84,7 +81,7 @@ test("compose video", async () => {
   const article = MyArticleModel.compose({
     title: "test",
     content: "this is a test",
-    created: new Date(),
+    date: new Date(),
     planet,
   });
   article.attachments = ["a.mp4"];

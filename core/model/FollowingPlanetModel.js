@@ -121,69 +121,105 @@ class FollowingPlanetModel {
     require("../ipfs").pin(cid);
 
     const publicPlanet = await FollowingPlanetModel.getPublicPlanet(cid);
-    log.info({ ens, name: publicPlanet.name }, "found native planet");
-    let planet = new FollowingPlanetModel({
-      id: require("uuid").v4().toUpperCase(),
-      planetType: PlanetType.ens,
-      name: publicPlanet.name,
-      about: publicPlanet.about,
-      link: ens,
-      cid: cid,
-      twitterUsername: publicPlanet.twitterUsername,
-      githubUsername: publicPlanet.githubUsername,
-      telegramUsername: publicPlanet.telegramUsername,
-      mastodonUsername: publicPlanet.mastodonUsername,
-      juiceboxEnabled: publicPlanet.juiceboxEnabled,
-      juiceboxProjectID: publicPlanet.juiceboxProjectID,
-      juiceboxProjectIDGoerli: publicPlanet.juiceboxProjectIDGoerli,
-      created: publicPlanet.created,
-      updated: publicPlanet.updated,
-      lastRetrieved: new Date(),
-    });
-    require("fs").mkdirSync(planet.basePath);
-    require("fs").mkdirSync(planet.articlesPath);
-    planet.articles = publicPlanet.articles.map((a) =>
-      FollowingArticleModel.from(a, planet)
-    );
-    planet.articles.sort((a, b) => b.created - a.created);
-    let url = await resolver.getAvatar();
-    if (!url) {
-      url = `${require("../ipfs").gateway}/ipfs/${cid}/avatar.png`;
-      log.info({ ens }, "try to found avatar in native planet");
-    } else {
-      log.info({ ens }, "found avatar from ENS");
-    }
-    const fs = require("fs");
-    const { Readable } = require("stream");
-    const { finished } = require("stream/promises");
-    const fileStream = fs.createWriteStream(planet.avatarPath, {
-      flags: "wx",
-    });
-    const res = await fetch(url);
-    if (res.status == 200) {
-      await finished(Readable.fromWeb(res.body).pipe(fileStream));
-      planet.avatar = await require("jimp").read(planet.avatarPath);
-    }
+    if (publicPlanet) {
+      log.info({ ens, name: publicPlanet.name }, "found native planet");
+      let planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType: PlanetType.ens,
+        name: publicPlanet.name,
+        about: publicPlanet.about,
+        link: ens,
+        cid: cid,
+        twitterUsername: publicPlanet.twitterUsername,
+        githubUsername: publicPlanet.githubUsername,
+        telegramUsername: publicPlanet.telegramUsername,
+        mastodonUsername: publicPlanet.mastodonUsername,
+        juiceboxEnabled: publicPlanet.juiceboxEnabled,
+        juiceboxProjectID: publicPlanet.juiceboxProjectID,
+        juiceboxProjectIDGoerli: publicPlanet.juiceboxProjectIDGoerli,
+        created: publicPlanet.created,
+        updated: publicPlanet.updated,
+        lastRetrieved: new Date(),
+      });
+      require("fs").mkdirSync(planet.basePath);
+      require("fs").mkdirSync(planet.articlesPath);
+      planet.articles = publicPlanet.articles.map((a) =>
+        FollowingArticleModel.from(a, planet)
+      );
+      planet.articles.sort((a, b) => b.created - a.created);
+      let url = await resolver.getAvatar();
+      if (!url) {
+        url = `${require("../ipfs").gateway}/ipfs/${cid}/avatar.png`;
+        log.info({ ens }, "try to found avatar in native planet");
+      } else {
+        log.info({ ens }, "found avatar from ENS");
+      }
+      const fs = require("fs");
+      const { Readable } = require("stream");
+      const { finished } = require("stream/promises");
+      const fileStream = fs.createWriteStream(planet.avatarPath, {
+        flags: "wx",
+      });
+      const res = await fetch(url);
+      if (res.status == 200) {
+        await finished(Readable.fromWeb(res.body).pipe(fileStream));
+        planet.avatar = await require("jimp").read(planet.avatarPath);
+      }
 
-    const walletAddress = await resolver.getAddress();
-    if (walletAddress) {
-      planet.walletAddress = walletAddress;
-      planet.walletAddressResolvedAt = new Date();
+      const walletAddress = await resolver.getAddress();
+      if (walletAddress) {
+        planet.walletAddress = walletAddress;
+        planet.walletAddressResolvedAt = new Date();
+      }
+      planet.save();
+      planet.articles.forEach((a) => a.save());
+      return planet;
     }
-    planet.save();
-    planet.articles.forEach((a) => a.save());
-    return planet;
+    log.debug({ ens }, "Follow: did not find native planet.json");
+    const feedURL = `${require("../ipfs").gateway}/ipfs/${cid}`;
+    const [feedData, htmlSoup] = await FeedUtils.findFeed(feedURL);
+    const now = new Date();
+    let planet;
+    let feedAvatar;
+    if (feedData) {
+      log.info({ ens }, "Follow ENS: found feed");
+      const FeedParser = require("feedparser");
+      const feedparser = new FeedParser();
+      const feed = await new Promise((resolve, reject) => {
+        feedData.pipe(feedparser);
+
+        feedparser.on("error", function (error) {
+          reject(error);
+        });
+
+        feedparser.on("readable", function () {
+          var stream = this; // `this` is `feedparser`, which is a stream
+          var meta = this.meta; // **NOTE** the "meta" is always available in the context of the feedparser instance
+          var item;
+          const items = [];
+          while ((item = stream.read())) {
+            items.push(item);
+          }
+          resolve({ meta, items });
+        });
+      });
+      console.log("parse return:", feed);
+    }
   }
   static async getPublicPlanet(cid) {
-    const planetURL = `${require("../ipfs").gateway}/ipfs/${cid}/planet.json`;
-    const rsp = await fetch(planetURL);
-    const json = await rsp.json();
-    json.created = json.created && timeFromReferenceDate(json.created);
-    json.updated = json.updated && timeFromReferenceDate(json.updated);
-    json.articles.forEach((a) => {
-      a.created = a.created && timeFromReferenceDate(a.created);
-    });
-    return new PublicPlanetModel(json);
+    try {
+      const planetURL = `${require("../ipfs").gateway}/ipfs/${cid}/planet.json`;
+      const rsp = await fetch(planetURL);
+      const json = await rsp.json();
+      json.created = json.created && timeFromReferenceDate(json.created);
+      json.updated = json.updated && timeFromReferenceDate(json.updated);
+      json.articles.forEach((a) => {
+        a.created = a.created && timeFromReferenceDate(a.created);
+      });
+      return new PublicPlanetModel(json);
+    } catch (err) {
+      log.error(err, "Get Public Planet from CID Error");
+    }
   }
   static async followDotBit(link) {}
   static async followHTTP(link) {}

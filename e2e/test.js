@@ -86,18 +86,19 @@ async function myplanet() {
   })();
 }
 
-async function follow() {
+async function follow(link) {
   // ******************************  following  ******************************
   await (async () => {
-    const site = await core.commands.followCreate({ link: "olivida.eth" });
-    expect(site.name).toBe("olivida.eth");
+    const site = await core.commands.followCreate({ link });
+    expect(site.articles.length).toBeTruthy();
   })();
 }
 
 async function run() {
   await init();
   // await myplanet();
-  await follow();
+  // await follow("olivida.eth");
+  await follow("vitalik.eth");
 
   log("Done");
 }

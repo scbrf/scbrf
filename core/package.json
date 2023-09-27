@@ -19,6 +19,7 @@
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "bunyan": "^1.8.15",
     "ethers": "^6.7.1",
+    "feedparser": "^2.2.10",
     "get-port": "^7.0.0",
     "image-size": "^1.0.2",
     "jimp": "^0.22.10",
