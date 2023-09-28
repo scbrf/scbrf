@@ -10,6 +10,7 @@ module.exports = function getLog(name) {
   var log = bunyan.createLogger({
     name,
     level,
+    serializers: bunyan.stdSerializers,
   });
   return log;
 };

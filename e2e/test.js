@@ -15,7 +15,7 @@ async function init() {
   log("init core ...");
   await core.init({
     PlanetSettingsDocumentRootKey: dataRoot,
-    PlanetDefaultLogLevelKey: "error",
+    PlanetDefaultLogLevelKey: "info",
   });
   log("observe ipfs state...");
   await new Promise((r) => {
@@ -100,7 +100,10 @@ async function run() {
   // await follow("olivida.eth");
   // await follow("vitalik.eth");
   // await follow("olivida.bit");
-  await follow("https://vitalik.ca/");
+  // await follow("https://vitalik.ca/");
+  await follow(
+    "k51qzi5uqu5dgbfw2poynnynor8h9kqqoxmzdrxy4h4wnzx1x5p4n40ijtosxk"
+  );
   log("Done");
 }
 run();

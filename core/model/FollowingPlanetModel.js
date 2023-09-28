@@ -284,7 +284,7 @@ class FollowingPlanetModel {
       });
       return new PublicPlanetModel(json);
     } catch (err) {
-      log.error(err, "Get Public Planet from CID Error");
+      log.error({ err, cid }, "Get Public Planet from CID Error");
     }
   }
   static async followDotBit(dotbit) {
@@ -490,7 +490,7 @@ class FollowingPlanetModel {
     const planetType = require("../ENSUtils").isIPNS(name)
       ? PlanetType.planet
       : PlanetType.dnslink;
-    const cid = require("../ipfs").resolveIPNSorDNSLink(name);
+    const cid = await require("../ipfs").resolveIPNSorDNSLink(name);
     log.info({ name, cid }, "Follow");
     require("../ipfs").pin(cid);
 
@@ -536,7 +536,7 @@ class FollowingPlanetModel {
       planet.articles.forEach((a) => a.save());
       return planet;
     }
-    log.debug({ ens }, "Follow: did not find native planet.json");
+    log.debug({ name }, "Follow: did not find native planet.json");
     const feedURL = `${require("../ipfs").gateway}/ipfs/${cid}/`;
     const [feedData, htmlSoup] = await require("../Helper/FeedUtils").findFeed(
       feedURL
