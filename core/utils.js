@@ -1,5 +1,21 @@
 const which = require("which");
+const { Readable } = require("stream");
+class ReadableString extends Readable {
+  sent = false;
 
+  constructor(str) {
+    super();
+    this.str = str;
+  }
+  _read() {
+    if (!this.sent) {
+      this.push(Buffer.from(this.str));
+      this.sent = true;
+    } else {
+      this.push(null);
+    }
+  }
+}
 class Executables {
   ipfs;
   ffmpeg;
@@ -61,4 +77,5 @@ module.exports = {
     return createHash("sha256").update(str).digest("hex");
   },
   exe: new Executables(),
+  ReadableString,
 };

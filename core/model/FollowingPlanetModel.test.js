@@ -1,4 +1,3 @@
-const { Readable } = require("stream");
 jest.mock("fs");
 jest.mock("../ipfs", () => ({
   pin() {},
@@ -12,23 +11,6 @@ jest.mock("../ENSUtils", () => ({
     return "123";
   },
 }));
-
-class ReadableString extends Readable {
-  sent = false;
-
-  constructor(str) {
-    super();
-    this.str = str;
-  }
-  _read() {
-    if (!this.sent) {
-      this.push(Buffer.from(this.str));
-      this.sent = true;
-    } else {
-      this.push(null);
-    }
-  }
-}
 
 const FollowingPlanetModel = require("./FollowingPlanetModel");
 test("ens follow planet", async () => {
@@ -50,7 +32,8 @@ test("ens follow rss", async () => {
     if (url.endsWith(".xml")) {
       return {
         status: 200,
-        body: new ReadableString(`
+        headers: { get: () => "text/xml" },
+        text: () => `
       <?xml version="1.0" ?>
       <rss version="2.0">
       <channel>
@@ -1080,13 +1063,13 @@ test("ens follow rss", async () => {
       </item>
       
       </channel>
-      </rss>`),
+      </rss>`,
       };
     }
     return {
       status: 200,
       headers: {
-        "content-type": "text/html",
+        get: () => "text/html",
       },
       text: () => `<!DOCTYPE html>
       <html>
@@ -1146,11 +1129,11 @@ test("ens follow rss", async () => {
 test("ens follow homepage", async () => {
   require("ethers").contenthash = "ipns://abc";
   require("ethers").avatar = "http://123";
-  global.fetch = (url) => {
+  global.fetch = () => {
     return {
       status: 200,
       headers: {
-        "content-type": "text/html",
+        get: () => "text/html",
       },
       text: () => `<!DOCTYPE html>
       <html>

@@ -1,5 +1,6 @@
 const PlanetError = require("../model/PlanetError");
 const PublicArticleModel = require("../model/PublicArticleModel");
+const { ReadableString } = require("../utils");
 const log = require("../log")("FeedUtils");
 class AvailableFeed {
   url = "";
@@ -86,9 +87,9 @@ class FeedUtils {
       return [null, null];
     }
     log.debug({ url, headers: response.headers }, "findFeed");
-    const mime = response.headers["content-type"].toLowerCase();
+    const mime = response.headers.get("content-type").toLowerCase();
     if (this.isFeed(mime)) {
-      return [response.body, null];
+      return [new ReadableString(await response.text()), null];
     }
     if (mime.indexOf("text/html") >= 0) {
       const jsdom = require("jsdom");
@@ -114,9 +115,13 @@ class FeedUtils {
       }
       const response2 = await fetch(bestFeed.url);
       if (response2.status != 200) {
+        log.error(
+          { status: response2.status, url: bestFeed.url },
+          "fetch error"
+        );
         throw PlanetError.NetworkError;
       }
-      return [response2.body, null];
+      return [new ReadableString(await response2.text()), null];
     }
     return [null, null];
   }

@@ -179,7 +179,7 @@ class FollowingPlanetModel {
       return planet;
     }
     log.debug({ ens }, "Follow: did not find native planet.json");
-    const feedURL = `${require("../ipfs").gateway}/ipfs/${cid}`;
+    const feedURL = `${require("../ipfs").gateway}/ipfs/${cid}/`;
     const [feedData, htmlSoup] = await require("../Helper/FeedUtils").findFeed(
       feedURL
     );

@@ -164,7 +164,7 @@ class FollowingArticleModel extends ArticleModel {
       articleLink = publicArticle.link;
     }
     const article = new FollowingArticleModel({
-      id: require("uuid").v4(),
+      id: require("uuid").v4().toUpperCase(),
       link: articleLink,
       title: publicArticle.title,
       content: publicArticle.content,
