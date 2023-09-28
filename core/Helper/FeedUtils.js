@@ -1,3 +1,4 @@
+const Jimp = require("jimp");
 const PlanetError = require("../model/PlanetError");
 const PublicArticleModel = require("../model/PublicArticleModel");
 const { ReadableString } = require("../utils");
@@ -124,6 +125,35 @@ class FeedUtils {
       return [new ReadableString(await response2.text()), null];
     }
     return [null, null];
+  }
+  async findAvatarFromHTMLOGImage(doc, root) {
+    const possibleAvatarElems = doc.querySelectorAll("meta[property='og:image");
+    const avatarElem = [...possibleAvatarElems].filter(
+      (e) => e.content.indexOf("/") >= 0
+    )[0];
+    if (avatarElem) {
+      return await Jimp.read(new URL(avatarElem.content, root).toString());
+    }
+  }
+  async findAvatarFromHTMLIcons(doc, root) {
+    const possibleAvatarElems = doc.querySelectorAll("link[sizes]");
+    console.log(possibleAvatarElems[0]);
+    const avatarElem = [...possibleAvatarElems].sort((a, b) => {
+      return (
+        parseInt(b.getAttribute("sizes").split("x")[0]) -
+        parseInt(a.getAttribute("sizes").split("x")[0])
+      );
+    })[0];
+    let avatarURLString;
+    if (avatarElem) {
+      avatarURLString = avatarElem.href;
+    } else {
+      const simpleLinkElems = doc.querySelectorAll("link[rel='icon']")[0];
+      avatarURLString = simpleLinkElems.href;
+    }
+    if (avatarURLString) {
+      return await Jimp.read(new URL(avatarURLString, root).toString());
+    }
   }
 }
 

@@ -1,7 +1,9 @@
 class MockJimp {
   static loadFont() {}
-  static read() {
-    return new MockJimp();
+  static read(path) {
+    const result = new MockJimp();
+    result.source = path;
+    return result;
   }
   print() {}
   writeAsync(path) {

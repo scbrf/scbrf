@@ -423,7 +423,69 @@ class FollowingPlanetModel {
 
     return planet;
   }
-  static async followHTTP(link) {}
+  static async followHTTP(link) {
+    const feedURL = link;
+    const [feedData, htmlSoup] = await require("../Helper/FeedUtils").findFeed(
+      feedURL
+    );
+    const now = new Date();
+    let planet;
+    let feedAvatar;
+    if (!feedData) {
+      throw PlanetError.InvalidPlanetURLError;
+    }
+    log.info({ link }, "Follow HTTP: found feed");
+    const feed = await require("../Helper/FeedUtils").parseFeed(
+      feedData,
+      feedURL
+    );
+    feedAvatar = feed.avatar;
+    planet = new FollowingPlanetModel({
+      id: require("uuid").v4().toUpperCase(),
+      planetType: PlanetType.dns,
+      name: feed.name || link,
+      about: feed.about || "",
+      link,
+      cid: null,
+      created: now,
+      updated: now,
+      lastRetrieved: now,
+    });
+    require("fs").mkdirSync(planet.basePath);
+    require("fs").mkdirSync(planet.articlesPath);
+    if (feed.articles && feed.articles.length) {
+      planet.articles = feed.articles.map((a) =>
+        FollowingArticleModel.from(a, planet)
+      );
+      planet.articles.sort((a, b) => b.created.getTime() - a.created.getTime());
+    } else {
+      planet.articles = [];
+    }
+    if (!feedAvatar) {
+      feedAvatar =
+        await require("../Helper/FeedUtils").findAvatarFromHTMLOGImage(
+          htmlSoup,
+          feedURL
+        );
+      if (!feedAvatar) {
+        feedAvatar =
+          await require("../Helper/FeedUtils").findAvatarFromHTMLIcons(
+            htmlSoup,
+            feedURL
+          );
+      }
+    }
+    if (feedAvatar) {
+      await feedAvatar.writeAsync(planet.avatarPath);
+      log.info({ link }, "Follow: found avatar from feed");
+      planet.avatar = feedAvatar;
+    }
+
+    planet.save();
+    planet.articles.forEach((a) => a.save());
+
+    return planet;
+  }
   static async followIPNSorDNSLink(link) {}
   static async follow(link) {
     link = link.trim();

@@ -1,5 +1,46 @@
 jest.mock("fs");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+
 const FeedUtils = require("./FeedUtils");
+test("findAvatarFromHTMLOGImage", async () => {
+  const { window } = new JSDOM(`
+  <html><head>
+  <meta property="og:image" content="/a.png" /></head></html>
+  `);
+  const jimp = await FeedUtils.findAvatarFromHTMLOGImage(
+    window.document,
+    "http://a.b.c"
+  );
+  expect(jimp.source).toBe("http://a.b.c/a.png");
+});
+test("findAvatarFromHTMLIcons", async () => {
+  const { window } = new JSDOM(`
+  <html><head>
+  <link rel="icon" href="./a.png" sizes="144x144">
+  <link rel="icon" href="./b.png" sizes="155x155">
+  </head></html>
+  `);
+  const jimp = await FeedUtils.findAvatarFromHTMLIcons(
+    window.document,
+    "http://a.b.c"
+  );
+  expect(jimp.source).toBe("http://a.b.c/b.png");
+});
+
+test("findAvatarFromHTMLIcons with link icon only", async () => {
+  const { window } = new JSDOM(`
+  <html><head>
+  <link rel="icon" href="./a.png" >
+  </head></html>
+  `);
+  const jimp = await FeedUtils.findAvatarFromHTMLIcons(
+    window.document,
+    "http://a.b.c"
+  );
+  expect(jimp.source).toBe("http://a.b.c/a.png");
+});
+
 test("findFeed", async () => {
   global.fetch = () => ({
     status: 200,

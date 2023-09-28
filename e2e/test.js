@@ -99,7 +99,8 @@ async function run() {
   // await myplanet();
   // await follow("olivida.eth");
   // await follow("vitalik.eth");
-  await follow("olivida.bit");
+  // await follow("olivida.bit");
+  await follow("https://vitalik.ca/");
   log("Done");
 }
 run();
