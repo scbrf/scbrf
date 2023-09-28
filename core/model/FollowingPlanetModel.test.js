@@ -10,6 +10,9 @@ jest.mock("../ENSUtils", () => ({
   getCID() {
     return "123";
   },
+  isIPNS() {
+    return true;
+  },
 }));
 
 const FollowingPlanetModel = require("./FollowingPlanetModel");
@@ -23,6 +26,20 @@ test("ens follow planet", async () => {
     }),
   });
   await FollowingPlanetModel.follow("planetable.eth");
+});
+
+test("ipns follow planet", async () => {
+  require("ethers").contenthash = "ipns://abc";
+  require("ethers").avatar = "http://123";
+  global.fetch = () => ({
+    json: () => ({
+      name: "test",
+      articles: [],
+    }),
+  });
+  await FollowingPlanetModel.follow(
+    "k51qzi5uqu5dit2o1lwoknd80bxx0dgifetl1tyrvlsl1w6qo1236zf4agu3r8"
+  );
 });
 
 test("dotbit follow planet", async () => {

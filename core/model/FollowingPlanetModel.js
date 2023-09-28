@@ -486,7 +486,138 @@ class FollowingPlanetModel {
 
     return planet;
   }
-  static async followIPNSorDNSLink(link) {}
+  static async followIPNSorDNSLink(name) {
+    const planetType = require("../ENSUtils").isIPNS(name)
+      ? PlanetType.planet
+      : PlanetType.dnslink;
+    const cid = require("../ipfs").resolveIPNSorDNSLink(name);
+    log.info({ name, cid }, "Follow");
+    require("../ipfs").pin(cid);
+
+    const publicPlanet = await FollowingPlanetModel.getPublicPlanet(cid);
+    if (publicPlanet) {
+      let planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType,
+        name: publicPlanet.name,
+        about: publicPlanet.about,
+        link: name,
+        cid,
+        twitterUsername: publicPlanet.twitterUsername,
+        githubUsername: publicPlanet.githubUsername,
+        telegramUsername: publicPlanet.telegramUsername,
+        mastodonUsername: publicPlanet.mastodonUsername,
+        juiceboxEnabled: publicPlanet.juiceboxEnabled,
+        juiceboxProjectID: publicPlanet.juiceboxProjectID,
+        juiceboxProjectIDGoerli: publicPlanet.juiceboxProjectIDGoerli,
+        created: publicPlanet.created,
+        updated: publicPlanet.updated,
+        lastRetrieved: new Date(),
+      });
+      require("fs").mkdirSync(planet.basePath);
+      require("fs").mkdirSync(planet.articlesPath);
+      planet.articles = publicPlanet.articles.map((a) =>
+        FollowingArticleModel.from(a, planet)
+      );
+      planet.articles.sort((a, b) => b.created - a.created);
+      let url = `${require("../ipfs").gateway}/ipfs/${cid}/avatar.png`;
+      const fs = require("fs");
+      const { Readable } = require("stream");
+      const { finished } = require("stream/promises");
+      const fileStream = fs.createWriteStream(planet.avatarPath, {
+        flags: "wx",
+      });
+      const res = await fetch(url);
+      if (res.status == 200) {
+        await finished(Readable.fromWeb(res.body).pipe(fileStream));
+        planet.avatar = await require("jimp").read(planet.avatarPath);
+      }
+      planet.save();
+      planet.articles.forEach((a) => a.save());
+      return planet;
+    }
+    log.debug({ ens }, "Follow: did not find native planet.json");
+    const feedURL = `${require("../ipfs").gateway}/ipfs/${cid}/`;
+    const [feedData, htmlSoup] = await require("../Helper/FeedUtils").findFeed(
+      feedURL
+    );
+    const now = new Date();
+    let planet;
+    let feedAvatar;
+    if (feedData) {
+      log.info({ ens }, "Follow IPNS or DNSLink: found feed");
+      const feed = await require("../Helper/FeedUtils").parseFeed(
+        feedData,
+        feedURL
+      );
+      feedAvatar = feed.avatar;
+      planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType,
+        name: feed.name || name,
+        about: feed.about || "",
+        link: name,
+        cid,
+        created: now,
+        updated: now,
+        lastRetrieved: now,
+      });
+      if (feed.articles && feed.articles.length) {
+        planet.articles = feed.articles.map((a) =>
+          FollowingArticleModel.from(a, planet)
+        );
+        planet.articles.sort(
+          (a, b) => b.created.getTime() - a.created.getTime()
+        );
+      } else {
+        planet.articles = [];
+      }
+    } else if (htmlSoup) {
+      log.info({ ens }, "Follow: no feed, use homepage as the only article");
+      planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType,
+        name,
+        about: "",
+        link: name,
+        cid,
+        created: now,
+        updated: now,
+        lastRetrieved: now,
+      });
+      const homepage = new PublicArticleModel({
+        id: require("uuid").v4().toUpperCase(),
+        link: "/",
+        title: htmlSoup.title || "Homepage",
+        content: "",
+        created: now,
+        hasVideo: false,
+        videoFilename: null,
+        hasAudio: false,
+        audioFilename: null,
+        audioDuration: null,
+        audioByteLength: null,
+        attachments: null,
+        heroImage: null,
+      });
+      planet.articles = [FollowingArticleModel.from(homepage, planet)];
+    } else {
+      throw new PlanetError.InvalidPlanetURLError();
+    }
+    require("fs").mkdirSync(planet.basePath);
+    require("fs").mkdirSync(planet.articlesPath);
+    const data = feedAvatar;
+    if (data) {
+      const image = await Jimp.read(data);
+      await image.writeAsync(planet.avatarPath);
+      log.info({ ens }, "Follow: found avatar from feed");
+      planet.avatar = image;
+    }
+    planet.save();
+    planet.articles.forEach((a) => a.save());
+
+    return planet;
+  }
   static async follow(link) {
     link = link.trim();
     if (link.startsWith("planet://")) {
