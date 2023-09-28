@@ -98,8 +98,8 @@ async function run() {
   await init();
   // await myplanet();
   // await follow("olivida.eth");
-  await follow("vitalik.eth");
-
+  // await follow("vitalik.eth");
+  await follow("olivida.bit");
   log("Done");
 }
 run();

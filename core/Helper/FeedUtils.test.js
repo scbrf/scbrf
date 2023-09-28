@@ -4,7 +4,7 @@ test("findFeed", async () => {
   global.fetch = () => ({
     status: 200,
     headers: {
-      "content-type": "text/html",
+      get: () => "text/html",
     },
     body: "dummy",
     text: () => `

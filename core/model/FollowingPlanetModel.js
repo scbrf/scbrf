@@ -287,7 +287,142 @@ class FollowingPlanetModel {
       log.error(err, "Get Public Planet from CID Error");
     }
   }
-  static async followDotBit(link) {}
+  static async followDotBit(dotbit) {
+    const dweb = await require("../Helper/DotBitKit").resolve(dotbit);
+    if (!dweb) {
+      throw PlanetError.DotBitNoDWebRecordError;
+    }
+    let cid;
+    if (dweb.type == dweb.DWebRecordType.ipfs) {
+      cid = dweb.value;
+    } else if (dweb.type == dweb.DWebRecordType.ipns) {
+      let resolved = await require("../ipfs").resolveIPNSorDNSLink(dweb.value);
+      if (!resolved) {
+        throw PlanetError.DotBitIPNSResolveError;
+      }
+      cid = resolved;
+    }
+    log.info({ cid, dotbit }, "Follow");
+    require("../ipfs").pin(cid);
+    const publicPlanet = await FollowingPlanetModel.getPublicPlanet(cid);
+    if (publicPlanet) {
+      log.info({ dotbit, name: publicPlanet.name }, "found native planet");
+      let planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType: PlanetType.dotbit,
+        name: publicPlanet.name,
+        about: publicPlanet.about,
+        link: dotbit,
+        cid: cid,
+        twitterUsername: publicPlanet.twitterUsername,
+        githubUsername: publicPlanet.githubUsername,
+        telegramUsername: publicPlanet.telegramUsername,
+        mastodonUsername: publicPlanet.mastodonUsername,
+        juiceboxEnabled: publicPlanet.juiceboxEnabled,
+        juiceboxProjectID: publicPlanet.juiceboxProjectID,
+        juiceboxProjectIDGoerli: publicPlanet.juiceboxProjectIDGoerli,
+        created: publicPlanet.created,
+        updated: publicPlanet.updated,
+        lastRetrieved: new Date(),
+      });
+      require("fs").mkdirSync(planet.basePath);
+      require("fs").mkdirSync(planet.articlesPath);
+      planet.articles = publicPlanet.articles.map((a) =>
+        FollowingArticleModel.from(a, planet)
+      );
+      planet.articles.sort((a, b) => b.created - a.created);
+      let url = `${require("../ipfs").gateway}/ipfs/${cid}/avatar.png`;
+      const fs = require("fs");
+      const { Readable } = require("stream");
+      const { finished } = require("stream/promises");
+      const fileStream = fs.createWriteStream(planet.avatarPath, {
+        flags: "wx",
+      });
+      const res = await fetch(url);
+      if (res.status == 200) {
+        await finished(Readable.fromWeb(res.body).pipe(fileStream));
+        planet.avatar = await require("jimp").read(planet.avatarPath);
+      }
+
+      planet.save();
+      planet.articles.forEach((a) => a.save());
+      return planet;
+    }
+    log.debug({ ens }, "Follow: did not find native planet.json");
+    const feedURL = `${require("../ipfs").gateway}/ipfs/${cid}/`;
+    const [feedData, htmlSoup] = await require("../Helper/FeedUtils").findFeed(
+      feedURL
+    );
+    const now = new Date();
+    let planet;
+    let feedAvatar;
+    if (feedData) {
+      log.info({ dotbit }, "Follow ENS: found feed");
+      const feed = await require("../Helper/FeedUtils").parseFeed(
+        feedData,
+        feedURL
+      );
+      feedAvatar = feed.avatar;
+      planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType: PlanetType.dotbit,
+        name: feed.name || dotbit,
+        about: feed.about || "",
+        link: dotbit,
+        cid,
+        created: now,
+        updated: now,
+        lastRetrieved: now,
+      });
+      if (feed.articles && feed.articles.length) {
+        planet.articles = feed.articles.map((a) =>
+          FollowingArticleModel.from(a, planet)
+        );
+        planet.articles.sort(
+          (a, b) => b.created.getTime() - a.created.getTime()
+        );
+      } else {
+        planet.articles = [];
+      }
+    } else if (htmlSoup) {
+      log.info({ ens }, "Follow: no feed, use homepage as the only article");
+      planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType: PlanetType.dotbit,
+        name: dotbit,
+        about: "",
+        link: dotbit,
+        cid: cid,
+        created: now,
+        updated: now,
+        lastRetrieved: now,
+      });
+      const homepage = new PublicArticleModel({
+        id: require("uuid").v4().toUpperCase(),
+        link: "/",
+        title: htmlSoup.title || "Homepage",
+        content: "",
+        created: now,
+        hasVideo: false,
+        videoFilename: null,
+        hasAudio: false,
+        audioFilename: null,
+        audioDuration: null,
+        audioByteLength: null,
+        attachments: null,
+        heroImage: null,
+      });
+      planet.articles = [FollowingArticleModel.from(homepage, planet)];
+    } else {
+      throw new PlanetError.InvalidPlanetURLError();
+    }
+    require("fs").mkdirSync(planet.basePath);
+    require("fs").mkdirSync(planet.articlesPath);
+    planet.save();
+    planet.articles.forEach((a) => a.save());
+
+    return planet;
+  }
   static async followHTTP(link) {}
   static async followIPNSorDNSLink(link) {}
   static async follow(link) {

@@ -25,6 +25,30 @@ test("ens follow planet", async () => {
   await FollowingPlanetModel.follow("planetable.eth");
 });
 
+test("dotbit follow planet", async () => {
+  require("ethers").contenthash = "ipns://abc";
+  require("ethers").avatar = "http://123";
+  global.fetch = (url) => {
+    if (url.endsWith("account/records"))
+      return {
+        json: () => ({
+          err_no: 0,
+          data: {
+            records: [{ key: "dweb_ipfs", value: "123" }],
+          },
+        }),
+      };
+    return {
+      json: () => ({
+        name: "test",
+        articles: [],
+      }),
+    };
+  };
+
+  await FollowingPlanetModel.follow("olivida.bit");
+});
+
 test("ens follow rss", async () => {
   require("ethers").contenthash = "ipns://abc";
   require("ethers").avatar = "http://123";
