@@ -1,4 +1,5 @@
 const PlanetError = require("../model/PlanetError");
+const PublicArticleModel = require("../model/PublicArticleModel");
 const log = require("../log")("FeedUtils");
 class AvailableFeed {
   url = "";
@@ -27,6 +28,58 @@ class FeedUtils {
       mime.indexOf("application/feed+json") >= 0
     );
   }
+  async parseFeed(data) {
+    const FeedParser = require("feedparser");
+    const feedparser = new FeedParser();
+    let items = [],
+      meta;
+    const feed = await new Promise((resolve, reject) => {
+      data.pipe(feedparser);
+
+      feedparser.on("error", function (error) {
+        reject(error);
+      });
+
+      feedparser.on("readable", function () {
+        var stream = this; // `this` is `feedparser`, which is a stream
+        meta = this.meta;
+        var item;
+        if (!this.items) this.items = [];
+        while ((item = stream.read())) {
+          items.push(item);
+        }
+      });
+      feedparser.on("end", () => {
+        resolve({ items, meta });
+      });
+    });
+    return {
+      name: feed.meta.title,
+      about: feed.meta.description,
+      avatar:
+        feed.meta.image && feed.meta.image.url
+          ? await require("jimp").read(feed.meta.image.url)
+          : null,
+      articles: feed.items.map(
+        (item) =>
+          new PublicArticleModel({
+            id: require("uuid").v4().toUpperCase(),
+            link: item.link,
+            title: item.title,
+            content: item.content || item.description,
+            created: new Date(item.date),
+            hasVideo: false,
+            videoFilename: null,
+            hasAudio: false,
+            audioFilename: null,
+            audioDuration: null,
+            audioByteLength: null,
+            attachments: null,
+            heroImage: null,
+          })
+      ),
+    };
+  }
   async findFeed(url) {
     const response = await fetch(url);
     if (response.status != 200) {
@@ -53,11 +106,11 @@ class FeedUtils {
       });
       log.debug({ availableFeeds }, "FeedUtils: availableFeeds");
       if (!availableFeeds.length) {
-        return [null, window];
+        return [null, window.document];
       }
       const bestFeed = this.selectBestFeed(availableFeeds);
       if (!bestFeed) {
-        return [null, window];
+        return [null, window.document];
       }
       const response2 = await fetch(bestFeed.url);
       if (response2.status != 200) {

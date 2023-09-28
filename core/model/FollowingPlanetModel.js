@@ -3,6 +3,9 @@ const PublicPlanetModel = require("./PublicPlanetModel");
 const FollowingArticleModel = require("./FollowingArticleModel");
 const PlanetType = require("./PlanetType");
 const { timeFromReferenceDate, timeToReferenceDate } = require("../utils");
+const PlanetError = require("./PlanetError");
+const Jimp = require("jimp");
+const PublicArticleModel = require("./PublicArticleModel");
 
 class FollowingPlanetModel {
   id = "";
@@ -177,34 +180,97 @@ class FollowingPlanetModel {
     }
     log.debug({ ens }, "Follow: did not find native planet.json");
     const feedURL = `${require("../ipfs").gateway}/ipfs/${cid}`;
-    const [feedData, htmlSoup] = await FeedUtils.findFeed(feedURL);
+    const [feedData, htmlSoup] = await require("../Helper/FeedUtils").findFeed(
+      feedURL
+    );
     const now = new Date();
     let planet;
     let feedAvatar;
     if (feedData) {
       log.info({ ens }, "Follow ENS: found feed");
-      const FeedParser = require("feedparser");
-      const feedparser = new FeedParser();
-      const feed = await new Promise((resolve, reject) => {
-        feedData.pipe(feedparser);
-
-        feedparser.on("error", function (error) {
-          reject(error);
-        });
-
-        feedparser.on("readable", function () {
-          var stream = this; // `this` is `feedparser`, which is a stream
-          var meta = this.meta; // **NOTE** the "meta" is always available in the context of the feedparser instance
-          var item;
-          const items = [];
-          while ((item = stream.read())) {
-            items.push(item);
-          }
-          resolve({ meta, items });
-        });
+      const feed = await require("../Helper/FeedUtils").parseFeed(
+        feedData,
+        feedURL
+      );
+      feedAvatar = feed.avatar;
+      planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType: PlanetType.ens,
+        name: feed.name || ens,
+        about: feed.about || "",
+        link: ens,
+        cid,
+        created: now,
+        updated: now,
+        lastRetrieved: now,
       });
-      console.log("parse return:", feed);
+      const walletAddress = await resolver.getAddress();
+      if (walletAddress) {
+        planet.walletAddress = walletAddress;
+        planet.walletAddressResolvedAt = new Date();
+      }
+      if (feed.articles && feed.articles.length) {
+        planet.articles = feed.articles.map((a) =>
+          FollowingArticleModel.from(a, planet)
+        );
+        planet.articles.sort(
+          (a, b) => b.created.getTime() - a.created.getTime()
+        );
+      } else {
+        planet.articles = [];
+      }
+    } else if (htmlSoup) {
+      log.info({ ens }, "Follow: no feed, use homepage as the only article");
+      planet = new FollowingPlanetModel({
+        id: require("uuid").v4().toUpperCase(),
+        planetType: PlanetType.ens,
+        name: ens,
+        about: "",
+        link: ens,
+        cid: cid,
+        created: now,
+        updated: now,
+        lastRetrieved: now,
+      });
+      const homepage = new PublicArticleModel({
+        id: require("uuid").v4().toUpperCase(),
+        link: "/",
+        title: htmlSoup.title || "Homepage",
+        content: "",
+        created: now,
+        hasVideo: false,
+        videoFilename: null,
+        hasAudio: false,
+        audioFilename: null,
+        audioDuration: null,
+        audioByteLength: null,
+        attachments: null,
+        heroImage: null,
+      });
+      planet.articles = [FollowingArticleModel.from(homepage, planet)];
+    } else {
+      throw new PlanetError.InvalidPlanetURLError();
     }
+    require("fs").mkdirSync(planet.basePath);
+    require("fs").mkdirSync(planet.articlesPath);
+    const data = await resolver.getAvatar();
+    if (data) {
+      const image = await Jimp.read(data);
+      await image.writeAsync(planet.avatarPath);
+      log.info({ ens }, "Follow: found avatar from feed");
+      planet.avatar = image;
+    }
+    planet.save();
+    planet.articles.forEach((a) => a.save());
+
+    const walletAddress = await resolver.getAddress();
+    if (!planet.walletAddress) {
+      planet.walletAddress = walletAddress;
+      planet.walletAddressResolvedAt = new Date();
+      planet.save();
+    }
+
+    return planet;
   }
   static async getPublicPlanet(cid) {
     try {
